@@ -1,7 +1,7 @@
 import hadoopy
 
 
-def launch_frozen(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(,), **kw):
+def launch_frozen(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), **kw):
     if hbase_in:
         kw['input_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableInputFormat'
     if hbase_out:
