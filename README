@@ -1,0 +1,10 @@
+Hadoopy HBase
+License: Apache V2 (http://www.apache.org/licenses/LICENSE-2.0)
+
+
+
+
+
+Acknowledgements: Lasthbase (https://github.com/tims/lasthbase) inspired this module but is incompatible with new HBase versions, necessitating starting from scratch.  The build scripts and general layout were used as a starting point.
+
+ 
