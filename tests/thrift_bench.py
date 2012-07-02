@@ -186,11 +186,53 @@ def few_many_2cf(client, max_rows):
     remove_table(client, 'benchtable')
 
 
+def manycols_1cf(client, max_rows):
+    print('\nmanycols_1cf')
+    num_cols = 1000
+    remove_table(client, 'benchtable')
+    with timer('createTable'):
+        client.createTable('benchtable', [ColumnDescriptor('cf0:')])
+    
+    with timer('mutateRow:Create'):
+        for x in xrange(max_rows):
+            client.mutateRow('benchtable', str(x), [Mutation(column='cf0:%d' % y, value=random_string(2 ** 5)) for y in xrange(num_cols)])
+
+    for x in ['cf0:0', '']:
+        scanner(client, 'benchtable', x, 10, max_rows)
+        scanner(client, 'benchtable', x, 1, max_rows)
+
+    delete_rows(client, 'benchtable', max_rows)
+    scanner(client, 'benchtable', '', 1, max_rows)
+    remove_table(client, 'benchtable')
+
+
+def manycols_manycf(client, max_rows):
+    print('\nmanycols_manycf')
+    num_cols = 1000
+    remove_table(client, 'benchtable')
+    with timer('createTable'):
+        client.createTable('benchtable', [ColumnDescriptor('cf%d:' % x) for x in xrange(num_cols)])
+    
+    with timer('mutateRow:Create'):
+        for x in xrange(max_rows):
+            client.mutateRow('benchtable', str(x), [Mutation(column='cf%d:%d' % (y, y), value=random_string(2 ** 5)) for y in xrange(num_cols)])
+
+    for x in ['cf0:0', '']:
+        scanner(client, 'benchtable', x, 10, max_rows)
+        scanner(client, 'benchtable', x, 1, max_rows)
+
+    delete_rows(client, 'benchtable', max_rows)
+    scanner(client, 'benchtable', '', 1, max_rows)
+    remove_table(client, 'benchtable')
+
+
 
 if __name__ == '__main__':
     client = setup()
     #simple(client, 1000)
     #small_large_1cf(client, 100)
     #small_large_2cf(client, 100)
-    few_many_1cf(client, 10000)
-    few_many_2cf(client, 10000)
+    #few_many_1cf(client, 10000)
+    #few_many_2cf(client, 10000)
+    manycols_1cf(client, 100)
+    manycols_manycf(client, 100)
