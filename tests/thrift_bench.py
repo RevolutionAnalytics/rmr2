@@ -188,7 +188,7 @@ def few_many_2cf(client, max_rows):
 
 def manycols_1cf(client, max_rows):
     print('\nmanycols_1cf')
-    num_cols = 1000
+    num_cols = 100
     remove_table(client, 'benchtable')
     with timer('createTable'):
         client.createTable('benchtable', [ColumnDescriptor('cf0:')])
@@ -208,7 +208,7 @@ def manycols_1cf(client, max_rows):
 
 def manycols_manycf(client, max_rows):
     print('\nmanycols_manycf')
-    num_cols = 1000
+    num_cols = 100
     remove_table(client, 'benchtable')
     with timer('createTable'):
         client.createTable('benchtable', [ColumnDescriptor('cf%d:' % x) for x in xrange(num_cols)])
@@ -229,10 +229,10 @@ def manycols_manycf(client, max_rows):
 
 if __name__ == '__main__':
     client = setup()
-    #simple(client, 1000)
-    #small_large_1cf(client, 100)
-    #small_large_2cf(client, 100)
-    #few_many_1cf(client, 10000)
-    #few_many_2cf(client, 10000)
+    simple(client, 1000)
+    small_large_1cf(client, 100)
+    small_large_2cf(client, 100)
+    few_many_1cf(client, 10000)
+    few_many_2cf(client, 10000)
     manycols_1cf(client, 100)
     manycols_manycf(client, 100)
