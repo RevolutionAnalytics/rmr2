@@ -7,6 +7,7 @@ sudo cp -R ${HBASE_PATH}/lib/* ${HADOOP_PATH}/lib/
 sudo cp -R ${HBASE_PATH}/*.jar ${HADOOP_PATH}/lib/
 
 echo "Copying libs into local build directory"
+mkdir -p ./lib/
 cp ${HBASE_PATH}/lib/commons-logging* ./lib/
 cp ${HBASE_PATH}/hbase-* ./lib/
 cp ${HADOOP_PATH}/hadoop-*-core.jar ./lib/
