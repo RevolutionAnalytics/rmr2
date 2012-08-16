@@ -5,9 +5,7 @@ License: Apache V2 (http://www.apache.org/licenses/LICENSE-2.0)
 How to Run Tests
 sudo /usr/lib/hbase/bin/start-hbase.sh
 sudo /etc/init.d/hadoop-hbase-thrift start
-sudo cp -R /usr/lib/hbase/lib/* /usr/lib/hadoop/lib/
-sudo cp -R /usr/lib/hbase/*.jar /usr/lib/hadoop/lib/
-cd build
+cd java
 sudo bash build.sh
 cd ../tests
 python thrift_example.py
