@@ -2,6 +2,7 @@
 import gevent.monkey
 gevent.monkey.patch_all()
 import hadoopy_hbase
+from hadoopy_hbase import BatchMutation, Mutation, ColumnDescriptor
 from thrift_bench import random_string, remove_table
 import vision_data
 import random
@@ -11,7 +12,7 @@ import time
 def main():
     #tags = ' animals   architecture   art   asia   australia   autumn   baby   band   barcelona   beach   berlin   bike   bird   birds   birthday   black   blackandwhite   blue   bw   california   canada   canon   car   cat   chicago   china   christmas   church   city   clouds   color   concert   dance   day   de   dog   england   europe   fall   family   fashion   festival   film   florida   flower   flowers   food   football   france   friends   fun   garden   geotagged   germany   girl   graffiti   green   halloween   hawaii   holiday   house   india   instagramapp   iphone   iphoneography   island   italia   italy   japan   kids   la   lake   landscape   light   live   london   love   macro   me   mexico   model   museum   music   nature   new   newyork   newyorkcity   night   nikon   nyc   ocean   old   paris   park   party   people   photo   photography   photos   portrait   raw   red   river   rock   san   sanfrancisco   scotland   sea   seattle   show   sky   snow   spain   spring   square   squareformat   street   summer   sun   sunset   taiwan   texas   thailand   tokyo   travel   tree   trees   trip   uk   unitedstates   urban   usa   vacation   vintage   washington   water   wedding   white   winter   woman   yellow   zoo '.strip().split()
     tags = ['Pyramids Of Giza', 'Great Wall Of China', 'Terracotta Warriors', 'Statue Of Liberty', 'Edinburgh Castle', 'Stirling Castle', 'Empire State Building', 'Stonehenge', 'Blackpool Tower', 'London Bridge', 'Tower Bridge', 'Buckinghampalace', 'Sphinx', 'Eiffle Tower', 'Arc Du Triomph', 'Louvre', 'Cristo Redentor', 'CN Tower', 'Norte Dame', 'River Nile', 'Mount Rushmore', 'Pentagon', 'White House', 'Lincoln Memorial', 'Grand Canyon', 'Leaning Tower Of Piza', 'Easter Island Heads', 'Niagara Falls', 'Abbey Road', 'Ayers Rock', 'Evangeline Oak', 'Lone Cyprus', 'Golden Gate Bridge', 'Colosseum', 'Taj Mahal', 'Santorini']
-    client = connect('localhost')
+    client = hadoopy_hbase.connect('localhost')
     random.shuffle(tags)
     flickr = vision_data.Flickr(max_iters=1)
     #remove_table(client, 'flickr')
