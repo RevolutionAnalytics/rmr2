@@ -3,9 +3,8 @@
 from thrift.transport.TSocket import TSocket
 from thrift.transport.TTransport import TBufferedTransport
 from thrift.protocol import TBinaryProtocol
-from hbase import Hbase
-from hbase.ttypes import ColumnDescriptor, Mutation
-import hbase.ttypes
+import hadoopy_hbase
+from hadoopy_hbase import Hbase, ColumnDescriptor, Mutation
 import time
 import contextlib
 import random
@@ -25,16 +24,6 @@ def random_string(l):
     if len(s) != l * 2:
         s = '0' * (2 * l - len(s)) + s
     return s.decode('hex')
-
-
-def setup():
-    transport = TBufferedTransport(TSocket('localhost', 9090))
-    transport.open()
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
-
-    client = Hbase.Client(protocol)
-    print(dir(client))
-    return client
 
 def remove_table(client, table):
     if table in client.getTableNames():
@@ -228,7 +217,7 @@ def manycols_manycf(client, max_rows):
 
 
 if __name__ == '__main__':
-    client = setup()
+    client = hadoopy_hbase.connect('localhost')
     simple(client, 1000)
     small_large_1cf(client, 100)
     small_large_2cf(client, 100)
