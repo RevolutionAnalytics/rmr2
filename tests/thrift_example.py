@@ -11,3 +11,4 @@ client.createTable('testtable', [hadoopy_hbase.ColumnDescriptor('colfam1:')])
 
 for x in xrange(100):
     client.mutateRow('testtable', str(x), [hadoopy_hbase.Mutation(column='colfam1:col%d' % y, value=random_string(5)) for y in range(10)])
+print(client.getRow('testtable', '0'))

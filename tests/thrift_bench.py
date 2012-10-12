@@ -27,7 +27,10 @@ def random_string(l):
 
 def remove_table(client, table):
     if table in client.getTableNames():
-        client.disableTable(table)
+        try:
+            client.disableTable(table)
+        except:
+            pass
         client.deleteTable(table)
 
 def scanner(client, table, column, num_rows, max_rows):
