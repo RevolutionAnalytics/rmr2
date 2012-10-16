@@ -4,6 +4,7 @@ from thrift.transport.TTransport import TBufferedTransport
 from thrift.protocol import TBinaryProtocol
 from hbase import Hbase
 from hbase.ttypes import ColumnDescriptor, Mutation, BatchMutation
+import hadoopy_hbase
 
 
 def connect(server='localhost', port=9090):
