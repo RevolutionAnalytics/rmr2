@@ -98,7 +98,6 @@ class HBaseRowDict(object):
         assert isinstance(key, str)
         assert isinstance(value, str)
         self._db.mutateRow(self._table, key, [hadoopy_hbase.Mutation(column=self._col, value=value)])
-        print('HBase Stored[%s]' % key)
 
     def __getitem__(self, key):
         assert isinstance(key, str)
