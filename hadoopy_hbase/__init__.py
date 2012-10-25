@@ -39,8 +39,8 @@ def launch_frozen(in_name, out_name, script_path, hbase_in=True, hbase_out=False
         kw['input_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableInputFormat'
     if hbase_out:
         kw['output_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableOutputFormat'
-    jobconfs = kw.get('jobconfs', [])
-    jobconfs.append("hbase.mapred.tablecolumns=%s" % ' '.join(columns))
+    jobconfs = hadoopy._runner._listeq_to_dict(kw.get('jobconfs', []))
+    jobconfs['hbase.mapred.tablecolumns'] = ' '.join(columns)
     kw['jobconfs'] = jobconfs
     hadoopy.launch_frozen(in_name, out_name, script_path, **kw)
 
@@ -50,8 +50,8 @@ def launch(in_name, out_name, script_path, hbase_in=True, hbase_out=False, colum
         kw['input_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableInputFormat'
     if hbase_out:
         kw['output_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableOutputFormat'
-    jobconfs = kw.get('jobconfs', [])
-    jobconfs.append("hbase.mapred.tablecolumns=%s" % ' '.join(columns))
+    jobconfs = hadoopy._runner._listeq_to_dict(kw.get('jobconfs', []))
+    jobconfs['hbase.mapred.tablecolumns'] = ' '.join(columns)
     kw['jobconfs'] = jobconfs
     hadoopy.launch(in_name, out_name, script_path, **kw)
 
