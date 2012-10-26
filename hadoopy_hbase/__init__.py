@@ -5,6 +5,7 @@ from thrift.protocol import TBinaryProtocol
 from hbase import Hbase
 from hbase.ttypes import ColumnDescriptor, Mutation, BatchMutation
 import hadoopy_hbase
+import hashlib
 
 
 def connect(server='localhost', port=9090):
@@ -110,3 +111,27 @@ class HBaseRowDict(object):
         assert isinstance(key, str)
         self._db.mutateRow(self._table, key, [hadoopy_hbase.Mutation(column=self._col, isDelete=True)])
 
+
+def hash_key(*args, **kw):
+    """Convenient key engineering function
+
+    Allows for raw prefix/suffix, with other arguments md5 hashed and truncated.
+    The key is only guaranteed to be unique if its prefix+suffix is unique.  If
+    being used to create a start key, you can leave off args/suffix but they must
+    be done in order (e.g., if you leave off an arg you must also leave off suffix).
+
+    Args:
+        *args: List of arguments to hash in order using hash_bytes of md5
+        prefix: Raw prefix of the string (default '')
+        suffix: Raw suffix of the string (default '')
+        delimiter: Raw delimiter of each field (default '')
+        hash_bytes: Number of md5 bytes (binary not hex) for each of *args (default 2)
+
+    Returns:
+        Combined key (binary)
+    """
+    prefix = kw.get('prefix', '')
+    suffix = kw.get('suffix', '')
+    hash_bytes = int(kw.get('hash_bytes', 2))
+    delimiter = kw.get('delimiter', '')
+    return delimiter.join([prefix] + [hashlib.md5(x).digest()[:hash_bytes] for x in args] + [suffix])
