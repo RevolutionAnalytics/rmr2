@@ -149,9 +149,6 @@ public class TypedBytesTableRecordReader
       Result value0 = new Result();
       boolean out = this.recordReaderImpl.next(key0, value0);
       if (out) {
-	  ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	  TypedBytesOutput tbo = TypedBytesOutput.get(new DataOutputStream(baos));
-	  byte b0[] = new byte[]{1, 2, 3, 4};
 	  TreeMap tm = new TreeMap();
 	  for (Map.Entry<byte [], NavigableMap<byte [], byte []>> entry : value0.getNoVersionMap().entrySet()) {
 	      TreeMap tm_inner = new TreeMap();
@@ -160,14 +157,8 @@ public class TypedBytesTableRecordReader
 	      }
 	      tm.put(new Buffer(entry.getKey()), tm_inner);
 	  }
-	  //tbo.writeBytes(key0.get());
-	  //key.set(new BytesWritable(baos.toByteArray()));
 	  key.setValue(new Buffer(key0.get()));
-	  //ByteBuffer b1 = ByteBuffer.wrap(b0);
-	  //key.setValue(b1);
 	  value.setValue(tm);
-	  //key.setValue(ByteBuffer.wrap(key0.get()));
-	  //value.setValue(value0.getNoVersionMap());
       }
       return out;
 
