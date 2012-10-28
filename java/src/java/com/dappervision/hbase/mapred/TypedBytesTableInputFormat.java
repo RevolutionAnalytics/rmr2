@@ -33,7 +33,9 @@ import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.util.StringUtils;
 import com.dappervision.hbase.mapred.TypedBytesTableInputFormatBase;
-
+import org.apache.hadoop.hbase.filter.RowFilter;
+import org.apache.hadoop.hbase.filter.RegexStringComparator;
+import org.apache.hadoop.hbase.filter.CompareFilter;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -52,10 +54,6 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
-//import org.apache.hadoop.hbase.filter.RowFilterInterface;
-//import org.apache.hadoop.hbase.filter.StopRowFilter;
-//import org.apache.hadoop.hbase.filter.WhileMatchRowFilter;
-//import org.apache.hadoop.hbase.io.RowResult;
 import org.apache.hadoop.hbase.mapred.TableSplit;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -88,10 +86,10 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
    * space delimited list of columns
    */
   public static final String COLUMN_LIST = "hbase.mapred.tablecolumns";
+  public static final String ROW_FILTER_REGEX = "hbase.mapred.rowfilter";
   private byte [][] inputColumns;
   private HTable table;
   private TypedBytesTableRecordReader tableRecordReader;
-  private Filter rowFilter;
 
   
   /**
@@ -111,6 +109,10 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
       m_cols[i] = Bytes.toBytes(colNames[i]);
     }
     setInputColumns(m_cols);
+    if (job.get(ROW_FILTER_REGEX) != null) {
+        LOG.info("Row Regex Filter[" + job.get(ROW_FILTER_REGEX) + "]");
+        setRowFilter(new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(job.get(ROW_FILTER_REGEX))));
+    }
     try {
       setHTable(new HTable(HBaseConfiguration.create(job), tableNames[0].getName()));
     } catch (Exception e) {

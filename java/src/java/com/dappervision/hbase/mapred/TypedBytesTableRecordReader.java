@@ -40,7 +40,6 @@ import java.util.NavigableMap;
 /**
  * Iterate over an HBase table data, return (Text, RowResult) pairs
  */
-//ImmutableBytesWritable, TypedBytesWritable
 public class TypedBytesTableRecordReader
     implements RecordReader<TypedBytesWritable, TypedBytesWritable> {
 
