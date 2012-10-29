@@ -17,9 +17,12 @@ def connect(server='localhost', port=9090):
     return client
 
 
-def scanner(client, table, columns=None, per_call=1, start_row=''):
+def scanner(client, table, columns=None, per_call=1, start_row='', stop_row=None):
     try:
-        sc = client.scannerOpen(table, start_row, columns if columns else [])
+        if stop_row is None:
+            sc = client.scannerOpen(table, start_row, columns if columns else [])
+        else:
+            sc = client.scannerOpenWithStop(table, start_row, stop_row, columns if columns else [])
         if per_call == 1:
             scanner = lambda : client.scannerGet(sc)
         else:
@@ -34,6 +37,16 @@ def scanner(client, table, columns=None, per_call=1, start_row=''):
                 break
     finally:
         client.scannerClose(sc)
+
+
+def scanner_row_column(client, table, column, **kw):
+    scanner = hadoopy_hbase.scanner(client, table, columns=[column], **kw)
+    for row, cols in scanner:
+        yield row, cols[column]
+
+
+def scanner_column(*args, **kw):
+    return (y for x, y in scanner_row_column(*args, **kw))
 
 
 def _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, kw):
