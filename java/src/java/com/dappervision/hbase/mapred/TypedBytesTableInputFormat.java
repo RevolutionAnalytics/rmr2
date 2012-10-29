@@ -90,7 +90,7 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
   public static final String COLUMN_LIST = "hbase.mapred.tablecolumns";
   public static final String ROW_FILTER_REGEX = "hbase.mapred.rowfilter";
   public static final String START_ROW = "hbase.mapred.startrowb64";
-  public static final String END_ROW = "hbase.mapred.endrowb64";
+  public static final String STOP_ROW = "hbase.mapred.stoprowb64";
 
   private byte [][] inputColumns;
   private HTable table;
@@ -126,12 +126,12 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
             LOG.error("Start Row[" + job.get(START_ROW) + "] - Error");
         }
     }
-    if (job.get(END_ROW) != null) {
-        LOG.info("End Row[" + job.get(END_ROW) + "]");
+    if (job.get(STOP_ROW) != null) {
+        LOG.info("Stop Row[" + job.get(STOP_ROW) + "]");
         try {
-            setEndRow(Base64.decodeBase64(job.get(END_ROW).getBytes("US-ASCII")));
+            setStopRow(Base64.decodeBase64(job.get(STOP_ROW).getBytes("US-ASCII")));
         } catch( UnsupportedEncodingException e){
-            LOG.error("End Row[" + job.get(END_ROW) + "] - Error");
+            LOG.error("Stop Row[" + job.get(STOP_ROW) + "] - Error");
         }
     }
     try {

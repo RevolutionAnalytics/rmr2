@@ -79,7 +79,7 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
   private TypedBytesTableRecordReader tableRecordReader;
   private Filter rowFilter;
   private ByteBuffer startRow;
-  private ByteBuffer endRow;
+  private ByteBuffer stopRow;
 
   /**
    * Builds a TableRecordReader. If no TableRecordReader was provided, uses
@@ -128,7 +128,7 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
       throw new IOException("No table was provided");
     }
     byte [][] startKeys = this.table.getStartKeys();
-    // NOTE(brandyn): Here we remove regions that are entirely outside of our start/end rows
+    // NOTE(brandyn): Here we remove regions that are entirely outside of our start/stop rows
     ByteBuffer emptyStartRow = ByteBuffer.wrap(HConstants.EMPTY_START_ROW);
     ArrayList<byte []> startKeysList = new ArrayList<byte []>();
     for (int i = 0; i < startKeys.length; i++) {
@@ -138,8 +138,8 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
             LOG.info("Skipping split (< start)...");
             continue;
         }
-        if (endRow != null && curStartKey.compareTo(endRow) > 0) {
-            LOG.info("Skipping split (> end)...");
+        if (stopRow != null && curStartKey.compareTo(stopRow) > 0) {
+            LOG.info("Skipping split (> stop)...");
             continue;
         }
         startKeysList.add(startKeys[i]);
@@ -171,9 +171,9 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
           LOG.info("Truncating split...");
           curStartKey = startRow;
       }
-      if (endRow != null && (curEndKey.compareTo(endRow) > 0 || curEndKey.compareTo(emptyStartRow) == 0)) {
+      if (stopRow != null && (curEndKey.compareTo(stopRow) > 0 || curEndKey.compareTo(emptyStartRow) == 0)) {
           LOG.info("Truncating split...");
-          curEndKey = endRow;
+          curEndKey = stopRow;
       }
       splits[curSplit] = new TableSplit(this.table.getTableName(), curStartKey.array(), curEndKey.array(), regionLocation);
       LOG.info("split: " + i + "->" + splits[curSplit]);
@@ -228,8 +228,8 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
       this.startRow = ByteBuffer.wrap(startRow);
   }
 
-  protected void setEndRow(byte [] endRow) {
-      this.endRow = ByteBuffer.wrap(endRow);
+  protected void setStopRow(byte [] stopRow) {
+      this.stopRow = ByteBuffer.wrap(stopRow);
   }
 
 }
