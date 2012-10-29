@@ -10,7 +10,7 @@ st = time.time()
 #,
 #
 out = 'out-%f/3' % st
-hadoopy_hbase.launch('testtable', out, 'hbase_test_job.py', columns=['colfam1:'], libjars=['hadoopy_hbase.jar'], jobconfs={'hbase.mapred.startrow': '5', 'hbase.mapred.endrow': '52'})
+hadoopy_hbase.launch('testtable', out, 'hbase_test_job.py', columns=['colfam1:'], libjars=['hadoopy_hbase.jar'], jobconfs={'hbase.mapred.startrowb64': 'NQ==', 'hbase.mapred.endrowb64': 'NTI='})
 results = hadoopy.readtb(out)
 print list(results)[:10]
 

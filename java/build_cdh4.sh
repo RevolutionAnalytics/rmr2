@@ -12,6 +12,7 @@ cp ${HBASE_HOME}/hbase-* ./lib/
 cp ${HADOOP_COMMONS_HOME}/*.jar ./lib/
 cp ${HADOOP_HOME}/hadoop-*-core.jar ./lib/
 cp ${HADOOP_HOME}/contrib/streaming/hadoop-streaming-*.jar ./lib/
+cp /usr/share/java/commons-codec.jar ./lib/
 
 
 echo "Building hadoopy_hbase.jar"

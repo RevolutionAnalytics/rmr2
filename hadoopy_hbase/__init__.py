@@ -6,6 +6,7 @@ from hbase import Hbase
 from hbase.ttypes import ColumnDescriptor, Mutation, BatchMutation
 import hadoopy_hbase
 import hashlib
+import base64
 
 
 def connect(server='localhost', port=9090):
@@ -35,25 +36,27 @@ def scanner(client, table, columns=None, per_call=1, start_row=''):
         client.scannerClose(sc)
 
 
-def launch_frozen(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), **kw):
+def _launch_args(hbase_in, hbase_out, columns, start_row, end_row, kw):
     if hbase_in:
         kw['input_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableInputFormat'
     if hbase_out:
         kw['output_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableOutputFormat'
     jobconfs = hadoopy._runner._listeq_to_dict(kw.get('jobconfs', []))
     jobconfs['hbase.mapred.tablecolumns'] = ' '.join(columns)
+    if start_row is not None:
+        jobconfs['hbase.mapred.startrowb64'] = base64.b64encode(start_row)
+    if end_row is not None:
+        jobconfs['hbase.mapred.endrowb64'] = base64.b64encode(end_row)
     kw['jobconfs'] = jobconfs
+
+
+def launch_frozen(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), start_row=None, end_row=None, **kw):
+    _launch_args(hbase_in, hbase_out, columns, kw)
     hadoopy.launch_frozen(in_name, out_name, script_path, **kw)
 
 
 def launch(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), **kw):
-    if hbase_in:
-        kw['input_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableInputFormat'
-    if hbase_out:
-        kw['output_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableOutputFormat'
-    jobconfs = hadoopy._runner._listeq_to_dict(kw.get('jobconfs', []))
-    jobconfs['hbase.mapred.tablecolumns'] = ' '.join(columns)
-    kw['jobconfs'] = jobconfs
+    _launch_args(hbase_in, hbase_out, columns, kw)
     hadoopy.launch(in_name, out_name, script_path, **kw)
 
 

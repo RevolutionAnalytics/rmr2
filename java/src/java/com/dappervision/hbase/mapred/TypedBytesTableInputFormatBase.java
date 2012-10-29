@@ -38,6 +38,7 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.typedbytes.TypedBytesWritable;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.ArrayList;
 import com.dappervision.hbase.mapred.TypedBytesTableRecordReader;
 
 /**
@@ -127,6 +128,24 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
       throw new IOException("No table was provided");
     }
     byte [][] startKeys = this.table.getStartKeys();
+    // NOTE(brandyn): Here we remove regions that are entirely outside of our start/end rows
+    ByteBuffer emptyStartRow = ByteBuffer.wrap(HConstants.EMPTY_START_ROW);
+    ArrayList<byte []> startKeysList = new ArrayList<byte []>();
+    for (int i = 0; i < startKeys.length; i++) {
+        ByteBuffer curStartKey = ByteBuffer.wrap(startKeys[i]);
+        ByteBuffer curEndKey = ByteBuffer.wrap(((i + 1) < startKeys.length) ? startKeys[i + 1]: HConstants.EMPTY_START_ROW);
+        if (startRow != null && curEndKey.compareTo(startRow) < 0 && curEndKey.compareTo(emptyStartRow) != 0) {
+            LOG.info("Skipping split (< start)...");
+            continue;
+        }
+        if (endRow != null && curStartKey.compareTo(endRow) > 0) {
+            LOG.info("Skipping split (> end)...");
+            continue;
+        }
+        startKeysList.add(startKeys[i]);
+    }
+    startKeys = startKeysList.toArray(new byte[startKeysList.size()][]);
+
     if (startKeys == null || startKeys.length == 0) {
       throw new IOException("Expecting at least one region");
     }
@@ -139,7 +158,6 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
     int middle = startKeys.length / realNumSplits;
     int startPos = 0;
     int curSplit = 0;
-    ByteBuffer emptyStartRow = ByteBuffer.wrap(HConstants.EMPTY_START_ROW);
     for (int i = 0; i < realNumSplits; i++) {
       int lastPos = startPos + middle;
       lastPos = startKeys.length % realNumSplits > i ? lastPos + 1 : lastPos;
@@ -148,15 +166,7 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
       ByteBuffer curStartKey = ByteBuffer.wrap(startKeys[startPos]);
       ByteBuffer curEndKey = ByteBuffer.wrap(((i + 1) < realNumSplits) ? startKeys[lastPos]: HConstants.EMPTY_START_ROW);
       startPos = lastPos;
-      // NOTE(Brandyn): If curEndKey < startRow or endRow < curStartKey, then skip.  Else truncate range
-      if (startRow != null && curEndKey.compareTo(startRow) < 0 && curEndKey.compareTo(emptyStartRow) != 0) {
-          LOG.info("Skipping split...");
-          continue;
-      }
-      if (endRow != null && curStartKey.compareTo(endRow) > 0) {
-          LOG.info("Skipping split...");
-          continue;
-      }
+      // NOTE(brandyn): Truncate splits that overlap start/end row
       if (startRow != null && curStartKey.compareTo(startRow) < 0) {
           LOG.info("Truncating split...");
           curStartKey = startRow;

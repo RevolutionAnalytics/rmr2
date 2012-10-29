@@ -37,6 +37,7 @@ import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import java.io.UnsupportedEncodingException;
+import org.apache.commons.codec.binary.Base64;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -88,8 +89,8 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
    */
   public static final String COLUMN_LIST = "hbase.mapred.tablecolumns";
   public static final String ROW_FILTER_REGEX = "hbase.mapred.rowfilter";
-  public static final String START_ROW = "hbase.mapred.startrow";
-  public static final String END_ROW = "hbase.mapred.endrow";
+  public static final String START_ROW = "hbase.mapred.startrowb64";
+  public static final String END_ROW = "hbase.mapred.endrowb64";
 
   private byte [][] inputColumns;
   private HTable table;
@@ -120,7 +121,7 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
     if (job.get(START_ROW) != null) {
         LOG.info("Start Row[" + job.get(START_ROW) + "]");
         try {
-            setStartRow(job.get(START_ROW).getBytes("US-ASCII"));
+            setStartRow(Base64.decodeBase64(job.get(START_ROW).getBytes("US-ASCII")));
         } catch( UnsupportedEncodingException e){
             LOG.error("Start Row[" + job.get(START_ROW) + "] - Error");
         }
@@ -128,7 +129,7 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
     if (job.get(END_ROW) != null) {
         LOG.info("End Row[" + job.get(END_ROW) + "]");
         try {
-            setEndRow(job.get(END_ROW).getBytes("US-ASCII"));
+            setEndRow(Base64.decodeBase64(job.get(END_ROW).getBytes("US-ASCII")));
         } catch( UnsupportedEncodingException e){
             LOG.error("End Row[" + job.get(END_ROW) + "] - Error");
         }
