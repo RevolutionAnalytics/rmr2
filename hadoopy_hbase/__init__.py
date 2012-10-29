@@ -51,12 +51,12 @@ def _launch_args(hbase_in, hbase_out, columns, start_row, end_row, kw):
 
 
 def launch_frozen(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), start_row=None, end_row=None, **kw):
-    _launch_args(hbase_in, hbase_out, columns, kw)
+    _launch_args(hbase_in, hbase_out, columns, start_row, end_row, kw)
     hadoopy.launch_frozen(in_name, out_name, script_path, **kw)
 
 
-def launch(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), **kw):
-    _launch_args(hbase_in, hbase_out, columns, kw)
+def launch(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), start_row=None, end_row=None, **kw):
+    _launch_args(hbase_in, hbase_out, columns, start_row, end_row, kw)
     hadoopy.launch(in_name, out_name, script_path, **kw)
 
 
