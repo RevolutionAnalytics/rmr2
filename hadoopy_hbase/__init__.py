@@ -75,8 +75,11 @@ def launch(in_name, out_name, script_path, hbase_in=True, hbase_out=False, colum
 
 class HBaseColumnDict(object):
 
-    def __init__(self, table, row, cf, **kw):
-        self._db = hadoopy_hbase.connect(**kw)
+    def __init__(self, table, row, cf, db=None, **kw):
+        if db is None:
+            self._db = hadoopy_hbase.connect(**kw)
+        else:
+            self._db = db
         self._table = table
         self._row = row
         self._cf = cf + ':'
@@ -106,8 +109,11 @@ class HBaseColumnDict(object):
 
 class HBaseRowDict(object):
 
-    def __init__(self, table, col, **kw):
-        self._db = hadoopy_hbase.connect(**kw)
+    def __init__(self, table, col, db=None, **kw):
+        if db is None:
+            self._db = hadoopy_hbase.connect(**kw)
+        else:
+            self._db = db
         self._table = table
         self._col = col
 
