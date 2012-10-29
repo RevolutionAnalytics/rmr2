@@ -36,6 +36,7 @@ import com.dappervision.hbase.mapred.TypedBytesTableInputFormatBase;
 import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.CompareFilter;
+import java.io.UnsupportedEncodingException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -87,6 +88,9 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
    */
   public static final String COLUMN_LIST = "hbase.mapred.tablecolumns";
   public static final String ROW_FILTER_REGEX = "hbase.mapred.rowfilter";
+  public static final String START_ROW = "hbase.mapred.startrow";
+  public static final String END_ROW = "hbase.mapred.endrow";
+
   private byte [][] inputColumns;
   private HTable table;
   private TypedBytesTableRecordReader tableRecordReader;
@@ -112,6 +116,22 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
     if (job.get(ROW_FILTER_REGEX) != null) {
         LOG.info("Row Regex Filter[" + job.get(ROW_FILTER_REGEX) + "]");
         setRowFilter(new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(job.get(ROW_FILTER_REGEX))));
+    }
+    if (job.get(START_ROW) != null) {
+        LOG.info("Start Row[" + job.get(START_ROW) + "]");
+        try {
+            setStartRow(job.get(START_ROW).getBytes("US-ASCII"));
+        } catch( UnsupportedEncodingException e){
+            LOG.error("Start Row[" + job.get(START_ROW) + "] - Error");
+        }
+    }
+    if (job.get(END_ROW) != null) {
+        LOG.info("End Row[" + job.get(END_ROW) + "]");
+        try {
+            setEndRow(job.get(END_ROW).getBytes("US-ASCII"));
+        } catch( UnsupportedEncodingException e){
+            LOG.error("End Row[" + job.get(END_ROW) + "] - Error");
+        }
     }
     try {
       setHTable(new HTable(HBaseConfiguration.create(job), tableNames[0].getName()));

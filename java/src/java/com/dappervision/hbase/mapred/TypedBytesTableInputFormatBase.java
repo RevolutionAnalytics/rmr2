@@ -36,6 +36,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.typedbytes.TypedBytesWritable;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import com.dappervision.hbase.mapred.TypedBytesTableRecordReader;
 
 /**
@@ -75,6 +77,8 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
   private HTable table;
   private TypedBytesTableRecordReader tableRecordReader;
   private Filter rowFilter;
+  private ByteBuffer startRow;
+  private ByteBuffer endRow;
 
   /**
    * Builds a TableRecordReader. If no TableRecordReader was provided, uses
@@ -134,18 +138,38 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
     InputSplit[] splits = new InputSplit[realNumSplits];
     int middle = startKeys.length / realNumSplits;
     int startPos = 0;
+    int curSplit = 0;
+    ByteBuffer emptyStartRow = ByteBuffer.wrap(HConstants.EMPTY_START_ROW);
     for (int i = 0; i < realNumSplits; i++) {
       int lastPos = startPos + middle;
       lastPos = startKeys.length % realNumSplits > i ? lastPos + 1 : lastPos;
       String regionLocation = table.getRegionLocation(startKeys[startPos]).
         getServerAddress().getHostname();
-      splits[i] = new TableSplit(this.table.getTableName(),
-        startKeys[startPos], ((i + 1) < realNumSplits) ? startKeys[lastPos]:
-          HConstants.EMPTY_START_ROW, regionLocation);
-      LOG.info("split: " + i + "->" + splits[i]);
+      ByteBuffer curStartKey = ByteBuffer.wrap(startKeys[startPos]);
+      ByteBuffer curEndKey = ByteBuffer.wrap(((i + 1) < realNumSplits) ? startKeys[lastPos]: HConstants.EMPTY_START_ROW);
       startPos = lastPos;
+      // NOTE(Brandyn): If curEndKey < startRow or endRow < curStartKey, then skip.  Else truncate range
+      if (startRow != null && curEndKey.compareTo(startRow) < 0 && curEndKey.compareTo(emptyStartRow) != 0) {
+          LOG.info("Skipping split...");
+          continue;
+      }
+      if (endRow != null && curStartKey.compareTo(endRow) > 0) {
+          LOG.info("Skipping split...");
+          continue;
+      }
+      if (startRow != null && curStartKey.compareTo(startRow) < 0) {
+          LOG.info("Truncating split...");
+          curStartKey = startRow;
+      }
+      if (endRow != null && (curEndKey.compareTo(endRow) > 0 || curEndKey.compareTo(emptyStartRow) == 0)) {
+          LOG.info("Truncating split...");
+          curEndKey = endRow;
+      }
+      splits[curSplit] = new TableSplit(this.table.getTableName(), curStartKey.array(), curEndKey.array(), regionLocation);
+      LOG.info("split: " + i + "->" + splits[curSplit]);
+      curSplit += 1;
     }
-    return splits;
+    return Arrays.copyOf(splits, curSplit);
   }
 
   /**
@@ -189,4 +213,13 @@ implements InputFormat<TypedBytesWritable, TypedBytesWritable> {
   protected void setRowFilter(Filter rowFilter) {
     this.rowFilter = rowFilter;
   }
+
+  protected void setStartRow(byte [] startRow) {
+      this.startRow = ByteBuffer.wrap(startRow);
+  }
+
+  protected void setEndRow(byte [] endRow) {
+      this.endRow = ByteBuffer.wrap(endRow);
+  }
+
 }
