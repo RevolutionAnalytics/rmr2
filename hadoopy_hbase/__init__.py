@@ -147,13 +147,20 @@ def hash_key(*args, **kw):
         prefix: Raw prefix of the string (default '')
         suffix: Raw suffix of the string (default '')
         delimiter: Raw delimiter of each field (default '')
-        hash_bytes: Number of md5 bytes (binary not hex) for each of *args (default 2)
+        hash_bytes: Number of md5 bytes (binary not hex) for each of *args
 
     Returns:
         Combined key (binary)
     """
     prefix = kw.get('prefix', '')
     suffix = kw.get('suffix', '')
-    hash_bytes = int(kw.get('hash_bytes', 2))
     delimiter = kw.get('delimiter', '')
-    return delimiter.join([prefix] + [hashlib.md5(x).digest()[:hash_bytes] for x in args] + [suffix])
+    if args:
+        try:
+            hash_bytes = kw['hash_bytes']
+        except KeyError:
+            raise ValueError('hash_bytes keyword argument must be specified')
+        return delimiter.join([prefix] + [hashlib.md5(x).digest()[:hash_bytes] for x in args] + [suffix])
+    else:
+        return delimiter.join([prefix, suffix])
+
