@@ -17,7 +17,8 @@ def connect(server='localhost', port=9090):
     return client
 
 
-def scanner(client, table, columns=None, per_call=1, start_row='', stop_row=None):
+def scanner(client, table, columns=None, per_call=1, start_row='', stop_row=None, max_rows=None):
+    num_rows = 0
     try:
         if stop_row is None:
             sc = client.scannerOpen(table, start_row, columns if columns else [])
@@ -31,8 +32,11 @@ def scanner(client, table, columns=None, per_call=1, start_row='', stop_row=None
             outs = scanner()
             if outs:
                 for out in outs:
+                    if max_rows is not None and num_rows >= max_rows:
+                        break
                     yield (out.row, dict((x, y.value)
                                          for x, y in out.columns.items()))
+                    num_rows += 1
             else:
                 break
     finally:
