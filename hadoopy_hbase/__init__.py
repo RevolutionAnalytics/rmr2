@@ -29,6 +29,8 @@ def scanner(client, table, columns=None, per_call=1, start_row='', stop_row=None
         else:
             scanner = lambda : client.scannerGetList(sc, per_call)
         while True:
+            if max_rows is not None and num_rows >= max_rows:
+                break
             outs = scanner()
             if outs:
                 for out in outs:
