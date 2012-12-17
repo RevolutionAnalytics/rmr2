@@ -57,7 +57,7 @@ def scanner_column(*args, **kw):
     return (y for x, y in scanner_row_column(*args, **kw))
 
 
-def _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, kw):
+def _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, single_value, kw):
     if hbase_in:
         kw['input_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableInputFormat'
     if hbase_out:
@@ -68,16 +68,18 @@ def _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, kw):
         jobconfs['hbase.mapred.startrowb64'] = base64.b64encode(start_row)
     if stop_row is not None:
         jobconfs['hbase.mapred.stoprowb64'] = base64.b64encode(stop_row)
+    if single_value:
+        jobconfs['hbase.mapred.valueformat'] = 'singlevalue'
     kw['jobconfs'] = jobconfs
 
 
-def launch_frozen(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), start_row=None, stop_row=None, **kw):
-    _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, kw)
+def launch_frozen(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), start_row=None, stop_row=None, single_value=None, **kw):
+    _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, single_value, kw)
     hadoopy.launch_frozen(in_name, out_name, script_path, **kw)
 
 
-def launch(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), start_row=None, stop_row=None, **kw):
-    _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, kw)
+def launch(in_name, out_name, script_path, hbase_in=True, hbase_out=False, columns=(), start_row=None, stop_row=None, single_value=None, **kw):
+    _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, single_value, kw)
     hadoopy.launch(in_name, out_name, script_path, **kw)
 
 

@@ -71,6 +71,7 @@ import org.apache.hadoop.typedbytes.TypedBytesWritable;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.util.StringUtils;
 import com.dappervision.hbase.mapred.TypedBytesTableRecordReader;
+import com.dappervision.hbase.mapred.TypedBytesTableRecordReaderSingleValue;
 
 
 
@@ -91,6 +92,7 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
   public static final String ROW_FILTER_REGEX = "hbase.mapred.rowfilter";
   public static final String START_ROW = "hbase.mapred.startrowb64";
   public static final String STOP_ROW = "hbase.mapred.stoprowb64";
+  public static final String VALUE_FORMAT = "hbase.mapred.valueformat";
 
   private byte [][] inputColumns;
   private HTable table;
@@ -139,7 +141,13 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
     } catch (Exception e) {
       LOG.error(StringUtils.stringifyException(e));
     }
-    super.setTableRecordReader(new TypedBytesTableRecordReader());
+    if (job.get(VALUE_FORMAT) != null && job.get(VALUE_FORMAT).equalsIgnoreCase("singlevalue")) {
+        LOG.info("Value Format[" + job.get(VALUE_FORMAT) + "]");
+        super.setTableRecordReader(new TypedBytesTableRecordReaderSingleValue());
+    } else {
+        LOG.info("Value Format[columns]");
+        super.setTableRecordReader(new TypedBytesTableRecordReader());
+    }
   }
 
   public void validateInput(JobConf job) throws IOException {
