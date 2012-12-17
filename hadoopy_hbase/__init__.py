@@ -19,6 +19,7 @@ def connect(server='localhost', port=9090):
 
 def scanner(client, table, columns=None, per_call=1, start_row='', stop_row=None, max_rows=None):
     num_rows = 0
+    sc = None
     try:
         if stop_row is None:
             sc = client.scannerOpen(table, start_row, columns if columns else [])
@@ -42,7 +43,8 @@ def scanner(client, table, columns=None, per_call=1, start_row='', stop_row=None
             else:
                 break
     finally:
-        client.scannerClose(sc)
+        if sc is not None:
+            client.scannerClose(sc)
 
 
 def scanner_row_column(client, table, column, **kw):
@@ -61,7 +63,7 @@ def _launch_args(hbase_in, hbase_out, columns, start_row, stop_row, kw):
     if hbase_out:
         kw['output_format'] = 'com.dappervision.hbase.mapred.TypedBytesTableOutputFormat'
     jobconfs = hadoopy._runner._listeq_to_dict(kw.get('jobconfs', []))
-    jobconfs['hbase.mapred.tablecolumns'] = ' '.join(columns)
+    jobconfs['hbase.mapred.tablecolumnsb64'] = ' '.join(map(base64.b64encode, columns))
     if start_row is not None:
         jobconfs['hbase.mapred.startrowb64'] = base64.b64encode(start_row)
     if stop_row is not None:

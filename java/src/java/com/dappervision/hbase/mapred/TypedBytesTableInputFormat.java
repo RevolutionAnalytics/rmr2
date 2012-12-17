@@ -87,7 +87,7 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
   /**
    * space delimited list of columns
    */
-  public static final String COLUMN_LIST = "hbase.mapred.tablecolumns";
+  public static final String COLUMN_LIST = "hbase.mapred.tablecolumnsb64";
   public static final String ROW_FILTER_REGEX = "hbase.mapred.rowfilter";
   public static final String START_ROW = "hbase.mapred.startrowb64";
   public static final String STOP_ROW = "hbase.mapred.stoprowb64";
@@ -111,7 +111,7 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
     String[] colNames = colArg.split(" ");
     byte [][] m_cols = new byte[colNames.length][];
     for (int i = 0; i < m_cols.length; i++) {
-      m_cols[i] = Bytes.toBytes(colNames[i]);
+        m_cols[i] = Base64.decodeBase64(Bytes.toBytes(colNames[i]));
     }
     setInputColumns(m_cols);
     if (job.get(ROW_FILTER_REGEX) != null) {
