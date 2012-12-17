@@ -145,7 +145,7 @@ public class TypedBytesTableInputFormat extends TypedBytesTableInputFormatBase i
         LOG.info("Value Format[" + job.get(VALUE_FORMAT) + "]");
         super.setTableRecordReader(new TypedBytesTableRecordReaderSingleValue());
     } else {
-        LOG.info("Value Format[columns]");
+        LOG.info("Value Format[familiescolumns]");
         super.setTableRecordReader(new TypedBytesTableRecordReader());
     }
   }
