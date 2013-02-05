@@ -1,4 +1,4 @@
-//Copyright 2011 Revolution Analytics
+//Copyright 2012 Revolution Analytics
 //   
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -12,11 +12,14 @@
 //See the License for the specific language governing permissions and
 //limitations under the License.
 
-#ifndef _RMR_DATAFRAME_TO_LIST_H
-#define _RMR_DATAFRAME_TO_LIST_H
+#ifndef _RMR_HBASE_TO_DF_H
+#define _RMR_HBASE_TO_DF_H
 
 #include <Rcpp.h>
 
-RcppExport SEXP dataframe_to_list(SEXP data, SEXP nrow, SEXP ncol, SEXP dest);
+
+RcppExport SEXP hbase_to_df(SEXP _source, SEXP _dest);
+RcppExport SEXP p_string_to_raw(SEXP _source);
+RcppExport SEXP raw_list_to_character(SEXP _source);
 
 #endif
