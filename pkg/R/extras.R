@@ -56,6 +56,15 @@ rmr.sample = function(input, output = NULL, method = c("any", "Bernoulli"), ...)
                   filter = rbinom(rmr.length(k), 1, p) == 1
                   keyval(rmr.slice(k, filter),
                          rmr.slice(v, filter))})}}
+
+## fast cpp extensions
+
+vsum = 
+  function(x) {
+    if(is.list(x)) 
+      .Call("vsum", x, PACKAGE = "rmr2")
+    else  
+      stop(paste("can't vsum a ", class(x)))}
             
 ##optimizer
 
@@ -98,17 +107,3 @@ rmr.str =
           match.call() [[2]], 
           capture.output(str(x))), 
         collapse="\n"))}
-
-## coerce data frame to lists of lists row first, faster than mapply
-data.frame.to.list =
-  function(x) {
-    .Call('dataframe_to_list', x, nrow(x), ncol(x), replicate(nrow(x), as.list(1:ncol(x)), simplify=F))}
-
-## fast cpp extensions
-
-vsum = 
-  function(x) {
-    if(is.list(x)) 
-      .Call("vsum", x, PACKAGE = "rmr2")
-    else  
-      stop(paste("can't vsum a ", class(x)))}

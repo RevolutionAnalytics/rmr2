@@ -427,7 +427,7 @@ void serialize(const SEXP & object, raw & serialized, bool native) {
       default: {
         throw UnsupportedType(robj.sexp_type());}}}}
 
-SEXP typed_bytes_writer(SEXP objs, SEXP native){
+SEXP typedbytes_writer(SEXP objs, SEXP native){
 	raw serialized(0);
 	Rcpp::List objects(objs);
   Rcpp::LogicalVector is_native(native);

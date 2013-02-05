@@ -189,6 +189,10 @@ rmr.stream = function(
   in.memory.combine,
   verbose, 
   debug) {
+  backend.parameters = 
+    c(backend.parameters, 
+      input.format$backend.parameters$hadoop, 
+      output.format$backend.parameters$hadoop)
   ## prepare map and reduce executables
   work.dir = 
     if(.Platform$OS.type == "windows") "../../jars"
