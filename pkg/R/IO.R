@@ -16,6 +16,7 @@
 make.json.input.format =
   function(key.class = rmr2:::qw(list, vector, data.frame, matrix),
            value.class = rmr2:::qw(list, vector, data.frame, matrix)) { #leave the pkg qualifier in here
+           value.class = rmr2:::qw(list, vector, data.frame, matrix)) {
     key.class = match.arg(key.class)
     value.class = match.arg(value.class)
     cast =
@@ -77,17 +78,17 @@ make.csv.output.format = function(...) function(kv, con) {
               row.names = FALSE, 
               col.names = FALSE)}
 
-typed.bytes.reader = function(data, nobjs) {
+typedbytes.reader = function(data, nobjs) {
   if(is.null(data)) NULL
   else
-    .Call("typed_bytes_reader", data, nobjs, PACKAGE = "rmr2")}
+    .Call("typedbytes_reader", data, nobjs, PACKAGE = "rmr2")}
 
-typed.bytes.writer = function(objects, con, native) {
+typedbytes.writer = function(objects, con, native) {
   writeBin(
-    .Call("typed_bytes_writer", objects, native, PACKAGE = "rmr2"),
+    .Call("typedbytes_writer", objects, native, PACKAGE = "rmr2"),
     con)}
 
-make.typed.bytes.input.format = function() {
+make.typedbytes.input.format = function(hbase = FALSE) {
   obj.buffer = list()
   obj.buffer.rmr.length = 0
   raw.buffer = raw()
@@ -98,7 +99,7 @@ make.typed.bytes.input.format = function() {
       raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
       read.size = as.integer(2*read.size)
       if(length(raw.buffer) == 0) break;
-      parsed = typed.bytes.reader(raw.buffer, as.integer(read.size/2))
+      parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
       obj.buffer <<- c(obj.buffer, parsed$objects)
       obj.buffer.rmr.length <<- sum(sapply(sample(even(obj.buffer), 10, replace = T), rmr.length)) * length(obj.buffer)/20
       if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
@@ -112,29 +113,140 @@ make.typed.bytes.input.format = function() {
            obj.buffer <<- obj.buffer[-length(obj.buffer)]}
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
-        kk = 
-          inverse.rle(
-            list(
-              lengths = sapply(vv, rmr.length),
-              values = kk))
-        keyval(
-          c.or.rbind(kk),
-          c.or.rbind(vv))}
+        if(!hbase) {
+          kk = 
+            inverse.rle(
+              list(
+                lengths = sapply(vv, rmr.length),
+                values = kk))
+          keyval(
+            c.or.rbind(kk), 
+            c.or.rbind(vv))}
+        else {
+          keyval(kk, vv)}}
     obj.buffer <<- straddler
     obj.buffer.rmr.length <<- 0
     retval}}
   
-make.native.input.format = make.typed.bytes.input.format
+make.native.input.format = make.typedbytes.input.format
 
 make.native.or.typedbytes.output.format = 
   function(keyval.length, native)
     function(kv, con){
       kvs = split.keyval(kv, keyval.length)
-      typed.bytes.writer(interleave(keys(kvs), values(kvs)), con, native)}
+      typedbytes.writer(interleave(keys(kvs), values(kvs)), con, native)}
 
 make.native.output.format = Curry(make.native.or.typedbytes.output.format, native = TRUE)
 make.typedbytes.output.format = Curry(make.native.or.typedbytes.output.format, native = FALSE)
 
+pRawToChar = 
+  function(rl)
+    .Call("raw_list_to_character", rl, PACKAGE="rmr2")
+
+hbase.rec2df = 
+  function(
+    source, 
+    atomic, 
+    dense, 
+    key.deserialize = pRawToChar, 
+    cell.deserialize =
+      function(x, column, family) pRawToChar(x)) {
+    filler = replicate(length(unlist(source))/2, NULL)
+    dest = 
+      list(
+        key = filler,
+        family = filler,
+        column = filler,
+        cell = filler)
+    tmp = 
+      .Call(
+        "hbase_to_df", 
+        source, 
+        dest, 
+        PACKAGE="rmr2")
+    retval = data.frame(
+      key = 
+        I(
+          key.deserialize(
+            tmp$data.frame$key[1:tmp$nrows])), 
+      family = 
+        pRawToChar(
+          tmp$data.frame$family[1:tmp$nrows]), 
+      column = 
+        pRawToChar(
+          tmp$data.frame$column[1:tmp$nrows]), 
+      cell = 
+        I(
+          cell.deserialize(
+            tmp$data.frame$cell[1:tmp$nrows],
+            tmp$data.frame$family[1:tmp$nrows],
+            tmp$data.frame$column[1:tmp$nrows])))
+    if(atomic) 
+      retval = 
+      as.data.frame(
+        lapply(
+          retval, 
+          function(x) if(is.factor(x)) x else unclass(x)))
+    if(dense) retval = dcast(retval,  key ~ family + column)
+    retval}
+
+# data.frame.to.raw = 
+#   function(a.data.frame)
+#     as.data.frame(
+#       lapply(
+#         a.data.frame, 
+#         function(x) 
+#           I(.Call("p_string_to_raw", as.character(x)))))
+
+make.hbase.input.format = 
+  function(dense, atomic, key.deserialize, cell.deserialize) {
+    deserialize.opt = 
+      function(deser) {
+        if(is.null(deser)) deser = "raw"
+        if(is.character(deser))
+          deser =
+          switch(
+            deser,
+            native = 
+              function(x) lapply(x, unserialize),
+            typedbytes = 
+              function(x) 
+                typedbytes.reader(
+                  do.call(c, x),  
+                  nobjs = length(x)),
+            raw = pRawToChar)
+        deser}
+    key.deserialize = deserialize.opt(key.deserialize)
+    cell.deserialize.one.arg = deserialize.opt(cell.deserialize)
+    cell.deserialize = function(x, family, column) {
+      cell.deserialize.one.arg(x)}
+    tif = make.typedbytes.input.format(hbase = TRUE)
+    if(is.null(dense)) dense = FALSE
+    function(con, keyval.length) {
+      rec = tif(con, keyval.length)
+      if(is.null(rec)) NULL
+      else {
+        df = hbase.rec2df(rec, atomic, dense, key.deserialize, cell.deserialize)
+        keyval(NULL, df)}}}
+
+# dfd.cm = melt(dfd.c, id.vars="key")
+# 
+# cbind(
+#   dfd.cm,
+#   as.data.frame(
+#     do.call(
+#       function(...) 
+#         mapply(..., FUN = c, SIMPLIFY = F), 
+#       strsplit(
+#         as.character(dfd.cm$variable), "_"))))
+
+df.to.mn = function(x,ind) {
+  if(length(ind)>0 && nrow(x) > 0) {
+    spl = split(x, x[,ind[1]])
+    lapply(x[,ind[1]], function(y) keyval(as.character(y), df.to.mn(spl[[y]], ind[-1])))}
+  else x$value}
+
+hbdf.to.m3 = Curry(df.to.mn, ind = c("key", "family", "column"))
 # I/O 
 make.keyval.readwriter = 
   function(mode, format, keyval.length, con = NULL, read) {
@@ -161,7 +273,7 @@ make.keyval.reader = Curry(make.keyval.readwriter, read = TRUE)
 make.keyval.writer = Curry(make.keyval.readwriter, keyval.length = NULL, read = FALSE)
 
 IO.formats = c("text", "json", "csv", "native",
-               "sequence.typedbytes")
+               "sequence.typedbytes", "hbase")
 
 make.input.format = 
   function(
@@ -170,6 +282,7 @@ make.input.format =
     streaming.format = NULL, 
     ...) {
     mode = match.arg(mode)
+    backend.parameters = NULL
     if(is.character(format)) {
       format = match.arg(format, IO.formats)
       switch(
@@ -187,11 +300,44 @@ make.input.format =
           format = make.native.input.format() 
           mode = "binary"}, 
         sequence.typedbytes = {
-          format = make.typed.bytes.input.format() 
-          mode = "binary"})}
+          format = make.typedbytes.input.format() 
+          mode = "binary"},
+        hbase = {
+          optlist = list(...)
+          format = 
+            make.hbase.input.format(
+              default(optlist$dense, F),
+              default(optlist$atomic, F),
+              default(optlist$key.deserialize, "raw"),
+              default(optlist$cell.deserialize, "raw"))
+          mode = "binary"
+          streaming.format = 
+            "com.dappervision.hbase.mapred.TypedBytesTableInputFormat"
+          family.columns = optlist$family.columns
+          backend.parameters = 
+            list(
+              hadoop = 
+                list(
+                  D = 
+                    paste(
+                      "hbase.mapred.tablecolumns=",
+                      sep = "",
+                      paste(
+                        collapse = " ",
+                        sapply(
+                          names(family.columns), 
+                          function(fam) 
+                            paste(
+                              fam, 
+                              family.columns[[fam]],
+                              sep = ":", 
+                              collapse = " "))))))})}
     if(is.null(streaming.format) && mode == "binary") 
       streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
-    list(mode = mode, format = format, streaming.format = streaming.format)}
+    list(mode = mode, 
+         format = format, 
+         streaming.format = streaming.format, 
+         backend.parameters = backend.parameters)}
 
 make.output.format = 
   function(
@@ -200,6 +346,7 @@ make.output.format =
     streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat", 
     ...) {
     mode = match.arg(mode)
+    backend.parameters = NULL
     if(is.character(format)) {
       format = match.arg(format, IO.formats)
       switch(
@@ -224,6 +371,19 @@ make.output.format =
         sequence.typedbytes = {
           format = make.typedbytes.output.format(keyval.length = rmr.options('keyval.length'))
           mode = "binary"
-          streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"})}
+          streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"},
+        hbase = {
+          format = make.typedbytes.output.format(hbase = TRUE)
+          mode = "binary"
+          streaming.format = "com.dappervision.mapreduce.TypedBytesTableOutputFormat"
+          backend.parameters = 
+            list(
+              hadoop = 
+                list(
+                  D = paste("hbase.mapred.tablecolumns=", 
+                            list(...)$family, 
+                            ":", 
+                            list(...)$column, 
+                            sep = "")))})}
     mode = match.arg(mode)
-    list(mode = mode, format = format, streaming.format = streaming.format)}
+    list(mode = mode, format = format, streaming.format = streaming.format, backend.parameters = backend.parameters)}
