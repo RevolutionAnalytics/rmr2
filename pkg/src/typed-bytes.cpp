@@ -255,7 +255,7 @@ SEXP unserialize(const raw & data, int & start, int type_code = 255){
       throw UnsupportedType(type_code);}}
       return new_object;}
 
-SEXP typed_bytes_reader(SEXP data, SEXP _nobjs){
+SEXP typedbytes_reader(SEXP data, SEXP _nobjs){
 	Rcpp::NumericVector nobjs(_nobjs);
 	Rcpp::List objs(floor(nobjs[0]));
 	Rcpp::RawVector tmp(data);
