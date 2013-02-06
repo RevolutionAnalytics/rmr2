@@ -618,6 +618,136 @@ class TRowResult:
   def __ne__(self, other):
     return not (self == other)
 
+class TScan:
+  """
+  A Scan object is used to specify scanner parameters when opening a scanner.
+
+  Attributes:
+   - startRow
+   - stopRow
+   - timestamp
+   - columns
+   - caching
+   - filterString
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'startRow', None, None, ), # 1
+    (2, TType.STRING, 'stopRow', None, None, ), # 2
+    (3, TType.I64, 'timestamp', None, None, ), # 3
+    (4, TType.LIST, 'columns', (TType.STRING,None), None, ), # 4
+    (5, TType.I32, 'caching', None, None, ), # 5
+    (6, TType.STRING, 'filterString', None, None, ), # 6
+  )
+
+  def __init__(self, startRow=None, stopRow=None, timestamp=None, columns=None, caching=None, filterString=None,):
+    self.startRow = startRow
+    self.stopRow = stopRow
+    self.timestamp = timestamp
+    self.columns = columns
+    self.caching = caching
+    self.filterString = filterString
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.startRow = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.stopRow = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I64:
+          self.timestamp = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.LIST:
+          self.columns = []
+          (_etype19, _size16) = iprot.readListBegin()
+          for _i20 in xrange(_size16):
+            _elem21 = iprot.readString();
+            self.columns.append(_elem21)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.I32:
+          self.caching = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.STRING:
+          self.filterString = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('TScan')
+    if self.startRow is not None:
+      oprot.writeFieldBegin('startRow', TType.STRING, 1)
+      oprot.writeString(self.startRow)
+      oprot.writeFieldEnd()
+    if self.stopRow is not None:
+      oprot.writeFieldBegin('stopRow', TType.STRING, 2)
+      oprot.writeString(self.stopRow)
+      oprot.writeFieldEnd()
+    if self.timestamp is not None:
+      oprot.writeFieldBegin('timestamp', TType.I64, 3)
+      oprot.writeI64(self.timestamp)
+      oprot.writeFieldEnd()
+    if self.columns is not None:
+      oprot.writeFieldBegin('columns', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRING, len(self.columns))
+      for iter22 in self.columns:
+        oprot.writeString(iter22)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.caching is not None:
+      oprot.writeFieldBegin('caching', TType.I32, 5)
+      oprot.writeI32(self.caching)
+      oprot.writeFieldEnd()
+    if self.filterString is not None:
+      oprot.writeFieldBegin('filterString', TType.STRING, 6)
+      oprot.writeString(self.filterString)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class IOError(TException):
   """
   An IOError exception signals that an error occurred communicating
