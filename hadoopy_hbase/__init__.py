@@ -3,7 +3,7 @@ from thrift.transport.TSocket import TSocket
 from thrift.transport.TTransport import TBufferedTransport
 from thrift.protocol import TBinaryProtocol
 from hbase import Hbase
-from hbase.ttypes import ColumnDescriptor, Mutation, BatchMutation
+from hbase.ttypes import ColumnDescriptor, Mutation, BatchMutation, TScan
 import hadoopy_hbase
 import hashlib
 import base64
@@ -17,14 +17,12 @@ def connect(server='localhost', port=9090):
     return client
 
 
-def scanner(client, table, columns=None, per_call=1, start_row='', stop_row=None, max_rows=None):
+def scanner(client, table, columns=None, per_call=1, start_row=None, stop_row=None, max_rows=None, filter=None, caching=None):
     num_rows = 0
     sc = None
     try:
-        if stop_row is None:
-            sc = client.scannerOpen(table, start_row, columns if columns else [])
-        else:
-            sc = client.scannerOpenWithStop(table, start_row, stop_row, columns if columns else [])
+        
+        sc = client.scannerOpenWithScan(table, TScan(startRow=start_row, stopRow=stop_row, columns=columns if columns else [], caching=caching, filterString=filter))
         if per_call == 1:
             scanner = lambda : client.scannerGet(sc)
         else:
