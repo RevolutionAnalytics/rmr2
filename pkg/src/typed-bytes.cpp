@@ -13,20 +13,25 @@
 //limitations under the License.
 
 #include "typed-bytes.h"
+#include <algorithm>
 #include <deque>
 #include <iostream>
-#include <algorithm>
 #include <math.h>
+#include <stdint.h>
+#include <string>
+#include <sstream>
 
 typedef std::deque<unsigned char> raw;
-#include <string>
-#include <iostream>
+
+template<typename T> 
+std::string to_string(T x) {
+  std::ostringstream ss;
+  ss << x;
+  return ss.str();}
 
 void safe_stop(std::string message) {
-  try{
-    throw Rcpp::exception(message.c_str(), "typed-bytes.cpp", 27);}//switch to rcpp::stop when available for revoR
-  catch( std::exception &ex ) {
-    forward_exception_to_r( ex );}}
+  std::cerr << message << std::endl;
+  exit(-1);}
     
 template<typename T>
 void stop_unimplemented(std::string what){
@@ -158,7 +163,37 @@ std::vector<std::string> unserialize_vector<std::string>(const raw & data, int &
     retval[i] = tmp_string;}
   return retval;}
       
-SEXP unserialize_SEXP(const raw & data, int & start) {
+SEXP unserialize(const raw & data, int & start, int type_code = 255);
+
+SEXP unserialize_list(const raw & data, int & start) {
+  int length = get_length(data, start);
+  Rcpp::List list(length);
+  for(int i = 0; i < length; i++) {
+    list[i] = unserialize(data, start);}
+  return Rcpp::wrap(list);}
+  
+SEXP unserialize_255_terminated_list(const raw & data, int & start) {
+  std::vector<Rcpp::RObject> vec;
+  int type_code = get_type(data, start);
+  while(type_code != 255){
+    vec.push_back(unserialize(data, start, type_code));
+    type_code = get_type(data, start);}
+  return Rcpp::wrap(vec);}
+      
+SEXP unserialize_map(const raw & data, int & start) {
+  int length = get_length(data, start);
+    Rcpp::List keys(length);
+    Rcpp::List values(length);
+    for(int i = 0; i < length; i++) {
+      keys[i] = unserialize(data, start);
+      values[i] = unserialize(data, start);}
+    return 
+      wrap( 
+        Rcpp::List::create(
+          Rcpp::Named("key") = keys,
+          Rcpp::Named("val") = values));}
+       
+SEXP unserialize_native(const raw & data, int & start) {
   int length = get_length(data, start);
   check_length<SEXP>(data, start, length);
   Rcpp::Function r_unserialize("unserialize");
@@ -174,7 +209,7 @@ template <typename T>
 SEXP wrap_unserialize_scalar(const raw & data, int & start) {
   return Rcpp::wrap(unserialize_scalar<T>(data, start));}
 
-SEXP unserialize(const raw & data, int & start, int type_code = 255){
+SEXP unserialize(const raw & data, int & start, int type_code){
   Rcpp::RObject new_object;
   if(type_code == 255) {
     type_code = get_type(data, start);}
@@ -183,69 +218,66 @@ SEXP unserialize(const raw & data, int & start, int type_code = 255){
       int length = get_length(data, start);
       new_object = wrap_unserialize_vector<unsigned char>(data, start, length);}
       break;
-    case 1: { //byte
-      new_object = wrap_unserialize_scalar<unsigned char>(data, start);}
+    case 1:  //byte
+      new_object = wrap_unserialize_scalar<unsigned char>(data, start);
       break;
-    case 2: { //boolean
-      new_object = wrap_unserialize_scalar<bool>(data, start);}
+    case 2: //boolean
+      new_object = wrap_unserialize_scalar<bool>(data, start);
       break;
-    case 3: { //integer
-      new_object = wrap_unserialize_scalar<int>(data, start);}      
+    case 3: //integer
+      new_object = wrap_unserialize_scalar<int>(data, start);
       break;
-    case 4: { //long
-      new_object = wrap_unserialize_scalar<long>(data, start);} 
+    case 4: //long
+      new_object = wrap_unserialize_scalar<long>(data, start);
       break;
-    case 5: { //float
-      throw UnsupportedType(type_code);}
+    case 5: //float
+      new_object = wrap_unserialize_scalar<float>(data, start);
       break;
-    case 6: { //double
-      new_object = wrap_unserialize_scalar<double>(data, start);}
+    case 6: //double
+      new_object = wrap_unserialize_scalar<double>(data, start);
       break;
-    case 7: { //string
+    case 7: {//string
       int length = get_length(data, start);
       std::vector<char> vec_tmp = unserialize_vector<char>(data, start, length);
       new_object =  Rcpp::wrap(std::string(vec_tmp.begin(), vec_tmp.end()));}
       break;
-    case 8: { //vector
-      int length = get_length(data, start);
-      Rcpp::List list(length);
-      int list_end = 0; 
-      for(int i = 0; i < length; i++) {
-        list[i] = unserialize(data, start);}
-      new_object = Rcpp::wrap(list);}
+    case 8: //list
+      new_object = unserialize_list(data, start);
       break;
-    case 9: // list (255 terminated vector)
-    case 10: { //map
-      throw UnsupportedType(type_code);}
+    case 9: //other list
+      new_object = unserialize_255_terminated_list(data, start);
       break;
-    case 144: { //R serialization
-      new_object = unserialize_SEXP(data, start);}
+    case 10: //map
+      new_object = unserialize_map(data, start);
+      break;
+    case 144: //R serialization
+      new_object = unserialize_native(data, start);
       break;
     case 145: {
       int raw_length = get_length(data, start);
       int vec_type_code  = get_type(data, start);
       raw_length = raw_length - 1;
       switch(vec_type_code) {
-        case 1:{
-          new_object = wrap_unserialize_vector<unsigned char>(data, start, raw_length);}
+        case 1:
+          new_object = wrap_unserialize_vector<unsigned char>(data, start, raw_length);
         break;
-        case 2:{
-          new_object = wrap_unserialize_vector<bool>(data, start, raw_length);}
+        case 2:
+          new_object = wrap_unserialize_vector<bool>(data, start, raw_length);
         break;
-        case 3:{
-          new_object = wrap_unserialize_vector<int>(data, start, raw_length);}
+        case 3:
+          new_object = wrap_unserialize_vector<int>(data, start, raw_length);
         break;
-        case 4:{
-          new_object = wrap_unserialize_vector<long>(data, start, raw_length);}
+        case 4:
+          new_object = wrap_unserialize_vector<long>(data, start, raw_length);
         break;
-        case 5:{
-          new_object = wrap_unserialize_vector<float>(data, start, raw_length);}
+        case 5:
+          new_object = wrap_unserialize_vector<float>(data, start, raw_length);
         break;
-        case 6:{
-          new_object = wrap_unserialize_vector<double>(data, start, raw_length);}
+        case 6:
+          new_object = wrap_unserialize_vector<double>(data, start, raw_length);
         break;
-        default: {
-          throw UnsupportedType(vec_type_code);}}}
+        default: 
+          throw UnsupportedType(vec_type_code);}}
       break;
     case 146: {
        int raw_length = get_length(data, start);
@@ -271,7 +303,7 @@ SEXP typedbytes_reader(SEXP data, SEXP _nobjs){
     catch (ReadPastEnd rpe){
       break;}
 		catch (UnsupportedType ue) {
-      safe_stop("Unsupported type: " + (int)ue.type_code);}
+      safe_stop("Unsupported type: " + to_string(ue.type_code));}
 		catch (NegativeLength nl) {
       safe_stop("Negative length exception");}}
   Rcpp::List list_tmp(objs.begin(), objs.begin() + objs_end);
