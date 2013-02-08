@@ -189,14 +189,6 @@ hbase.rec2df =
     if(dense) retval = dcast(retval,  key ~ family + column)
     retval}
 
-# data.frame.to.raw = 
-#   function(a.data.frame)
-#     as.data.frame(
-#       lapply(
-#         a.data.frame, 
-#         function(x) 
-#           I(.Call("p_string_to_raw", as.character(x)))))
-
 make.hbase.input.format = 
   function(dense, atomic, key.deserialize, cell.deserialize) {
     deserialize.opt = 
@@ -227,17 +219,6 @@ make.hbase.input.format =
       else {
         df = hbase.rec2df(rec, atomic, dense, key.deserialize, cell.deserialize)
         keyval(NULL, df)}}}
-
-# dfd.cm = melt(dfd.c, id.vars="key")
-# 
-# cbind(
-#   dfd.cm,
-#   as.data.frame(
-#     do.call(
-#       function(...) 
-#         mapply(..., FUN = c, SIMPLIFY = F), 
-#       strsplit(
-#         as.character(dfd.cm$variable), "_"))))
 
 df.to.mn = function(x,ind) {
   if(length(ind)>0 && nrow(x) > 0) {
