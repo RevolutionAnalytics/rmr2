@@ -87,7 +87,7 @@ typedbytes.writer = function(objects, con, native) {
     .Call("typedbytes_writer", objects, native, PACKAGE = "rmr2"),
     con)}
 
-make.typedbytes.input.format = function(hbase = FALSE) {
+make.typedbytes.input.format = function(recycle = TRUE) {
   obj.buffer = list()
   obj.buffer.rmr.length = 0
   raw.buffer = raw()
@@ -112,7 +112,7 @@ make.typedbytes.input.format = function(hbase = FALSE) {
            obj.buffer <<- obj.buffer[-length(obj.buffer)]}
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
-        if(!hbase) {
+        if(recycle) {
           kk = 
             inverse.rle(
               list(
@@ -142,7 +142,7 @@ pRawToChar =
   function(rl)
     .Call("raw_list_to_character", rl, PACKAGE="rmr2")
 
-hbase.rec2df = 
+hbase.rec.to.data.frame = 
   function(
     source, 
     atomic, 
@@ -211,22 +211,22 @@ make.hbase.input.format =
     cell.deserialize.one.arg = deserialize.opt(cell.deserialize)
     cell.deserialize = function(x, family, column) {
       cell.deserialize.one.arg(x)}
-    tif = make.typedbytes.input.format(hbase = TRUE)
+    tif = make.typedbytes.input.format(recycle = FALSE)
     if(is.null(dense)) dense = FALSE
     function(con, keyval.length) {
       rec = tif(con, keyval.length)
       if(is.null(rec)) NULL
       else {
-        df = hbase.rec2df(rec, atomic, dense, key.deserialize, cell.deserialize)
+        df = hbase.rec.to.data.frame(rec, atomic, dense, key.deserialize, cell.deserialize)
         keyval(NULL, df)}}}
 
-df.to.mn = function(x,ind) {
+data.frame.to.nested.map = function(x,ind) {
   if(length(ind)>0 && nrow(x) > 0) {
     spl = split(x, x[,ind[1]])
-    lapply(x[,ind[1]], function(y) keyval(as.character(y), df.to.mn(spl[[y]], ind[-1])))}
+    lapply(x[,ind[1]], function(y) keyval(as.character(y), data.frame.to.nested.map(spl[[y]], ind[-1])))}
   else x$value}
 
-hbdf.to.m3 = Curry(df.to.mn, ind = c("key", "family", "column"))
+hbdf.to.m3 = Curry(data.frame.to.nested.map, ind = c("key", "family", "column"))
 # I/O 
 make.keyval.readwriter = 
   function(mode, format, keyval.length, con = NULL, read) {
@@ -353,7 +353,7 @@ make.output.format =
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"},
         hbase = {
-          format = make.typedbytes.output.format(hbase = TRUE)
+          format = make.typedbytes.output.format(recycle = FALSE)
           mode = "binary"
           streaming.format = "com.dappervision.mapreduce.TypedBytesTableOutputFormat"
           backend.parameters = 
