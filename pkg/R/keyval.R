@@ -134,7 +134,7 @@ split.keyval = function(kv, size) {
   if(is.null(k)) {
     k =  ceiling(1:rmr.length(v)/size)
     recycle.keyval(
-      keyval(NULL,
+      keyval(list(NULL),
              unname(rmr.split(v, k))))}
   else {
     kv = recycle.keyval(kv)
