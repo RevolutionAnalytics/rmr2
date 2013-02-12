@@ -124,13 +124,16 @@ rmr.split =
 
 split.keyval = function(kv, size) {
   k = keys(kv)
-  v = rmr.recycle(values(kv), k)
+  v = values(kv)
   if(is.null(k)) {
     k =  ceiling(1:rmr.length(v)/size)
     recycle.keyval(
-      keyval(list(NULL),
+      keyval(list(list(NULL)),
              unname(rmr.split(v, k))))}
   else {
+    kv = recycle.keyval(kv)
+    k = keys(kv)
+    v = values(kv)
     ind = {
       if(is.list(k) && !is.data.frame(k)) 
         sapply(k, digest)
