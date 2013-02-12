@@ -62,19 +62,18 @@ rmr.slice =
 
 rmr.recycle = 
   function(x,y) {
-    recycle.length = 
-      function(z) {
-        if(rmr.length(z) == 0) 1 
-        else rmr.length(z) }
-    lx = recycle.length(x)
-    ly = recycle.length(y)
+    lx = rmr.length(x)
+    ly = rmr.length(y)
     if(lx == ly) x
-    else
-      rmr.slice(
-        c.or.rbind(
-          rep(list(x),
-              ceiling(ly/lx))),
-        1:max(ly, lx))}
+    else {
+      if(min(lx,ly) == 0)
+        stop("Can't recycle 0-length argument")
+      else
+        rmr.slice(
+          c.or.rbind(
+            rep(list(x),
+                ceiling(ly/lx))),
+          1:max(ly, lx))}}
 
 recycle.keyval =
   function(kv) {
