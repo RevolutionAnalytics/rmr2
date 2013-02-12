@@ -22,11 +22,11 @@ freebase.input.format =
     family.columns = 
       list(
         name = "", 
-        `freebase-types` = ""), 
+        freebase = "types"), 
     key.deserialize = "raw", 
     cell.deserialize = "raw", 
-    dense = T, 
-    atomic = T)
+    dense = F, 
+    atomic = F)
 
 from.dfs(
   mapreduce(
@@ -34,5 +34,5 @@ from.dfs(
     input.format = freebase.input.format,
     backend.parameters = 
       list(
-        hadoop = list(libjars = "../hadoopy_hbase.jar")),
+        hadoop = list(libjars = hadoopy.hbase.jar)),
     map = function(k,v) keyval(k[1,], v[1,])))
