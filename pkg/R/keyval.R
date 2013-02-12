@@ -165,5 +165,9 @@ apply.keyval =
     FUN, 
     split.size = 
       stop("Must specify key when using keyval in map and combine functions")) {
+    k = keys(kv)
     kvs = split.keyval(kv, split.size)
-    mapply(FUN, keys(kvs), values(kvs), SIMPLIFY = FALSE)}
+    if(is.null(k)) 
+      lapply(values(kvs), function(v) FUN(NULL,v))
+    else
+      mapply(FUN, keys(kvs), values(kvs), SIMPLIFY = FALSE)}
