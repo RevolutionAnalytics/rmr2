@@ -79,9 +79,12 @@ recycle.keyval =
   function(kv) {
     k = keys(kv)
     v = values(kv)
-    keyval(
-      rmr.recycle(k, v),
-      rmr.recycle(v, k))}
+    if(is.null(k))
+      kv
+    else
+      keyval(
+        rmr.recycle(k, v),
+        rmr.recycle(v, k))}
 
 slice.keyval = 
   function(kv, r) {
