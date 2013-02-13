@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>What&#39;s new in 2.0.2</title>
+<title>What&#39;s new in 2.1.0</title>
 
 <style type="text/css">
 body, td {
@@ -141,25 +141,27 @@ hr {
 </head>
 
 <body>
-<h1>What&#39;s new in 2.0.2</h1>
+<h1>What&#39;s new in 2.1.0</h1>
 
-<h2>Fixes</h2>
+<h1>Speed and more speed</h1>
 
-<ul>
-<li>Fixed a bug whereby data frames in outer joing wouldn&#39;t work.</li>
-<li>Fixed a bug whereby only  the first column of a data.frame used as key would be available in the reducer.</li>
-<li>Updated the equijoin reduce default to work with the 2.x API.</li>
-<li>Updated equijoin to work correctly on the output of previous MR jobs.</li>
-<li>Cleaned up some stray debuggin statements that polluted stderr.</li>
-<li>Made equijoin resilient to the case where there are no records to join from either side for a particular key.</li>
-<li>Now compatible with the latest Rcpp (0.10.1) hence the latest R (2.15.2)</li>
-</ul>
+<p>Through a mix of behind-the-scenes changes and few new API extensions we have made rmr2 much faster. As a driving example we used a NLP taks, collocations, borrowed from the Cloudera blog. It&#39;s simple, we didn&#39;t make it up and we knew it hit some of the weaknesses of rmr2.0, specifically the case of small records and small groups in the reduce phase. The good news is that on that example we now are, in our tests, within striking distance of a native Java implementation, that is about 20% slower. The other side of the coin is that to reach that number we had to replace one line of R with 10 lines of C++ (in the example, the library already contains about 14% C++ code), but we think it&#39;s a good trade-off as compared to switching to C++ or Java altogether.</p>
 
-<h2>Dependencies</h2>
+<h2>More vectorization in the reduce phase</h2>
 
-<ul>
-<li>Removed dependency on httr which is still a little too bleeding edge and not available everywhere, besides having a number of dependencies of its own (thanks @hadley for letting us take and modify one needed function from httr).</li>
-</ul>
+<p>The <code>mapreduce</code> function has an additional option, <code>vectorized.reduce</code>, which, when set to <code>TRUE</code> make <code>rmr2</code> call the user-supplied reduce function on not one but many reduce groups. The reduce groups are always complete (all the records for one key are processed in the same call). This is particularly helpful when dealing with small records and small reduce groups, such that vectorizing only on the values is not sufficient to achieve the desired performance. Check out the <a href="../pkg/examples/collocations.R">collocations example</a> to see it in action and <code>help(mapreduce)</code> has the gory details. </p>
+
+<h2>Combine in memory</h2>
+
+<h2>Helpful counters</h2>
+
+<h2>Hbase input</h2>
+
+<h2>Hadoop status and counters</h2>
+
+<h2>memory profiling</h2>
+
+<h2>Concatenate keyval pairs</h2>
 
 </body>
 
