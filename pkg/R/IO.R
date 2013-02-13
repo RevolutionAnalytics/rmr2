@@ -312,7 +312,7 @@ make.input.format =
                               family.columns[[fam]],
                               sep = ":", 
                               collapse = " ")))),
-                  libjars = system.file(package = "rmr2", "inst/java/hadoopy_hbase.jar")))})}
+                  libjars = system.file(package = "rmr2", "java/hadoopy_hbase.jar")))})}
     if(is.null(streaming.format) && mode == "binary") 
       streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
     list(mode = mode, 
@@ -368,6 +368,6 @@ make.output.format =
                     ":", 
                     list(...)$column, 
                     sep = ""),
-                libjars = system.file(package = "rmr2", "inst/java/hadoopy_hbase.jar")))})}
+                libjars = system.file(package = "rmr2", "java/hadoopy_hbase.jar")))})}
     mode = match.arg(mode)
     list(mode = mode, format = format, streaming.format = streaming.format, backend.parameters = backend.parameters)}
