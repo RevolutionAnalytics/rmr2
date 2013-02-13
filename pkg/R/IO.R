@@ -311,7 +311,8 @@ make.input.format =
                               fam, 
                               family.columns[[fam]],
                               sep = ":", 
-                              collapse = " "))))))})}
+                              collapse = " ")))),
+                  libjars = system.file(package = "rmr2", "inst/java/hadoopy_hbase.jar")))})}
     if(is.null(streaming.format) && mode == "binary") 
       streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
     list(mode = mode, 
@@ -353,6 +354,7 @@ make.output.format =
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"},
         hbase = {
+          stop("hbase output format not implemented yet")
           format = make.typedbytes.output.format(recycle = FALSE)
           mode = "binary"
           streaming.format = "com.dappervision.mapreduce.TypedBytesTableOutputFormat"
@@ -360,10 +362,12 @@ make.output.format =
             list(
               hadoop = 
                 list(
-                  D = paste("hbase.mapred.tablecolumns=", 
-                            list(...)$family, 
-                            ":", 
-                            list(...)$column, 
-                            sep = "")))})}
+                  D = paste(
+                    "hbase.mapred.tablecolumns=", 
+                    list(...)$family, 
+                    ":", 
+                    list(...)$column, 
+                    sep = ""),
+                libjars = system.file(package = "rmr2", "inst/java/hadoopy_hbase.jar")))})}
     mode = match.arg(mode)
     list(mode = mode, format = format, streaming.format = streaming.format, backend.parameters = backend.parameters)}
