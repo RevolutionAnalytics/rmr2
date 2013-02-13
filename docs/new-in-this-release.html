@@ -145,7 +145,7 @@ hr {
 
 <h1>Speed and more speed</h1>
 
-<p>Through a mix of behind-the-scenes changes and few new API extensions we have made rmr2 much faster. As a driving example we used a NLP taks, collocations, borrowed from the Cloudera blog. It&#39;s simple, we didn&#39;t make it up and we knew it hit some of the weaknesses of rmr2.0, specifically the case of small records and small groups in the reduce phase. The good news is that on that example we now are, in our tests, within striking distance of a native Java implementation, that is about 20% slower. The other side of the coin is that to reach that number we had to replace one line of R with 10 lines of C++ (in the example, the library already contains about 14% C++ code), but we think it&#39;s a good trade-off as compared to switching to C++ or Java altogether. We packed this little piece of C code in the library as the function <code>vsum</code> for your convenience, and it&#39;s just a fast version of <code>sapply(x, sum)</code> when <code>x</code> is a big list of relatively small vectors.</p>
+<p>Through a mix of behind-the-scenes changes and few new API extensions we have made rmr2 much faster. As a driving example we used a NLP taks, collocations, borrowed from the <a href="http://blog.cloudera.com/blog/2013/01/a-guide-to-python-frameworks-for-hadoop/">Cloudera blog</a>. It&#39;s simple, we didn&#39;t make it up and we knew it hit some of the weaknesses of rmr2.0, specifically the case of small records and small groups in the reduce phase. The good news is that on that example we now are, in our tests, within striking distance of a native Java implementation, that is about 20% slower. The other side of the coin is that to reach that number we had to write a tiny bit of problem-specific C++. See details below.</p>
 
 <h2>More vectorization in the reduce phase</h2>
 
@@ -158,6 +158,10 @@ hr {
 <h2>Helpful counters</h2>
 
 <p>The goal of vectorization is to have an R program get more work done in the C layer than in the R interpreter. For a program using <code>rmr2</code> that means processing all your data with few, efficient map and reduce calls that take care of relatively big chunks of data. As an aid to optimizations of this type, we added two Hadoop counters, &ldquo;map calls&rdquo; and &ldquo;reduce calls&rdquo; that you can monitor inthe normal jobtracker web interface together with all other counters. If the number of one or the other is the same order of magnitude as the number of records in input and typical records are small, the answer is more vectorization.</p>
+
+<h2>Fast aggregation</h2>
+
+<p>To achieve <code>rmr2</code>&#39;s full potential we needed to write a fast reducer, and we couldn&#39;t find a library function to help us. The task was simply <code>sapply(x, sum)</code> when <code>x</code> is a big list of relatively small vectors. We had to replace that single line with 10 lines of <a href="http://dirk.eddelbuettel.com/code/rcpp.html">Rcpp</a>-enhanced C++, but we think it&#39;s a good trade-off as compared to switching to C++ or Java altogether. We packed this function with the library as the function <code>vsum</code> for your convenience. It may be the first in a series of fast aggregators and we seek community input and contributions towards making writing fast reducers ever easier.</p>
 
 <h1>Other friendly features</h1>
 
