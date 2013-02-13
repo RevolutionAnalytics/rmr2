@@ -1,2 +1,6 @@
-# What's new in 
+# What's new in 2.1.0
 
+# Speed and more speed
+
+Through a mix of behind-the-scenes changes and few new API extensions we have improved a lot on the speed issue. As a driving example we used a NLP taks, collocations, borrowed from the Cloudera blog. It's simple, we didn't make it up and we knew it covered some of the weaknesses of 2.0.
+The good news is that on that example we are, in our tests, within striking distance of a native Java implementation, about 20% slower, but to get there we had to write a 10-line almost-problem-specific C++ extension. We think it's a trade-
