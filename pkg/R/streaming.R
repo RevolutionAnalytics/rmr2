@@ -202,7 +202,7 @@ rmr.stream = function(
   
   preamble = paste(sep = "", 'options(warn=1)
 
-  assign("system.intern", function(...) system.default(intern = T, ignore.stderr = T, ...), baseenv())
+  assign("system.intern", function(...) system(intern = T, ignore.stderr = T, ...), baseenv())
   assignInNamespace("system",system.intern, "base")
   load("',file.path(work.dir, basename(rmr.global.env)),'")
   (function(){
