@@ -17,7 +17,7 @@ The complete list is:
 
 ```
 [1] "text"                "json"                "csv"                
-[4] "native"              "sequence.typedbytes"
+[4] "native"              "sequence.typedbytes" "hbase"              
 ```
 
 
@@ -63,11 +63,14 @@ function (con, keyval.length)
         NULL
     else keyval(NULL, df)
 }
-<environment: 0x1039870a8>
+<bytecode: 0x1048cd318>
+<environment: 0x1048a6540>
 
 $streaming.format
 NULL
 
+$backend.parameters
+NULL
 ```
 
 
@@ -92,11 +95,14 @@ function (kv, con)
         v
     else cbind(k, v), ..., row.names = FALSE, col.names = FALSE)
 }
-<environment: 0x1048da140>
+<bytecode: 0x104cec2b0>
+<environment: 0x103d33e38>
 
 $streaming.format
 NULL
 
+$backend.parameters
+NULL
 ```
 
 
@@ -146,7 +152,11 @@ tsv.reader = function(con, nrecs){
     NULL
   else {
     delim = strsplit(lines, split = "\t")
-    keyval(sapply(delim, function(x) x[1]), sapply(delim, function(x) x[-1]))}} 
+    keyval(
+      sapply(delim, 
+             function(x) x[1]), 
+      sapply(delim, 
+             function(x) x[-1]))}} 
 ## first column is the key, note that column indexes moved by 1
 ```
 
@@ -230,15 +240,16 @@ fwf.writer <- function(kv, con, keyval.size) {
   ser =
     function(df) 
       paste(
-          apply(df,
-                1, 
-                function(x) 
-                  paste(
-                    format(
-                      x, 
-                      width = field.size), 
-                    collapse = "")), 
-        collapse = "\n")
+          apply(
+            df,
+            1, 
+            function(x) 
+              paste(
+                format(
+                  x, 
+                  width = field.size), 
+                collapse = "")), 
+          collapse = "\n")
   out = ser(values(kv))
   writeLines(out, con = con)}
 fwf.output.format = make.output.format(mode = "text", format = fwf.writer)
@@ -256,8 +267,7 @@ The key thing to note about `fwf.reader` is the global variable `fields`. In `fi
 end byte locations for each field in the data:
 
 ```r
-qw = function(...) as.character(match.call())[-1]
-fields <- qw(mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb) 
+fields <- rmr2:::qw(mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb) 
 field.size = 8
 ```
 
