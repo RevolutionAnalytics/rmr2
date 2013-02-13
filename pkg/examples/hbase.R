@@ -11,10 +11,7 @@ from.dfs(
         key.deserialize = "raw", 
         cell.deserialize = "raw", 
         dense = T, 
-        atomic = T), 
-    backend.parameters = 
-      list(
-        hadoop = list(libjars = "../hadoopy_hbase.jar"))))
+        atomic = T)))
 
 freebase.input.format = 
   make.input.format(
@@ -32,7 +29,4 @@ from.dfs(
   mapreduce(
     input = "freebase",
     input.format = freebase.input.format,
-    backend.parameters = 
-      list(
-        hadoop = list(libjars = hadoopy.hbase.jar)),
     map = function(k,v) keyval(k[1,], v[1,])))
