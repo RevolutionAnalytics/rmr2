@@ -202,8 +202,19 @@ rmr.stream = function(
   
   preamble = paste(sep = "", 'options(warn=1)
 
+  assign("system.default", base::system, baseenv())
   assign("system.intern", function(...) system(intern = T, ignore.stderr = T, ...), baseenv())
-  assignInNamespace("system",system.intern, "base")
+  assignInNamespace(
+    "system",
+    function(...) {
+        cls <- sys.calls()
+        from.install.packages = 
+            any(sapply(cls, "[[", 1) == as.name("install.packages"))
+        if(from.install.packages) {
+            system.intern(...)} 
+        else {
+            system.default(...)}},
+   "base")
   load("',file.path(work.dir, basename(rmr.global.env)),'")
   (function(){
   load("',file.path(work.dir, basename(rmr.local.env)),'")  
