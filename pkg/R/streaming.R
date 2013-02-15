@@ -211,7 +211,14 @@ rmr.stream = function(
         from.install.packages = 
             any(sapply(cls, "[[", 1) == as.name("install.packages"))
         if(from.install.packages) {
-            system.intern(...)} 
+            old.warn = getOptions("warn")
+            options(warn = 2)
+            retval = tryCatch(system.intern(...), error = function(e) 1), 
+            options(warn = old.warn)
+            if(is.character(retval)){
+              cat(paste(retval, collapse = "\n"), stderr())
+              1}
+            else 0} 
         else {
             system.default(...)}},
    "base")
