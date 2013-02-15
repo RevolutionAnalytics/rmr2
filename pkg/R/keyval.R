@@ -79,7 +79,7 @@ recycle.keyval =
   function(kv) {
     k = keys(kv)
     v = values(kv)
-    if(is.null(k))
+    if(is.null(k) || (rmr.length(k) == rmr.length(v)))
       kv
     else
       keyval(
