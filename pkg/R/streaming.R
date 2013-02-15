@@ -203,7 +203,7 @@ rmr.stream = function(
   preamble = paste(sep = "", 'options(warn=1)
 
   assign("system.default", base::system, baseenv())
-  assign("system.intern", function(...) system(intern = T, ignore.stderr = T, ...), baseenv())
+  assign("system.intern", function(...) system.default(intern = T, ignore.stderr = T, ...), baseenv())
   assignInNamespace(
     "system",
     function(...) {
