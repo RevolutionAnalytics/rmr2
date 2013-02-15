@@ -216,7 +216,7 @@ rmr.stream = function(
             retval = tryCatch(system.intern(...), error = function(e) 1) 
             options(warn = old.warn)
             if(is.character(retval)){
-              cat(paste(retval, collapse = "\n"), stderr())
+              #cat(paste(retval, collapse = "\n"), stderr())
               0}
             else 1} 
         else {
