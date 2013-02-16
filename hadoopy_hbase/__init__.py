@@ -17,32 +17,31 @@ def connect(server='localhost', port=9090):
     return client
 
 
-def scanner(client, table, columns=None, per_call=1, start_row=None, stop_row=None, max_rows=None, filter=None, caching=None):
-    num_rows = 0
-    sc = None
+def scanner_create_id(client, table, columns=None, start_row=None, stop_row=None, filter=None, caching=None):
+    return client.scannerOpenWithScan(table, TScan(startRow=start_row, stopRow=stop_row, columns=columns if columns else [], caching=caching, filterString=filter))
+
+
+def scanner_from_id(client, table, sc, per_call=1, close=True):
     try:
-        
-        sc = client.scannerOpenWithScan(table, TScan(startRow=start_row, stopRow=stop_row, columns=columns if columns else [], caching=caching, filterString=filter))
         if per_call == 1:
             scanner = lambda : client.scannerGet(sc)
         else:
             scanner = lambda : client.scannerGetList(sc, per_call)
         while True:
-            if max_rows is not None and num_rows >= max_rows:
-                break
             outs = scanner()
             if outs:
                 for out in outs:
-                    if max_rows is not None and num_rows >= max_rows:
-                        break
-                    yield (out.row, dict((x, y.value)
-                                         for x, y in out.columns.items()))
-                    num_rows += 1
+                    yield (out.row, dict((x, y.value) for x, y in out.columns.items()))
             else:
                 break
     finally:
-        if sc is not None:
+        if sc is not None and close:
             client.scannerClose(sc)
+
+
+def scanner(client, table, per_call=1, close=True, **kw):
+    sc = scanner_create_id(client, table, **kw)
+    return scanner_from_id(client, table, sc, per_call, close)
 
 
 def scanner_row_column(client, table, column, **kw):
