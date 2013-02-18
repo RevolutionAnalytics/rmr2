@@ -199,16 +199,16 @@ make.hbase.input.format =
           switch(
             deser,
             native = 
-              function(x) lapply(x, unserialize),
+              function(x, family = NULL, column = NULL) lapply(x, unserialize),
             typedbytes = 
-              function(x) 
+              function(x, family = NULL, column = NULL) 
                 typedbytes.reader(
                   do.call(c, x),  
                   nobjs = length(x)),
-            raw = pRawToChar)
+            raw = function(x, family = NULL, column = NULL) pRawToChar(x))
         deser}
     key.deserialize = deserialize.opt(key.deserialize)
-    cell.deserialize.one.arg = deserialize.opt(cell.deserialize)
+    cell.deserialize = deserialize.opt(cell.deserialize)
     cell.deserialize = function(x, family, column) {
       cell.deserialize.one.arg(x)}
     tif = make.typedbytes.input.format(recycle = FALSE)
