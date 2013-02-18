@@ -57,7 +57,7 @@ pre code {
    display: block; padding: 0.5em;
 }
 
-code.r {
+code.r, code.cpp {
    background-color: #F8F8F8;
 }
 
@@ -178,29 +178,69 @@ hljs.initHighlightingOnLoad();
 </head>
 
 <body>
-<pre><code class="r">zz =rmr2:::interleave(1:10^6, 1:10^6)
+<pre><code class="r">zz = rmr2:::interleave(1:10^6, 1:10^6)
 con = file(&quot;/tmp/n-test&quot;, &quot;wb&quot;)
-system.time({rmr2:::typedbytes.writer(zz, con, TRUE)})
-#   user  system elapsed 
-#  0.355   0.058   0.468 
-close(con)
+system.time({
+    rmr2:::typedbytes.writer(zz, con, TRUE)
+})
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##   0.587   0.033   0.621
+</code></pre>
+
+<pre><code class="r">close(con)
 con = file(&quot;/tmp/tb-test&quot;, &quot;wb&quot;)
-system.time({rmr2:::typedbytes.writer(zz, con, FALSE)})
-#   user  system elapsed 
-#  0.310   0.023   0.333 
-close(con)
-system.time({save(zz, file= &quot;/tmp/save-test&quot;)})
-#user  system elapsed 
-#1.535   0.010   1.546 
-system.time({rmr2:::make.typedbytes.input.format()(file(&quot;/tmp/n-test&quot;, &quot;rb&quot;), 10^6)})
-#user  system elapsed 
-# 8.398   0.252   8.650 
-system.time({rmr2:::make.typedbytes.input.format()(file(&quot;/tmp/tb-test&quot;, &quot;rb&quot;), 10^6)})
-#user  system elapsed 
-# 6.999   0.212   7.206
-system.time({load(file=&quot;/tmp/save-test&quot;)})
-#user  system elapsed 
-#0.645   0.009   0.659 
+system.time({
+    rmr2:::typedbytes.writer(zz, con, FALSE)
+})
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##   0.307   0.021   0.328
+</code></pre>
+
+<pre><code class="r">close(con)
+system.time({
+    save(zz, file = &quot;/tmp/save-test&quot;)
+})
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##   2.431   0.026   2.457
+</code></pre>
+
+<pre><code class="r">system.time({
+    rmr2:::make.typedbytes.input.format()(file(&quot;/tmp/n-test&quot;, &quot;rb&quot;), 10^6)
+})
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##   8.906   0.268   9.175
+</code></pre>
+
+<pre><code class="r">system.time({
+    rmr2:::make.typedbytes.input.format()(file(&quot;/tmp/tb-test&quot;, &quot;rb&quot;), 10^6)
+})
+</code></pre>
+
+<pre><code>## Warning: closing unused connection 4 (/tmp/n-test)
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##   5.301   0.101   5.402
+</code></pre>
+
+<pre><code class="r">system.time({
+    load(file = &quot;/tmp/save-test&quot;)
+})
+</code></pre>
+
+<pre><code>## Warning: closing unused connection 4 (/tmp/tb-test)
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##   0.636   0.001   0.638
 </code></pre>
 
 </body>
