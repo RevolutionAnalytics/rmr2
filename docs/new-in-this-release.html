@@ -167,7 +167,7 @@ hr {
 
 <h2>HBase input</h2>
 
-<p>By popular demand, but still a little experimental, an input format that can read directly from HBase tables. Deserialization is configurable and a few common choices are provided. Please kick the tires and let us know how it&#39;s working for you.</p>
+<p>By popular demand, but still experimental, an input format that can read directly from HBase tables. Deserialization is configurable and a few reasonable choices are provided. Please kick the tires and let us know how it&#39;s working for you. &ldquo;Experimental&rdquo; means that the testing is not as thorough as it should and that we could withdraw the feature later on.</p>
 
 <h2>Hadoop status and counters</h2>
 
@@ -186,11 +186,15 @@ hr {
 <p>The implementation of typedbytes should now cover the complete spec in HADOOP-1722 (unfortunately the Hive team forked its own implementation extending the format, those extensions are not supported). Some interesting corner cases for keyval pairs have been thought out more carefully. The short of it is that mixing 0-length arguments with non-zero length is not supported, as in <code>keyval(1, integer(0))</code>. The exceptions are:</p>
 
 <ol>
-<li><code>keyval(NULL, x)</code> with x of length at least 1, which roughly means keys are missing and is a common idiom </li>
+<li><code>keyval(NULL, x)</code> with x of length at least 1, which roughly means keys are missing and is a common idiom.</li>
 <li><code>keyval(NULL, NULL)</code> which is not allowed. </li>
 </ol>
 
-<p>Here &ldquo;length&rdquo; should be read as the value returned by <code>length</code> for lists and vectors and &ldquo;number of rows&rdquo; for data frames and matrices, according to the usual rmr convention.</p>
+<p>Here &ldquo;length&rdquo; should be read as the value returned by <code>length</code> for lists and vectors and &ldquo;number of rows&rdquo; for data frames and matrices, according to the usual rmr convention. <code>keyval</code> doesn&#39;t fail immediately, only when recycling or serialization are needed.</p>
+
+<h1>Pulled 1-install feature</h1>
+
+<p>Unfortunately we couldn&#39;t make the 1-install feature that was experimentally introduced with the previous release stable enough and we decided to pull it. The idea was to install missing packages on the fly on any nodes that needed them just before the map or the reduce functions are invoked. We are not giving up on the general idea but we are going to follow a different approach.</p>
 
 </body>
 

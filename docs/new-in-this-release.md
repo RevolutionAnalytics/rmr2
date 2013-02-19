@@ -19,7 +19,7 @@ To achieve `rmr2`'s full potential on the collocations example we needed to writ
 # Other friendly features
 
 ## HBase input
-By popular demand, but still a little experimental, an input format that can read directly from HBase tables. Deserialization is configurable and a few common choices are provided. Please kick the tires and let us know how it's working for you.
+By popular demand, but still experimental, an input format that can read directly from HBase tables. Deserialization is configurable and a few reasonable choices are provided. Please kick the tires and let us know how it's working for you. "Experimental" means that the testing is not as thorough as it should and that we could withdraw the feature later on.
 
 ## Hadoop status and counters
 You can now set the task attempt status with `status` and increment counters with `increment.counter` to better monitor your computations. One additional use for these calls is to tell Hadoop that your map or reduce function is still alive. If your computation is very CPU bound and fails on time-outs for larger data sets but seems correct otherwise, updating the status or incrementing a counter every minute or so can solve the problem.
@@ -33,7 +33,10 @@ The new function `c.keyval` helps people porting programs from rmr 1.3. A list o
 # Bugs
 The implementation of typedbytes should now cover the complete spec in HADOOP-1722 (unfortunately the Hive team forked its own implementation extending the format, those extensions are not supported). Some interesting corner cases for keyval pairs have been thought out more carefully. The short of it is that mixing 0-length arguments with non-zero length is not supported, as in `keyval(1, integer(0))`. The exceptions are:
 
-  1. `keyval(NULL, x)` with x of length at least 1, which roughly means keys are missing and is a common idiom 
+  1. `keyval(NULL, x)` with x of length at least 1, which roughly means keys are missing and is a common idiom.
   2. `keyval(NULL, NULL)` which is not allowed. 
 
-Here "length" should be read as the value returned by `length` for lists and vectors and "number of rows" for data frames and matrices, according to the usual rmr convention.
+Here "length" should be read as the value returned by `length` for lists and vectors and "number of rows" for data frames and matrices, according to the usual rmr convention. `keyval` doesn't fail immediately, only when recycling or serialization are needed.
+
+# Pulled 1-install feature
+Unfortunately we couldn't make the 1-install feature that was experimentally introduced with the previous release stable enough and we decided to pull it. The idea was to install missing packages on the fly on any nodes that needed them just before the map or the reduce functions are invoked. We are not giving up on the general idea but we are going to follow a different approach.
