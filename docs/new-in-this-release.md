@@ -19,7 +19,7 @@ To achieve `rmr2`'s full potential on the collocations example we needed to writ
 # Other friendly features
 
 ## HBase input
-By popular demand, but still experimental, an input format that can read directly from HBase tables. Deserialization is configurable and a few reasonable choices are provided. Please kick the tires and let us know how it's working for you. "Experimental" means that the testing is not as thorough as it should and that we could withdraw the feature later on.
+By popular demand, but still experimental, an input format that can read directly from HBase tables. Deserialization is configurable and a few reasonable choices are provided. Please kick the tires and let us know how it's working for you. "Experimental" means that the testing is not as thorough as it should and that we could withdraw the feature in a minor release.
 
 ## Hadoop status and counters
 You can now set the task attempt status with `status` and increment counters with `increment.counter` to better monitor your computations. One additional use for these calls is to tell Hadoop that your map or reduce function is still alive. If your computation is very CPU bound and fails on time-outs for larger data sets but seems correct otherwise, updating the status or incrementing a counter every minute or so can solve the problem.
