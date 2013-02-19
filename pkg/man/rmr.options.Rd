@@ -6,18 +6,18 @@ Function to set and get package options}
 \description{
 set and get package options}
 \usage{
-rmr.options(backend = c("hadoop", "local"), profile.nodes = c("off", "calls", "memory", "both"), keyval.length = 1000, install.args = NULL, update.args = NULL)
-%-, depend.check = NULL, managed.dir = NULL)
+rmr.options(backend = c("hadoop", "local"), profile.nodes = c("off", "calls", "memory", "both"), keyval.length = 1000)
+%, install.args = NULL, update.args = NULL, depend.check = NULL, managed.dir = NULL)
 }
 \arguments{
   \item{...}{Names of options to get values of, as character}
   \item{backend}{One of "hadoop" or "local", the latter being implemented entirely in the current R interpreter, sequentially, for learning and debugging.}
   \item{profile.nodes}{Collect profiling and memory information when running additional R interpreters (besides the current one) on the cluster. No effect on the local backend, use Rprof instead. For backward compatibility, \code{"calls"} is equivalent to \code{TRUE} and \code{"off"} to \code{FALSE}}
   \item{keyval.length}{How many records to read into a single, key-value pair or how many to write to when the key is \code{NULL}. Controls both \code{\link{from.dfs}} and \code{\link{to.dfs}} and \code{\link{mapreduce}} behavior.}
- %\item{depend.check}{Activate makefile-like dependency checking (under construction)}
+ % \item{depend.check}{Activate makefile-like dependency checking (under construction)}
  % \item{managed.dir}{Where to put intermediate result when makefile-like features are activated}
-  \item{install.args}{Additional arguments for \code{install.package} when attempting to install missing packages on the nodes at the beginning of a mapreduce job. The default, \code{NULL}, disables any installationn. rmr will then just issue a warning for missing packages and try to continue, hoping that they are not necessary.}
-  \item{update.args}{Additional arguments for \code{update.packages} when attempting to install missing packages on the nodes at the beginning of a mapreduce job. The default, \code{NULL}, disables any update. `ask = FALSE` is passed independent of the setting of this option}
+ % \item{install.args}{Additional arguments for \code{install.package} when attempting to install missing packages on the nodes at the beginning of a mapreduce job. The default, \code{NULL}, disables any installationn. rmr will then just issue a warning for missing packages and try to continue, hoping that they are not necessary.}
+ % \item{update.args}{Additional arguments for \code{update.packages} when attempting to install missing packages on the nodes at the beginning of a mapreduce job. The default, \code{NULL}, disables any update. `ask = FALSE` is passed independent of the setting of this option}
 }
 \details{
  Mapreduce has come to mean massive, fault tolerant distributed computing because of its use by Google and Hadoop, but it is also

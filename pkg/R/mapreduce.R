@@ -26,9 +26,9 @@ rmr.options.env$update.args = NULL
 rmr.options = 
   function(backend = c("hadoop", "local"), 
            profile.nodes = c("off", "calls", "memory", "both"),
-           keyval.length = 1000,
-           install.args = NULL,
-           update.args = NULL#, 
+           keyval.length = 1000#,
+           #install.args = NULL,
+           #update.args = NULL, 
            #depend.check = FALSE, 
            #managed.dir = FALSE
   ) {
