@@ -7,8 +7,7 @@ PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"`
 all: $(SHLIB) hbase-io
 
 hbase-io:
-	ls
-	sh hbase-io/build_linux.sh
+	(cd hbase-io; sh build_linux.sh)
 	
 clean:
 	echo "not implemented yet"
