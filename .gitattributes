@@ -1,0 +1,20 @@
+# Set default behaviour, in case users don't have core.autocrlf set.
+* text=auto
+
+*.cpp text
+*.h text
+*.html text
+*.java text
+*.jpeg binary
+*.md text
+*.o: binary
+*.png binary
+*.properties text
+*.R: text
+*.Rd text
+*.Rmd text
+*.sh text
+*.so binary
+*.xml text
+.gitignore text
+Makevars* text
