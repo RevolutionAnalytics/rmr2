@@ -182,7 +182,7 @@ else
 fi
 
 # Special case for Cloudera Hadoop Distribution
-candidates=(`find / -name "*hadoop-common*.jar"`)
+candidates=(`find /usr/lib/hadoop -maxdepth 1 -type f -name "*hadoop-common*.jar" | grep -v test`)
 if [ $candidates ]; then
     cp ${candidates[0]} ./lib/
 fi
