@@ -130,7 +130,7 @@ rmr.split =
 
 key.normalize= function(k) {
   k = rmr.slice(k, 1)
-  if (is.data.frame(k))
+  if (is.data.frame(k) || is.matrix(k))
     rownames(k) = NULL
   k}
 
