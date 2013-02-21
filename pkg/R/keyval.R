@@ -128,6 +128,12 @@ rmr.split =
       spl = if(has.rows(x)) split.data.frame else split
       spl(x,ind, drop = TRUE)}}
 
+key.normalize= function(k) {
+  k = rmr.slice(k, 1)
+  if (is.data.frame(k))
+    rownames(k) = NULL
+  k}
+
 split.keyval = function(kv, size) {
   k = keys(kv)
   v = values(kv)
@@ -153,7 +159,7 @@ split.keyval = function(kv, size) {
             k}}}
     x = unname(rmr.split(k, ind))
     if (rmr.length(x) != rmr.length(k))
-      x = lapply(x, unique)
+      x = lapply(x, key.normalize)
     keyval(x, unname(rmr.split(v, ind)))}}
 
 unsplit.keyval = function(kv) {
