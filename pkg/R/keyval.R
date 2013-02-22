@@ -20,13 +20,18 @@ rmr.length =
 
 rmr.equal = 
   function(xx, y) {
-    if(is.atomic(xx) && !is.matrix(xx)) xx == y
+    if(rmr.length(xx) == 0) logical()
     else {
-      if(rmr.length(xx) == 0) logical()
-      else 
+      if(is.atomic(xx) && !is.matrix(xx)) xx == y
+      else {
         sapply(
           1:rmr.length(xx), 
-          function(i) identical(rmr.slice(xx,i), y))}}
+          function(i) 
+            isTRUE(
+              all.equal(
+                rmr.slice(xx,i), 
+                y, 
+                check.attributes=F)))}}}
     
 length.keyval = 
   function(kv) 
