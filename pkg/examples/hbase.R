@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+## @knitr hbase-blogposts
 from.dfs(
   mapreduce(
     input="blogposts", 
@@ -28,6 +28,7 @@ from.dfs(
         dense = T, 
         atomic = T)))
 
+## @knitr hbase-freebase.input.format
 freebase.input.format = 
   make.input.format(
     "hbase", 
@@ -40,8 +41,10 @@ freebase.input.format =
     dense = F, 
     atomic = F)
 
+## @knitr freebase-mapreduce
 from.dfs(
   mapreduce(
     input = "freebase",
     input.format = freebase.input.format,
     map = function(k,v) keyval(k[1,], v[1,])))
+## @knitr end
