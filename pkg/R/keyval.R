@@ -157,8 +157,14 @@ split.keyval = function(kv, size) {
             as.integer(k)
           else
             k}}}
-    x = unname(rmr.split(k, ind))
-    if (rmr.length(x) != rmr.length(k))
+    x = k 
+    if(has.rows(x)) 
+      rownames(x) = NULL
+    else
+      names(x) = NULL
+    x = unname(rmr.split(x, ind))
+    if ((rmr.length(x) != rmr.length(k)) || 
+          is.data.frame(k))
       x = lapply(x, key.normalize)
     keyval(x, unname(rmr.split(v, ind)))}}
 
