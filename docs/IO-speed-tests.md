@@ -1,3 +1,5 @@
+Knit document for some timing results:
+
 
 ```r
 zz = rmr2:::interleave(1:10^6, 1:10^6)
@@ -9,7 +11,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   0.587   0.033   0.621
+##   0.599   0.034   0.632
 ```
 
 ```r
@@ -22,7 +24,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   0.307   0.021   0.328
+##   0.308   0.020   0.328
 ```
 
 ```r
@@ -34,7 +36,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   2.431   0.026   2.457
+##   2.353   0.022   2.374
 ```
 
 ```r
@@ -45,7 +47,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   8.906   0.268   9.175
+##   8.955   0.398   9.354
 ```
 
 ```r
@@ -60,7 +62,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   5.301   0.101   5.402
+##   5.449   0.150   5.599
 ```
 
 ```r
@@ -75,6 +77,6 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   0.636   0.001   0.638
+##   0.643   0.010   0.653
 ```
 

@@ -1,3 +1,5 @@
+Knit document for some timing results:
+
 ```{r}
 zz = rmr2:::interleave(1:10^6, 1:10^6)
 con = file("/tmp/n-test", "wb")
