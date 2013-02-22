@@ -4,6 +4,7 @@
 
 
 
+
 * This document responds to several inquiries on data formats and how to get data in and out of the rmr system
 * Still more a collection of snippets than anything organized
 * Thanks Damien  and @ryangarner for the examples and Koert for conversations on the subject
@@ -27,6 +28,7 @@ language has decent JSON libraries. It was the default in `rmr` 1.0, but we'll k
 1. `csv`: A family of concrete formats modeled after R's own `read.table`. See examples below.
 1. `native`: based on R's own serialization, it is the default and supports everything that R's `serialize` supports. If you want to know the gory details, it is implemented as an application specific type for the typedbytes format, which is further encapsulated in the sequence file format when writing to HDFS, which ... Dont't worry about it, it just works. Unfortunately, it is written and read by only one package, `rmr` itself.
 1. `sequence.typedbytes`: based on specs in HADOOP-1722 it has emerged as the standard for non Java hadoop application talking to the rest of Hadoop. Also implemented in C for efficiency, its underlying data model is different from R's and we tried to map the two systems the best we could.
+1. `hbase`: read directly from an Hbase table. Experimental and input only for now. Experimental means that testing has not been as thourough as it should and that the feature could be withdrawn in a minor release.
 
 ## The easy way
 
@@ -63,8 +65,8 @@ function (con, keyval.length)
         NULL
     else keyval(NULL, df)
 }
-<bytecode: 0x1048cd318>
-<environment: 0x1048a6540>
+<bytecode: 0x1049a9e78>
+<environment: 0x1049a2a30>
 
 $streaming.format
 NULL
@@ -95,8 +97,8 @@ function (kv, con)
         v
     else cbind(k, v), ..., row.names = FALSE, col.names = FALSE)
 }
-<bytecode: 0x104cec2b0>
-<environment: 0x103d33e38>
+<bytecode: 0x104c7c098>
+<environment: 0x104c7c630>
 
 $streaming.format
 NULL
@@ -335,5 +337,45 @@ mapreduce(
     #complicated function here
     keyval(k, vv[[1]])})
 ```
+
+
+### HBase
+
+Reading from an HBase table (an experimental feature) requires specifying yet another format. We rely on the system to be alredy configured to run java MR jobs on HBase tables, see `help(make.input.format)` for a reference. As you can see in the following, non self-contained snippet, one specifies the name of the table as a the input argument to mapreduce (this is not strictly part of the input format but it seemed a good moment to explain it). Then the `input.format` argument is created with a, as usual `make.input.format` with a first argument equal to `"hbase"`. The second argument, `family.colums`, allows  to select certain columns within certain families of columns. It is represented as a  list of lists, with the labels in the outer lists being the name of the families and the element of the lists being the column names.
+
+
+```r
+from.dfs(
+  mapreduce(
+    input="blogposts", 
+    input.format = 
+      make.input.format(
+        "hbase", 
+        family.columns = 
+          list(
+            image= list("bodyimage"), 
+            post = list("author", "body")), 
+        key.deserialize = "raw", 
+        cell.deserialize = "raw", 
+        dense = T, 
+        atomic = T)))
+```
+
+
+
+```r
+freebase.input.format = 
+  make.input.format(
+    "hbase", 
+    family.columns = 
+      list(
+        name = "", 
+        freebase = "types"), 
+    key.deserialize = "raw", 
+    cell.deserialize = "raw", 
+    dense = F, 
+    atomic = F)
+```
+
 
 

@@ -1,5 +1,6 @@
 `r read_chunk('../pkg/tests/getting-data-in-and-out.R')`
 `r read_chunk('../pkg/tests/wordcount.R')`
+`r read_chunk('../pkg/examples/hbase.R')`
 `r opts_chunk$set(echo=TRUE, eval=FALSE, cache=FALSE, tidy=FALSE)`
 ```{r cache=FALSE, eval=TRUE, echo=FALSE, results='hide', message=FALSE}
 library(rmr2)
@@ -134,3 +135,14 @@ This time providing output argument so one can extract from hdfs (cannot hdfs.ge
 ```{r getting-data.explicit.output.arg}
 ```
 
+### HBase
+
+Reading from an HBase table (an experimental feature) requires specifying yet another format. We rely on the system to be alredy configured to run java MR jobs on HBase tables, see `help(make.input.format)` for a reference. As you can see in the following, non self-contained snippet, one specifies the name of the table as a the input argument to mapreduce (this is not strictly part of the input format but it seemed a good moment to explain it). Then the `input.format` argument is created with a, as usual `make.input.format` with a first argument equal to `"hbase"`. The second argument, `family.colums`, allows  to select certain columns within certain families of columns. It is represented as a  list of lists, with the labels in the outer lists being the name of the families and the element of the lists being the column names. Then we have two deserialiation-related arguments, one for the keys and one for the cell contents. HBase is agnostic to cell content nature. Lacking a source of metadata or a default encoding, keys and cells are passed to R as raw bytes and the user has to fill in the missing information.
+
+```{r hbase-blogposts}
+```
+
+```{r hbase-freebase.input.format}
+```
+```{r hbase-freebase-mapreduce}
+```
