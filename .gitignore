@@ -28,3 +28,5 @@ Rprof.out
 *.aup
 *.au
 *.swp
+*.gz
+!build/*.gz
