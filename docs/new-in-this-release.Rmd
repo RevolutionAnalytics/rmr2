@@ -38,5 +38,5 @@ The implementation of typedbytes should now cover the complete spec in HADOOP-17
 
 Here "length" should be read as the value returned by `length` for lists and vectors and "number of rows" for data frames and matrices, according to the usual rmr convention. `keyval` doesn't fail immediately, only when recycling or serialization are needed.
 
-# Pulled 1-install feature
-Unfortunately we couldn't make the 1-install feature that was experimentally introduced with the previous release stable enough and we decided to pull it. The idea was to install missing packages on the fly on any nodes that needed them just before the map or the reduce functions are invoked. We are not giving up on the general idea but we are going to follow a different approach.
+# Removed feature
+Unfortunately we couldn't make the 1-install feature, which had been experimentally introduced with the previous release, stable enough and we decided to pull it. The idea was to install missing packages on the fly on any nodes that needed them just before the map or the reduce functions are invoked. We are not giving up on the general idea but we are going to go back to the drawing board and try different approaches.
