@@ -310,7 +310,7 @@ make.input.format =
                               family.columns[[fam]],
                               sep = ":", 
                               collapse = " ")))),
-                  libjars = system.file(package = "rmr2", "java/hadoopy_hbase.jar")))})}
+                  libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))})}
     if(is.null(streaming.format) && mode == "binary") 
       streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
     list(mode = mode, 
