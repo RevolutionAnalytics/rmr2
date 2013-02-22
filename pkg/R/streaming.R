@@ -112,9 +112,6 @@ map.loop =
     if(profile != "off") close.profiling()
     invisible()}
 
-list.cmp = function(ll, e) sapply(ll, function(l) isTRUE(all.equal(e, l, check.attributes = FALSE)))
-## using isTRUE(all.equal(x)) because identical() was too strict, but on paper it should be it
-
 reduce.loop = 
   function(reduce, vectorized, keyval.reader, keyval.writer, profile) {
     if(profile != "off") activate.profiling(profile)
