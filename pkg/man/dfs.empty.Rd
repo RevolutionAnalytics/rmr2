@@ -5,7 +5,7 @@
 Get a directory or file size or check if it is empty}
 
 \description{
- Check if a dfs file is empty}
+ Check if a dfs path is empty or return its size}
  
 \usage{
 dfs.empty(f)

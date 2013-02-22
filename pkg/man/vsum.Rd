@@ -14,13 +14,13 @@ vsum(x)
 }
 }
 \details{
-Equivalent to \code{sapply(x, sum)}, it's about 30X faster. It's often useful in reducers in the vectorized form.
+Equivalent to \code{sapply(x, sum)}, it's about 30X faster in some use cases (many small sums). It's often useful in reducers in the vectorized form.
 }
 \value{
 A numeric vector with the sum of each element of the list provided as argument}
 
 \note{
-Added mostly as a demo for the new vectorized reduce. See collocations.R in the examples directory.
+See collocations.R in the examples directory.
 }
 
 \seealso{

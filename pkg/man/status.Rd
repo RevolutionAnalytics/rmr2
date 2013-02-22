@@ -18,7 +18,7 @@ increment.counter(group, counter, increment = 1)
   \item{increment}{By how much to increment the counter}
 }
 \details{
-\code{status} set the status for the current job. \code{increment.counter} increment the counter named \code{counter} in group \code{group} by \code{increment}. If the counter doesn't exist yet it is initialized to 0. Both calls work only within the map or reduce functions and under local backend just write some messages to stderr. Unfortunately there is  no API to query the value of either status or counters at this time, but you can examine them via the jobtracker web interface.
+\code{status} sets the status for the current job. \code{increment.counter} increments the counter named \code{counter} in group \code{group} by \code{increment}. If the counter doesn't exist yet it is initialized to 0. Both calls work only within the map or reduce functions and under local backend just write some messages to stderr. Unfortunately there is  no API to query the value of either status or counters at this time, but you can examine them via the jobtracker web interface.
 }
 \value{
 NULL for both.
