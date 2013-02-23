@@ -240,8 +240,8 @@ function (con, keyval.length)
         NULL
     else keyval(NULL, df)
 }
-&lt;bytecode: 0x1049a9e78&gt;
-&lt;environment: 0x1049a2a30&gt;
+&lt;bytecode: 0x1049ad0d0&gt;
+&lt;environment: 0x1049a4d18&gt;
 
 $streaming.format
 NULL
@@ -268,8 +268,8 @@ function (kv, con)
         v
     else cbind(k, v), ..., row.names = FALSE, col.names = FALSE)
 }
-&lt;bytecode: 0x104c7c098&gt;
-&lt;environment: 0x104c7c630&gt;
+&lt;bytecode: 0x104c80310&gt;
+&lt;environment: 0x104c808a8&gt;
 
 $streaming.format
 NULL
@@ -466,7 +466,7 @@ Just like input.format, one must define an output format function:</p>
 
 <h3>HBase</h3>
 
-<p>Reading from an HBase table (an experimental feature) requires specifying yet another format. We rely on the system to be alredy configured to run java MR jobs on HBase tables, see <code>help(make.input.format)</code> for a reference. As you can see in the following, non self-contained snippet, one specifies the name of the table as a the input argument to mapreduce (this is not strictly part of the input format but it seemed a good moment to explain it). Then the <code>input.format</code> argument is created with a, as usual <code>make.input.format</code> with a first argument equal to <code>&quot;hbase&quot;</code>. The second argument, <code>family.colums</code>, allows  to select certain columns within certain families of columns. It is represented as a  list of lists, with the labels in the outer lists being the name of the families and the element of the lists being the column names.</p>
+<p>Reading from an HBase table (an experimental feature) requires specifying yet another format. We rely on the system to be alredy configured to run java MR jobs on HBase tables, see <code>help(make.input.format)</code> for a reference. As you can see in the following, non self-contained snippet, one specifies the name of the table as a the input argument to mapreduce (this is not strictly part of the input format but it seemed a good moment to explain it). Then the <code>input.format</code> argument is created with a, as usual <code>make.input.format</code> with a first argument equal to <code>&quot;hbase&quot;</code>. The second argument, <code>family.colums</code>, allows  to select certain columns within certain families of columns. It is represented as a  list of lists, with the labels in the outer lists being the name of the families and the element of the lists being the column names. Then we have two deserialiation-related arguments, one for the keys and one for the cell contents. HBase is agnostic to cell content nature. Lacking a source of metadata or a default encoding, keys and cells are passed to R as raw bytes and the user has to fill in the missing information. We support three deserialization formats: &ldquo;raw&rdquo; means that the raw bytes are converted to characters, &ldquo;native&rdquo; is the built-in R serialization format and &ldquo;typedbytes&rdquo; is a format shared with other Hadoop libraries. It&#39;s unlikely that these three options are going to cover all applications, therefore both arguments accept also functions for maximum flexibility. For the keys, the function should take a list of raw vectors, deserialize them and return a list with the deserilizaed object. For the cells, the idea is the same but two additional arguments, which will contain the familiy and column being deserialized, allow for additional flexibility. The last two arguments affect the &ldquo;shape&rdquo; of the data frame created with the cell contents and the specific types of the columns. <code>dense</code> means that a data frame column will be created for each selected HBase column; missing cells will take the value <code>NA</code>. When <code>dense</code> is <code>FALSE</code> the data frame passed to the map function will have always 4 columns, one for the key, one for the family, one for the column and one for the cell contents. That way we can handle the case of sparse HBase tables that can have even millions of columns. Finally <code>atomic</code> means that columns can be <code>unlist</code>-ed before being added to the data frame, otherwise they are wrapped in a <code>I</code> call and added as they are, to support complex cell types.</p>
 
 <pre><code class="r">from.dfs(
   mapreduce(
@@ -484,6 +484,8 @@ Just like input.format, one must define an output format function:</p>
         atomic = T)))
 </code></pre>
 
+<p>This is another example run on a freebase data dump loaded into HBase, we have a family named &ldquo;name&rdquo; with a single, unnamed column (I suspect this is not recommended, but it works) and another named freebase with a column named &ldquo;types&rdquo;, which is itself a comma separated list. One could think of a better deserialization that also parses this into a character vector, one element per type, but it&#39;s not what is done here.</p>
+
 <pre><code class="r">freebase.input.format = 
   make.input.format(
     &quot;hbase&quot;, 
@@ -495,6 +497,15 @@ Just like input.format, one must define an output format function:</p>
     cell.deserialize = &quot;raw&quot;, 
     dense = F, 
     atomic = F)
+</code></pre>
+
+<p>The input format thus defined can be used as any other inputp format, on a table called &ldquo;freebase&rdquo;</p>
+
+<pre><code class="r">from.dfs(
+  mapreduce(
+    input = &quot;freebase&quot;,
+    input.format = freebase.input.format,
+    map = function(k,v) keyval(k[1,], v[1,])))
 </code></pre>
 
 </body>

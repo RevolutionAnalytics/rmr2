@@ -41,7 +41,7 @@ freebase.input.format =
     dense = F, 
     atomic = F)
 
-## @knitr freebase-mapreduce
+## @knitr hbase-freebase-mapreduce
 from.dfs(
   mapreduce(
     input = "freebase",
