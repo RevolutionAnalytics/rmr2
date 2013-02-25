@@ -43,7 +43,7 @@ import java.util.NavigableMap;
 public class TypedBytesTableRecordReader
     implements RecordReader<TypedBytesWritable, TypedBytesWritable> {
 
-  protected TableRecordReaderImpl recordReaderImpl = new TableRecordReaderImpl();
+  private TableRecordReaderImpl recordReaderImpl = new TableRecordReaderImpl();
 
   /**
    * Restart from survivable exceptions by creating a new scanner.
