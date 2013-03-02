@@ -1,0 +1,19 @@
+Hadoopy HBase
+License: Apache V2 (http://www.apache.org/licenses/LICENSE-2.0)
+
+
+How to Run Tests
+sudo /usr/lib/hbase/bin/start-hbase.sh
+sudo /etc/init.d/hadoop-hbase-thrift start
+cd java
+sudo bash build.sh
+cd ../tests
+python thrift_example.py
+python hbase_test.py
+
+
+
+
+Acknowledgements: Lasthbase (https://github.com/tims/lasthbase) inspired this module but is incompatible with new HBase versions, necessitating starting from scratch.  The build scripts and general layout were used as a starting point.
+
+ 
