@@ -1,1 +1,32 @@
-rmr2_*.tar.gz
+#for Mac users
+.DS_Store
+#for R users
+.RData
+.Rhistory
+*.Rcheck
+Rprof.out
+#for RStudio users
+.Rproj.user
+*.Rproj
+#for rmr users
+rmr-*-env*
+rmr-streaming-*
+#for emacs users
+*~
+#for whirr users
+whirr.log*
+#for emerge users
+*.orig
+rhbase/pkg/config.log
+#Compilation artifacts
+src-i386
+src-x86_64
+*.o
+*.so
+*.rds
+Rprof.out
+*.aup
+*.au
+*.swp
+*.gz
+!build/*.gz
