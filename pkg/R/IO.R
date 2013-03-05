@@ -63,7 +63,11 @@ make.csv.input.format = function(...) function(con, keyval.length) {
   df = 
     tryCatch(
       read.table(file = con, nrows = keyval.length, header = FALSE, ...),
-      error = function(e) NULL)
+      error = 
+        function(e) {
+          if(e$message != "no lines available in input")
+            stop(e$message)
+          NULL})  
   if(is.null(df) || dim(df)[[1]] == 0) NULL
   else keyval(NULL, df)}
 
