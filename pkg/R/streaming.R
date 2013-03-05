@@ -70,10 +70,8 @@ close.profiling =
     Rprofmem(NULL)}
 
 reduce.as.keyval = 
-  function(k, vv, reduce) {
-    kv = as.keyval(reduce(k, vv))
-    if(length.keyval(kv) > 0) kv
-    else as.keyval(NULL)}
+  function(k, vv, reduce) 
+    as.keyval(reduce(k, vv))
 
 apply.reduce =
   function(kv, reduce)

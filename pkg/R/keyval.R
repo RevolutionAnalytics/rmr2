@@ -117,9 +117,11 @@ c.or.rbind =
 c.keyval = 
   Make.single.or.multi.arg(
   function(kvs) {
-    null.keys = sapply(kvs, function(kv) is.null(keys(kv)))
-    if(!(all(null.keys) || !any(null.keys)))
-       stop("can't mix NULL and not NUll key keyval pairs")
+    zero.length = sapply(kvs, function(kv) length.keyval(kv) == 0)
+    null.keys = sapply(kvs, function(kv) is.null(keys(kv))) 
+    if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) {
+      rmr.str(kvs)
+      stop("can't mix NULL and not NULL key keyval pairs")}
     kvs = lapply(kvs, recycle.keyval)
     vv = lapply(kvs, values)
     kk = lapply(kvs, keys)
