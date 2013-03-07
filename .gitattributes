@@ -1,0 +1,20 @@
+# Set default behaviour, in case users don't have core.autocrlf set.
+* text=auto
+
+*.cpp text eol=lf
+*.h text eol=lf
+*.html text eol=lf
+*.java text eol=lf
+*.jpeg binary
+*.md text eol=lf
+*.o: binary
+*.png binary
+*.properties text eol=lf
+*.R: text eol=lf
+*.Rd text eol=lf
+*.Rmd text eol=lf
+*.sh text eol=lf
+*.so binary
+*.xml text eol=lf
+.gitignore text eol=lf
+Makevars* text eol=lf
