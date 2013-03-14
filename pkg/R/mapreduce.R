@@ -218,7 +218,7 @@ dfs.tempfile = function(pattern = "file", tmpdir = tempdir()) {
   reg.finalizer(environment(namefun), 
                 function(e) {
                   fname = eval(expression(fname), envir = e)
-                  if(Sys.getenv("mapred_task_id") != "" && dfs.exists(fname)) dfs.rm(fname)
+                  if(Sys.getenv("mapred_task_id") == "" && dfs.exists(fname)) dfs.rm(fname)
                 })
   namefun
 }
