@@ -202,12 +202,11 @@ We are talking about k-means. This is not a production ready implementation, but
 ```r
     dist.fun = 
       function(C, P) {
-        apply(C,
-              1, 
-              function(x) 
-                matrix(
-                  rowSums((t(t(P) - x))^2), 
-                  ncol = length(x)))}
+        apply(
+          C,
+          1, 
+          function(x) 
+            colSums((t(P) - x)^2))}
 ```
 
 
@@ -226,7 +225,7 @@ This is simply a distance function, the only noteworthy property of which is tha
           else {
             D = dist.fun(C, P)
             nearest = max.col(-D)}}
-        if(!(combine || in.mem.combine))
+        if(!(combine || in.memory.combine))
           keyval(nearest, P) 
         else 
           keyval(nearest, cbind(1, P))}
@@ -237,16 +236,30 @@ The role of the map function is to compute distances between some points and all
 
 ```r
     kmeans.reduce = {
-      if (!(combine || in.mem.combine) ) 
-        function(x, P) 
+      if (!(combine || in.memory.combine) ) 
+        function(., P) 
           t(as.matrix(apply(P, 2, mean)))
       else 
         function(k, P) 
-          keyval(k, t(as.matrix(apply(P, 2, sum))))}
+          keyval(
+            k, 
+            t(as.matrix(apply(P, 2, sum))))}
 ```
 
 
 The reduce function couldn't be simpler as it just computes column averages of a matrix of points sharing a center, which is the key.
+
+
+```r
+kmeans.mr = 
+  function(
+    P, 
+    num.clusters, 
+    num.iter, 
+    combine, 
+    in.memory.combine) {
+```
+
 
 
 ```r
@@ -259,9 +272,8 @@ The reduce function couldn't be simpler as it just computes column averages of a
               P, 
               map = kmeans.map,
               reduce = kmeans.reduce)))
-      if(combine || in.mem.combine)
+      if(combine || in.memory.combine)
         C = C[, -1]/C[, 1]
-      points(C, col = i + 1, pch = 19)
 ```
 
 
@@ -273,13 +285,14 @@ The reduce function couldn't be simpler as it just computes column averages of a
             C,
             matrix(
               rnorm(
-                (num.clusters - nrow(C)) * nrow(C)), 
+                (num.clusters - 
+                   nrow(C)) * nrow(C)), 
               ncol = nrow(C)) %*% C) }}
         C}
 ```
 
 
-The main loop does nothing but bring into memory the result of a mapreduce job with the two above functions as mapper and reducer and the big data object with the points as input. Once the keys are discarded, the values form a matrix which become the new centers. The last two lines before the return value are a heuristic to keep the number of centers the desired one (when centers are nearest to no points, they are lost). To run this function we need some data:
+The main loop does nothing but bring into memory the result of a mapreduce job with the two above functions as mapper and reducer and the big data object with the points as input. Once the keys are discarded, the values form a matrix which become the new centers. The last if before the return value implements a heuristic to keep the number of centers the desired one (when centers are nearest to no points, they are lost). To run this function we need some data:
 
 
 ```r
@@ -293,7 +306,6 @@ The main loop does nothing but bring into memory the result of a mapreduce job w
             ncol=2)), 
         20)) + 
     matrix(rnorm(200), ncol =2)
-  plot(P)
 ```
 
 
@@ -303,10 +315,10 @@ The main loop does nothing but bring into memory the result of a mapreduce job w
 ```r
     kmeans.mr(
       to.dfs(P),
-      num.clusters  = 12, 
-      num.iter= 5,
+      num.clusters = 12, 
+      num.iter = 5,
       combine = FALSE,
-      in.mem.combine = FALSE)
+      in.memory.combine = FALSE)
 ```
 
 

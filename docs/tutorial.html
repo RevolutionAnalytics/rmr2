@@ -336,12 +336,11 @@ hljs.initHighlightingOnLoad();
 
 <pre><code class="r">    dist.fun = 
       function(C, P) {
-        apply(C,
-              1, 
-              function(x) 
-                matrix(
-                  rowSums((t(t(P) - x))^2), 
-                  ncol = length(x)))}
+        apply(
+          C,
+          1, 
+          function(x) 
+            colSums((t(P) - x)^2))}
 </code></pre>
 
 <p>This is simply a distance function, the only noteworthy property of which is that it can compute all the distance between a matrix of centers <code>C</code> and a matrix of points <code>P</code> very efficiently, on my laptop it can do 10<sup>6</sup> points and 10<sup>2</sup> centers in 5 dimensions in approx. 16s. The only explicit iteration is over the dimension, but all the other operations are vectorized (e.g. loops are pushed to the C library), hence the speed.</p>
@@ -357,7 +356,7 @@ hljs.initHighlightingOnLoad();
           else {
             D = dist.fun(C, P)
             nearest = max.col(-D)}}
-        if(!(combine || in.mem.combine))
+        if(!(combine || in.memory.combine))
           keyval(nearest, P) 
         else 
           keyval(nearest, cbind(1, P))}
@@ -366,15 +365,26 @@ hljs.initHighlightingOnLoad();
 <p>The role of the map function is to compute distances between some points and all centers and return for each point the closest center. It has two flavors controlled by the main <code>if</code>: the first iteration when no candidate centers are available and all the following ones. Please note that while the points are stored in HDFS and provided to the map function as its second argument, the centers are simply stored in a matrix and available in the map function because of normal scope rules. In the first iteration, each point is randomly assigned to a center, whereas in the following ones a min distance criterion is used. Finally notice the vectorized use of keyval whereby all the center-point pairs are returned in one statement (the correspondence is positional, with the second dimension used when present).</p>
 
 <pre><code class="r">    kmeans.reduce = {
-      if (!(combine || in.mem.combine) ) 
-        function(x, P) 
+      if (!(combine || in.memory.combine) ) 
+        function(., P) 
           t(as.matrix(apply(P, 2, mean)))
       else 
         function(k, P) 
-          keyval(k, t(as.matrix(apply(P, 2, sum))))}
+          keyval(
+            k, 
+            t(as.matrix(apply(P, 2, sum))))}
 </code></pre>
 
 <p>The reduce function couldn&#39;t be simpler as it just computes column averages of a matrix of points sharing a center, which is the key.</p>
+
+<pre><code class="r">kmeans.mr = 
+  function(
+    P, 
+    num.clusters, 
+    num.iter, 
+    combine, 
+    in.memory.combine) {
+</code></pre>
 
 <pre><code class="r">    C = NULL
     for(i in 1:num.iter ) {
@@ -385,9 +395,8 @@ hljs.initHighlightingOnLoad();
               P, 
               map = kmeans.map,
               reduce = kmeans.reduce)))
-      if(combine || in.mem.combine)
+      if(combine || in.memory.combine)
         C = C[, -1]/C[, 1]
-      points(C, col = i + 1, pch = 19)
 </code></pre>
 
 <pre><code class="r">      if(nrow(C) &lt; num.clusters) {
@@ -396,12 +405,13 @@ hljs.initHighlightingOnLoad();
             C,
             matrix(
               rnorm(
-                (num.clusters - nrow(C)) * nrow(C)), 
+                (num.clusters - 
+                   nrow(C)) * nrow(C)), 
               ncol = nrow(C)) %*% C) }}
         C}
 </code></pre>
 
-<p>The main loop does nothing but bring into memory the result of a mapreduce job with the two above functions as mapper and reducer and the big data object with the points as input. Once the keys are discarded, the values form a matrix which become the new centers. The last two lines before the return value are a heuristic to keep the number of centers the desired one (when centers are nearest to no points, they are lost). To run this function we need some data:</p>
+<p>The main loop does nothing but bring into memory the result of a mapreduce job with the two above functions as mapper and reducer and the big data object with the points as input. Once the keys are discarded, the values form a matrix which become the new centers. The last if before the return value implements a heuristic to keep the number of centers the desired one (when centers are nearest to no points, they are lost). To run this function we need some data:</p>
 
 <pre><code class="r">  P = 
     do.call(
@@ -413,17 +423,16 @@ hljs.initHighlightingOnLoad();
             ncol=2)), 
         20)) + 
     matrix(rnorm(200), ncol =2)
-  plot(P)
 </code></pre>
 
 <p>That is, create a large matrix with a few rows  repeated many times and then add some noise. Finally, the function call:</p>
 
 <pre><code class="r">    kmeans.mr(
       to.dfs(P),
-      num.clusters  = 12, 
-      num.iter= 5,
+      num.clusters = 12, 
+      num.iter = 5,
       combine = FALSE,
-      in.mem.combine = FALSE)
+      in.memory.combine = FALSE)
 </code></pre>
 
 <p>With a little extra work you can even get pretty visualizations like <a href="kmeans.gif">this one</a>.</p>

@@ -123,13 +123,16 @@ The role of the map function is to compute distances between some points and all
 
 The reduce function couldn't be simpler as it just computes column averages of a matrix of points sharing a center, which is the key.
 
+```{r kmeans-signature}
+```
+
 ```{r kmeans-main-1}
 ```
 
 ```{r kmeans-main-2}
 ```
 
-The main loop does nothing but bring into memory the result of a mapreduce job with the two above functions as mapper and reducer and the big data object with the points as input. Once the keys are discarded, the values form a matrix which become the new centers. The last two lines before the return value are a heuristic to keep the number of centers the desired one (when centers are nearest to no points, they are lost). To run this function we need some data:
+The main loop does nothing but bring into memory the result of a mapreduce job with the two above functions as mapper and reducer and the big data object with the points as input. Once the keys are discarded, the values form a matrix which become the new centers. The last if before the return value implements a heuristic to keep the number of centers the desired one (when centers are nearest to no points, they are lost). To run this function we need some data:
 
 ```{r kmeans-data}
 ```
