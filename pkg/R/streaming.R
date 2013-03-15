@@ -198,45 +198,17 @@ rmr.stream = function(
   
   preamble = paste(sep = "", 'options(warn=1)
 
-  assign("system.default", base::system, baseenv())
-  assign("system.intern", function(...) system.default(intern = T, ignore.stderr = T, ...), baseenv())
-  assignInNamespace(
-    "system",
-    function(...) {
-        cls <- sys.calls()
-        from.install.packages = 
-            any(sapply(cls, "[[", 1) == as.name("install.packages"))
-        if(from.install.packages) {
-            old.warn = getOption("warn")
-            options(warn = 2)
-            retval = tryCatch(system.intern(...), error = function(e) 1) 
-            options(warn = old.warn)
-            if(is.character(retval)){
-              0}
-            else 1} 
-        else {
-            system.default(...)}},
-   "base")
+ 
   load("',file.path(work.dir, basename(rmr.global.env)),'")
   (function(){
   load("',file.path(work.dir, basename(rmr.local.env)),'")  
   sink(file = stderr())
-  if(!is.null(rmr.update))
-    rmr.update(ask = FALSE)
-  if(!is.null(rmr.install)) {
-    install.args = eval(expression(.orig), envir = environment(rmr.install))
-    .libPaths(c(.libPaths(), install.args$lib))}
   invisible(
     lapply(
       libs, 
         function(l)
-          if (!require(l, character.only = T)) {
-            if(is.null(rmr.install)) {
-              warning(paste("can\'t load", l))}
-            else {
-              install.out = capture.output(rmr.install(l, quiet = T))
-              if(!require(l, character.only = T))
-                warning(paste("can\'t install", l, "because", install.out))}}))
+          if (!require(l, character.only = T)) 
+            warning(paste("can\'t load", l))))
   sink(NULL)
   input.reader = 
     function()
