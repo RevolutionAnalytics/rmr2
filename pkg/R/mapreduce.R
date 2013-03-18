@@ -19,7 +19,7 @@ rmr.options.env = new.env(parent=emptyenv())
 rmr.options.env$backend = "hadoop"
 rmr.options.env$keyval.length = 10000
 rmr.options.env$profile.nodes = "off"
-rmr.options.env$hdfs.tempdir = tempdir()
+rmr.options.env$dfs.tempdir = tempdir()
 rmr.options.env$depend.check = FALSE
 #rmr.options$managed.dir = "/var/rmr/managed"
 
@@ -27,7 +27,7 @@ rmr.options =
   function(backend = c("hadoop", "local"), 
            profile.nodes = c("off", "calls", "memory", "both"),
            keyval.length = 10000,
-           hdfs.tempdir = tempdir()#,
+           dfs.tempdir = tempdir()#,
            #depend.check = FALSE, 
            #managed.dir = FALSE
   ) {
@@ -224,7 +224,7 @@ from.dfs = function(input, format = "native") {
 
 # mapreduce
 
-dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("hdfs.tempdir")) {
+dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
