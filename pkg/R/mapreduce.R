@@ -113,11 +113,11 @@ dfs.exists =
       hdfs.test(e = f) 
     else file.exists(f)}
 
-dfs.rm = 
+dfs.rmr = 
   function(f) {
     if(rmr.options('backend') == 'hadoop')
-      hdfs.rm(f)
-    else file.remove(f)}
+      hdfs.rmr(f)
+    else unlink(f, recursive = TRUE)}
 
 dfs.is.dir = 
   function(f) { 
@@ -233,7 +233,7 @@ dfs.tempfile = function(pattern = "file", tmpdir = tempdir()) {
   reg.finalizer(environment(namefun), 
                 function(e) {
                   fname = eval(expression(fname), envir = e)
-                  if(Sys.getenv("mapred_task_id") == "" && dfs.exists(fname)) dfs.rm(fname)
+                  if(Sys.getenv("mapred_task_id") == "" && dfs.exists(fname)) dfs.rmr(fname)
                 },
                 onexit = TRUE)
   namefun
