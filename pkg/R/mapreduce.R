@@ -21,13 +21,15 @@ rmr.options.env$keyval.length = 10000
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = tempdir()
 rmr.options.env$depend.check = FALSE
+rmr.options.env$rscript.cmd = 'Rscript'
 #rmr.options$managed.dir = "/var/rmr/managed"
 
 rmr.options = 
   function(backend = c("hadoop", "local"), 
            profile.nodes = c("off", "calls", "memory", "both"),
            keyval.length = 10000,
-           dfs.tempdir = tempdir()#,
+           dfs.tempdir = tempdir(),
+           rscript.cmd = 'Rscript'#,
            #depend.check = FALSE, 
            #managed.dir = FALSE
   ) {
