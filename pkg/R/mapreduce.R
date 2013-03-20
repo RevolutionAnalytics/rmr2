@@ -407,8 +407,9 @@ equijoin =
 
 status = function(value)
   cat(
-    sprintf("reporter:status:%s\n", 
-            value), 
+    sprintf(
+      "reporter:status:%s\n", 
+      value), 
     file = stderr())
 
 increment.counter =
