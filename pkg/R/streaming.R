@@ -139,7 +139,7 @@ reduce.loop =
       kv = keyval.reader()}
     if(!is.null(straddler)){
       if(!vectorized) {
-        increment.counter("rmr", "reduce calls", length.keyval(complete))
+        increment.counter("rmr", "reduce calls", length.keyval(straddler))
         out = apply.reduce(straddler, red.as.kv)}
       else{
         increment.counter("rmr", "reduce calls", 1)
