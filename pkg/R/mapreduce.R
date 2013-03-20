@@ -330,6 +330,8 @@ equijoin =
     right.input = NULL, 
     input = NULL, 
     output = NULL, 
+    input.format = "native",
+    output.format = "native",
     outer = c("", "left", "right", "full"), 
     map.left = to.map(identity), 
     map.right = to.map(identity), 
@@ -399,7 +401,9 @@ equijoin =
     map = map, 
     reduce = eqj.reduce,
     input = c(left.input, right.input), 
-    output = output)}
+    output = output,
+    input.format = input.format,
+    output.format = output.format,)}
 
 status = function(value)
   cat(
