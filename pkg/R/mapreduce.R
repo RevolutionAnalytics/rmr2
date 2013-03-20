@@ -413,8 +413,8 @@ status = function(value)
 
 increment.counter =
   function(group, counter, increment = 1)
-      cat(
-        sprintf(
-          "reporter:counter:%s\n", 
-          paste(group, counter, increment, sep=",")), 
-        file = stderr())
+    cat(
+      sprintf(
+        "reporter:counter:%s\n", 
+        paste(group, counter, increment, sep=",")), 
+      file = stderr())
