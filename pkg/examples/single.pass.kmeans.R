@@ -13,35 +13,73 @@
 # limitations under the License.
 
 normalize = 
-  function(x, s) round(s*x/sum(x))
+  function(x, to) round(to*x/sum(x))
 
+cluster.sizes = 
+  function(clusters)
+    do.call(
+      c, 
+      lapply(clusters, function(x) x$size))
+
+#create a data set based on a set of clusters with a given size
 clusters.to.dataset =
-  function(clusters, cluster.sizes, dataset.size) {
-    centers = do.call(rbind, lapply(clusters, function(x) x$centers))
-    centers[rep(1:nrow(centers), normalize(cluster.sizes, dataset.size)),]}
-
+  function(clusters, dataset.size) {
+    centers = 
+      do.call(
+        rbind, 
+        lapply(clusters, function(x) x$centers))
+    centers[
+      rep(
+        1:nrow(centers), 
+        normalize(cluster.sizes(clusters), dataset.size)),
+      ]}
 
 combine.clusters = 
   function(clusters, centers, dataset.size){
-    cluster.sizes = do.call(c, lapply(clusters, function(x) x$size))
-    points = clusters.to.dataset(clusters, cluster.sizes, dataset.size)
-    km = kmeans(x=points, centers = min(centers, nrow(points) - 1))
-    km$size = normalize(km$size, sum(cluster.sizes))
+    points = 
+      clusters.to.dataset(clusters, dataset.size)
+    km = 
+      kmeans(
+        x = points, 
+        centers = min(centers, nrow(points) - 1))
+    km$size = 
+      normalize(
+        km$size, sum(cluster.sizes(clusters)))
     km}
 
 single.pass.kmeans = 
-  function(data, centers, intermediate.data, intermediate.centers, splits)
+  function(
+    data, 
+    centers, 
+    intermediate.dataset.size = 100 * centers, 
+    intermediate.centers = centers)
     mapreduce(
       data,
       map = 
-        function(k,v) 
-          keyval(sample(1:splits, nrow(v), replace = T), v),
+        function(., data) {
+          keyval(
+            1, 
+            list(
+              kmeans(
+                x = data, 
+                centers = min(
+                  intermediate.centers, 
+                  nrow(data) - 1))))},
       combine = 
-        function(k, vv) {
-          if (is.matrix(vv)){
-            keyval(1, list(kmeans(vv, min(intermediate.centers, nrow(vv) - 1))))}
-          else
-            keyval(1, list(combine.clusters(vv, intermediate.centers, intermediate.data)))},
+        function(., clusters)
+            keyval(
+              1, 
+              list(
+                combine.clusters(
+                  clusters, 
+                  intermediate.centers, 
+                  intermediate.dataset.size))),
       reduce = 
-        function(k, vv) 
-          keyval(1, list(combine.clusters(vv, centers, intermediate.data))))
+        function(., clusters) 
+          keyval(
+            1, 
+            list(
+              combine.clusters(
+                clusters, 
+                centers, 
+                intermediate.dataset.size))))
