@@ -125,4 +125,5 @@ rmr.str =
             str(sc)), 
           match.call() [[2]], 
           capture.output(str(x))), 
-        collapse="\n"))}
+        collapse="\n"))
+    x}
