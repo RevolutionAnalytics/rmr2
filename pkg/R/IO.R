@@ -95,7 +95,7 @@ make.typedbytes.input.format = function(recycle = TRUE) {
   obj.buffer = list()
   obj.buffer.rmr.length = 0
   raw.buffer = raw()
-  read.size = rmr.options(read.size)
+  read.size = rmr.options("read.size")
   function(con, keyval.length) {
     while(length(obj.buffer) < 2 || 
       obj.buffer.rmr.length < keyval.length) {
