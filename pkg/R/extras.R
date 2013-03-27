@@ -57,7 +57,7 @@ rmr.sample = function(input, output = NULL, method = c("any", "Bernoulli"), ...)
                   keyval(rmr.slice(k, filter),
                          rmr.slice(v, filter))})}}
 
-## map and reducer generators
+## map and reduce generators
 
 partitioned.map = 
   function(map, n)
