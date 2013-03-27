@@ -17,7 +17,8 @@
 rmr.options.env = new.env(parent=emptyenv())
 
 rmr.options.env$backend = "hadoop"
-rmr.options.env$keyval.length = 10000
+rmr.options.env$keyval.length = 10^4
+rmr.options.env$read.size = 10^7
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = tempdir()
 rmr.options.env$depend.check = FALSE
@@ -27,7 +28,8 @@ rmr.options.env$rscript.cmd = 'Rscript'
 rmr.options = 
   function(backend = c("hadoop", "local"), 
            profile.nodes = c("off", "calls", "memory", "both"),
-           keyval.length = 10000,
+           keyval.length = 10^4,
+           read.size = 10^7,
            dfs.tempdir = tempdir(),
            rscript.cmd = 'Rscript'#,
            #depend.check = FALSE, 
