@@ -21,27 +21,34 @@ cluster.sizes =
       c, 
       lapply(clusters, function(x) x$size))
 
+n.clusters =
+  function(clusters)
+    sapply(clusters, function(x) nrow(x$centers))
+
 #create a data set based on a set of clusters with a given size
 clusters.to.dataset =
-  function(clusters, dataset.size) {
+  function(clusters) {
     centers = 
       do.call(
         rbind, 
         lapply(clusters, function(x) x$centers))
+    cl.sz = cluster.sizes(clusters)
     centers[
       rep(
         1:nrow(centers), 
-        normalize(cluster.sizes(clusters), dataset.size)),
-      ]}
+        normalize(cl.sz, min(sum(cl.sz, 10^5)))),] +
+        rnorm(nrow(centers), sd = sum(apply(centers,2,sd))/10^4)}
 
 combine.clusters = 
-  function(clusters, centers, dataset.size){
+  function(clusters){
     points = 
-      clusters.to.dataset(clusters, dataset.size)
+      clusters.to.dataset(clusters)
+    rmr.str(clusters)
     km = 
       kmeans(
         x = points, 
-        centers = min(centers, nrow(points) - 1))
+        centers = max(n.clusters(clusters)),
+        nstart = 10)
     km$size = 
       normalize(
         km$size, sum(cluster.sizes(clusters)))
@@ -50,9 +57,7 @@ combine.clusters =
 single.pass.kmeans = 
   function(
     data, 
-    centers, 
-    intermediate.dataset.size = 100 * centers, 
-    intermediate.centers = centers)
+    centers)
     mapreduce(
       data,
       map = 
@@ -62,24 +67,17 @@ single.pass.kmeans =
             list(
               kmeans(
                 x = data, 
-                centers = min(
-                  intermediate.centers, 
-                  nrow(data) - 1))))},
+                centers = centers,
+                nstart = 10)))},
       combine = 
         function(., clusters)
-            keyval(
-              1, 
-              list(
-                combine.clusters(
-                  clusters, 
-                  intermediate.centers, 
-                  intermediate.dataset.size))),
+          keyval(
+            1, 
+            list(
+              combine.clusters(clusters))),
       reduce = 
         function(., clusters) 
           keyval(
             1, 
             list(
-              combine.clusters(
-                clusters, 
-                centers, 
-                intermediate.dataset.size))))
+              combine.clusters(clusters))))
