@@ -14,6 +14,7 @@
 
 library(cluster)
 
+napply = function(ll, a.name) lapply(ll, function(l) l[[a.name]])
 
 cluster.mr = 
   function(data, subcluster, merge) 
@@ -32,17 +33,38 @@ cluster.mr =
 subclara = 
   function(n.clusters)
     function(data) {
-      clust = clara(rmr.str(data), n.clusters, keep.data=F)
-      rmr.str(clust)
-      clust$sampled.data = data[clust$sample,]
-      clust}
+      clust = 
+        clara(
+          rmr.str(data), 
+          n.clusters, 
+          keep.data=F)
+      list(
+        size = nrow(data),
+        sample = data[clust$sample,],
+        medoids = clust$medoids)}
 
 merge.clara =
   function(n.clusters)
-    function(clusters)
-      subclara(n.clusters)(
-        do.call(rbind, lapply(clusters, function(cl)cl$sampled.data)))
-        
+    function(clusters){
+      sizes = unlist(napply(clusters, 'size'))
+      total.size = sum(sizes)
+      size.range = range(sizes)
+      size.ratio = max(size.range)/min(size.range)
+      clust = 
+        subclara(n.clusters)(
+          do.call(
+            rbind, 
+            lapply(
+              clusters, 
+              function(x) 
+                x$sample[
+                  sample(
+                    1:nrow(x$sample), 
+                    round(nrow(x$sample) * size.ratio),
+                    replace = TRUE),
+                  ])))
+      clust$size = total.size
+      clust}        
 
 clara.mr = function(data, n.clusters)
   values(
