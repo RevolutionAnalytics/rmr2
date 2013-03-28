@@ -99,14 +99,15 @@ make.typedbytes.input.format = function(recycle = TRUE) {
   function(con, keyval.length) {
     while(length(obj.buffer) < 2 || 
       obj.buffer.rmr.length < keyval.length) {
+      rmr.str(read.size)
       raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
-      read.size = as.integer(2*read.size)
       if(length(raw.buffer) == 0) break;
       parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
       obj.buffer <<- c(obj.buffer, parsed$objects)
-      obj.buffer.rmr.length <<- sum(sapply(sample(even(obj.buffer), 10, replace = T), rmr.length)) * length(obj.buffer)/20
+      approx.read.records = sum(sapply(sample(even(obj.buffer), 10, replace = T), rmr.length))
+      obj.buffer.rmr.length <<- approx.read.records * length(obj.buffer)/20
+      read.size <<- ceiling(1.1^sign(keyval.length - approx.read.records) * read.size)
       if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
-    read.size = as.integer(read.size/2)
     straddler = list()
     retval = 
       if(length(obj.buffer) == 0) NULL 
