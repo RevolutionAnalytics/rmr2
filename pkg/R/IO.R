@@ -99,7 +99,6 @@ make.typedbytes.input.format = function(recycle = TRUE) {
   function(con, keyval.length) {
     while(length(obj.buffer) < 2 || 
       obj.buffer.rmr.length < keyval.length) {
-      rmr.str(read.size)
       raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
       if(length(raw.buffer) == 0) break;
       parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
