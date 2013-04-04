@@ -145,25 +145,41 @@ hr {
 
 <p>We are starting to see user feedback driving feature development, and that is a good thing.</p>
 
-<h2>Control read size</h2>
+<h2>Features</h2>
+
+<h3>Control read size</h3>
 
 <p>When reading binary formats, rmr2 reads a certain number of bytes, checks they contain at least <code>rmr.options(&quot;keyval.length&quot;)</code> records, then reads more if necessary or passes them to user code. The read size is adjusted so as to read the desired number of records in one shot, on average. You can now control the initial value of the read size if you need tighter control on how many records are processed in a map call if, say, are hitting memory or timeout limits. To achieve that, use <code>rmr.options(read.size = ideal.size.in.bytes)</code>. I can see reasons why people would want to control this and <code>keyval.length</code> on a job by job basis, but I am also wary of making the <code>mapreduce</code> interface more complicated. Let us know what you think.</p>
 
-<h2><code>rmr.str</code> returns its argument</h2>
+<h3><code>rmr.str</code> returns its argument</h3>
 
 <p>The small utility call to safely print expression values and stack information in standard error now returns its argument on top of doing its regular job, making for less intrusive code changes. For instance if you have a map function <code>function(k,v) keyval(k, v/2)</code> and you wonder what&#39;s going on you can change that to <code>function(k,v) rmr.str(keyval(k, v/2))</code> keeping the semantics of the function intact while adding useful information to stderr.</p>
 
-<h2>Input and output formats for equijoins</h2>
+<h3>Input and output formats for equijoins</h3>
 
 <p>On a specific user request, IO formats for equijoins. They work just like IO formats in mapreduce.</p>
 
-<h2>Options to RScript</h2>
+<h3>Options to RScript</h3>
 
 <p>On a specific user request, you can now change the command that is used to run the map and reduce programs. This defaults to &ldquo;Rscript&rdquo; and it&#39;s highly recommended you keep using Rscript unless you really know what you are doing. Some users though, while still using Rscript, wanted to provide options to control memory usage and other performance related options. Use <code>rmr.options(rscript.cmd = some.cmd.line)</code> to do this. Advanced use only. You can do a lot of damage with this.</p>
 
-<h2>Configure HDFS tempdir</h2>
+<h3>Configure HDFS tempdir</h3>
 
 <p>Again based on user feedback, you can now change the temp directory used on the distributed file system with <code>rmr.options(dfs.tempdir = some.dfs.path)</code>. Until now it just used the value returned by <code>tempdir()</code>, which is valid for the local file system but not necessarily for the distibuted one (still the default). Trying to find a common ground was a useless exercise in compromise: the two settings should be decoupled and they can be now.</p>
+
+<h2>Bugs</h2>
+
+<ul>
+<li><code>mapreduce</code> doesn&#39;t drop records silently with malformed CSV files. Now it will stop with error and forward whatever error was produced by <code>read.table</code> to standard error.</li>
+<li><code>c.keyval</code> doesn&#39;t fail on empty lists and other corner cases for <code>keyval</code> objects. Intended semantics is now <a href="https://github.com/RevolutionAnalytics/RHadoop/wiki/Keyval-types-and-combinations">documented</a>.</li>
+<li>the &ldquo;reduce calls&rdquo; counter is now accurate.</li>
+</ul>
+
+<h2>Miscellanea</h2>
+
+<ul>
+<li>added single pass clustering <a href="../pkg/examples/cluster.mr.R">example</a></li>
+</ul>
 
 </body>
 
