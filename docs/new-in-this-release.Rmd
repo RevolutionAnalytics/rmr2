@@ -10,7 +10,7 @@ When reading binary formats, rmr2 reads a certain number of bytes, checks they c
 
 ### `rmr.str` returns its argument
 
-The small utility call to safely print expression values and stack information in standard error now returns its argument on top of doing its regular job, making for less intrusive code changes. For instance if you have a map function `function(k,v) keyval(k, v/2)` and you wonder what's going on you can change that to `function(k,v) rmr.str(keyval(k, v/2))` keeping the semantics of the function intact while adding useful information to stderr.
+The small utility call to safely print expression values and stack information to standard error now returns its argument on top of doing its regular job, making for less intrusive code changes. For instance if you have a map function `function(k,v) keyval(k, v/2)` and you wonder what's going on you can change that to `function(k,v) rmr.str(keyval(k, v/2))` keeping the semantics of the function intact while adding useful information to stderr logs.
 
 ### Input and output formats for equijoins
 
@@ -34,4 +34,5 @@ Again based on user feedback, you can now change the temp directory used on the 
 
 ## Miscellanea
 
-* added single pass clustering [example](../pkg/examples/cluster.mr.R)
+* Added single pass clustering [example](../pkg/examples/cluster.mr.R)
+* For the git-initiated, we are now managing the dependency from hadoopy-hbase using subtree. You may see a large number of changes related to this (the diff with the previous version is some 15K lines) but most of them are related to this change.
