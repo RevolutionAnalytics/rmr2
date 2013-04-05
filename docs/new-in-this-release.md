@@ -12,23 +12,21 @@ The small utility call to safely print expression values and stack information i
 
 ### Input and output formats for equijoins
 
-On a specific user request, IO formats for equijoins. They work just like IO formats in mapreduce.
+In response to a user request, IO formats for `equijoin`. They work just like IO formats in `mapreduce`.
 
 ### Options to RScript
 
-On a specific user request, you can now change the command that is used to run the map and reduce programs. This defaults to "Rscript" and it's highly recommended you keep using Rscript unless you really know what you are doing. Some users though, while still using Rscript, wanted to provide options to control memory usage and other performance related options. Use `rmr.options(rscript.cmd = some.cmd.line)` to do this. Advanced use only. You can do a lot of damage with this.
+Per user request, you can now change the command that is used to run the map and reduce programs. This defaults to "Rscript" and it's highly recommended you keep using Rscript unless you really know what you are doing. Some users though, while still using Rscript, wanted to provide options to control memory usage and other performance related options. Use `rmr.options(rscript.cmd = some.cmd.line)` to do this. Advanced use only. You can do a lot of damage with this.
 
 ### Configure HDFS tempdir
 
 Again based on user feedback, you can now change the temp directory used on the distributed file system with `rmr.options(dfs.tempdir = some.dfs.path)`. Until now it just used the value returned by `tempdir()`, which is valid for the local file system but not necessarily for the distibuted one (still the default). Trying to find a common ground was a useless exercise in compromise: the two settings should be decoupled and they can be now.
-
 
 ## Bugs
 
 * `mapreduce` doesn't drop records silently with malformed CSV files. Now it will stop with error and forward whatever error was produced by `read.table` to standard error.
 * `c.keyval` doesn't fail on empty lists and other corner cases for `keyval` objects. Intended semantics is now [documented](https://github.com/RevolutionAnalytics/RHadoop/wiki/Keyval-types-and-combinations).
 * the "reduce calls" counter is now accurate.
-
 
 ## Miscellanea
 
