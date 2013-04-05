@@ -1,7 +1,5 @@
 # What's new in 2.2.0 
 
-We are starting to see user feedback driving feature development, and that is a good thing.
-
 ## Features
 
 ### Control read size
