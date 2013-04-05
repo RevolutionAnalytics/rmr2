@@ -153,7 +153,7 @@ hr {
 
 <h3><code>rmr.str</code> returns its argument</h3>
 
-<p>The small utility call to safely print expression values and stack information in standard error now returns its argument on top of doing its regular job, making for less intrusive code changes. For instance if you have a map function <code>function(k,v) keyval(k, v/2)</code> and you wonder what&#39;s going on you can change that to <code>function(k,v) rmr.str(keyval(k, v/2))</code> keeping the semantics of the function intact while adding useful information to stderr.</p>
+<p>The small utility call to safely print expression values and stack information to standard error now returns its argument on top of doing its regular job, making for less intrusive code changes. For instance if you have a map function <code>function(k,v) keyval(k, v/2)</code> and you wonder what&#39;s going on you can change that to <code>function(k,v) rmr.str(keyval(k, v/2))</code> keeping the semantics of the function intact while adding useful information to stderr logs.</p>
 
 <h3>Input and output formats for equijoins</h3>
 
@@ -178,7 +178,8 @@ hr {
 <h2>Miscellanea</h2>
 
 <ul>
-<li>added single pass clustering <a href="../pkg/examples/cluster.mr.R">example</a></li>
+<li>Added single pass clustering <a href="../pkg/examples/cluster.mr.R">example</a></li>
+<li>For the git-initiated, we are now managing the dependency from hadoopy-hbase using subtree. You may see a large number of changes related to this (the diff with the previous version is some 15K lines) but most of them are related to this change.</li>
 </ul>
 
 </body>
