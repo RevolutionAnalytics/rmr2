@@ -20,7 +20,7 @@ rmr.options.env$backend = "hadoop"
 rmr.options.env$keyval.length = 10^4
 rmr.options.env$read.size = 10^7
 rmr.options.env$profile.nodes = "off"
-rmr.options.env$dfs.tempdir = tempdir()
+rmr.options.env$dfs.tempdir = NULL
 rmr.options.env$depend.check = FALSE
 rmr.options.env$rscript.cmd = 'Rscript'
 #rmr.options$managed.dir = "/var/rmr/managed"
@@ -228,7 +228,8 @@ from.dfs = function(input, format = "native") {
 
 # mapreduce
 
-dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
+dfs.tempfile = function(pattern = "file", tmpdir = NULL) {
+  if (is.null(tmpdir)) tmpdir = tempdir()
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
@@ -239,8 +240,7 @@ dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
                   if(Sys.getenv("mapred_task_id") == "" && dfs.exists(fname)) dfs.rmr(fname)
                 },
                 onexit = TRUE)
-  namefun
-}
+  namefun}
 
 dfs.managed.file = function(call, managed.dir = rmr.options('managed.dir')) {
   file.path(managed.dir, digest(lapply(call, eval)))}
