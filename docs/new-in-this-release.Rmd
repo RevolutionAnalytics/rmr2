@@ -12,11 +12,11 @@ The small utility call to safely print expression values and stack information t
 
 ### Input and output formats for equijoins
 
-IO formats for `equijoin`. They work just like IO formats in `mapreduce`.
+They work just like IO formats in `mapreduce`.
 
 ### Options to RScript
 
-You can now change the command that is used to run the map and reduce programs. This defaults to "Rscript" and it's highly recommended you keep using Rscript unless you really know what you are doing. Some users though, while still using Rscript, wanted to provide options to control memory usage and other performance related options. Use `rmr.options(rscript.cmd = some.cmd.line)` to do this. Advanced use only. You can do a lot of damage with this.
+You can now change the command that is used to run the map and reduce programs. This defaults to "Rscript" and it's highly recommended you keep using Rscript unless you really know what you are doing. Some users though, while still using Rscript, wanted to provide options to control memory usage and other performance related options. Use `rmr.options(rscript.cmd = some.cmd.line)` to do so. **Advanced use only**. You can do a lot of damage with this.
 
 ### Configure HDFS tempdir
 
@@ -32,5 +32,6 @@ You can now change the temp directory used on the distributed file system with `
 
 ## Miscellanea
 
-* Added single pass clustering [example](../pkg/examples/cluster.mr.R)
+* Added single pass clustering [example](../pkg/examples/cluster.mr.R) based on [clara](cran.r-project.org/web/packages/cluster/cluster.pdf
+), but it should also provide a template for other single pass clustering algorithms. The idea is to cluster the data in chunks as soon as you see the data and then merge the clusters.
 * For the git-initiated, we are now managing the dependency from hadoopy-hbase using subtree. You may see a large number of changes related to this (the diff with the previous version is some 15K lines) but most of them are related to this change.

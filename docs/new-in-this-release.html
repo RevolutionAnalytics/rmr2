@@ -155,11 +155,11 @@ hr {
 
 <h3>Input and output formats for equijoins</h3>
 
-<p>IO formats for <code>equijoin</code>. They work just like IO formats in <code>mapreduce</code>.</p>
+<p>They work just like IO formats in <code>mapreduce</code>.</p>
 
 <h3>Options to RScript</h3>
 
-<p>You can now change the command that is used to run the map and reduce programs. This defaults to &ldquo;Rscript&rdquo; and it&#39;s highly recommended you keep using Rscript unless you really know what you are doing. Some users though, while still using Rscript, wanted to provide options to control memory usage and other performance related options. Use <code>rmr.options(rscript.cmd = some.cmd.line)</code> to do this. Advanced use only. You can do a lot of damage with this.</p>
+<p>You can now change the command that is used to run the map and reduce programs. This defaults to &ldquo;Rscript&rdquo; and it&#39;s highly recommended you keep using Rscript unless you really know what you are doing. Some users though, while still using Rscript, wanted to provide options to control memory usage and other performance related options. Use <code>rmr.options(rscript.cmd = some.cmd.line)</code> to do so. <strong>Advanced use only</strong>. You can do a lot of damage with this.</p>
 
 <h3>Configure HDFS tempdir</h3>
 
@@ -176,7 +176,7 @@ hr {
 <h2>Miscellanea</h2>
 
 <ul>
-<li>Added single pass clustering <a href="../pkg/examples/cluster.mr.R">example</a></li>
+<li>Added single pass clustering <a href="../pkg/examples/cluster.mr.R">example</a> based on <a href="cran.r-project.org/web/packages/cluster/cluster.pdf">clara</a>, but it should also provide a template for other single pass clustering algorithms. The idea is to cluster the data in chunks as soon as you see the data and then merge the clusters.</li>
 <li>For the git-initiated, we are now managing the dependency from hadoopy-hbase using subtree. You may see a large number of changes related to this (the diff with the previous version is some 15K lines) but most of them are related to this change.</li>
 </ul>
 
