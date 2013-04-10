@@ -6,7 +6,7 @@ Function to set and get package options}
 \description{
 set and get package options}
 \usage{
-rmr.options(backend = c("hadoop", "local"), profile.nodes = c("off", "calls", "memory", "both"), keyval.length = 10000, read.size = 10^7, dfs.tempdir = tempdir(), rscript.cmd = 'Rscript')
+rmr.options(backend = c("hadoop", "local"), profile.nodes = c("off", "calls", "memory", "both"), keyval.length = 10^4, read.size = 10^7, dfs.tempdir = tempdir(), rscript.cmd = 'Rscript')
 % depend.check = NULL, managed.dir = NULL)
 }
 \arguments{
