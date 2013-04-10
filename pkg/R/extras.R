@@ -57,7 +57,26 @@ rmr.sample = function(input, output = NULL, method = c("any", "Bernoulli"), ...)
                   keyval(rmr.slice(k, filter),
                          rmr.slice(v, filter))})}}
 
-## fast cpp extensions
+## map and reduce generators
+
+partitioned.map = 
+  function(map, n)
+    function(k,v) {
+      kv = map(k,v)
+      keyval(
+        data.frame(
+          sample(
+            1:n, size=length(k), 
+            replace=T), k),
+        v)}
+
+partitioned.combine = 
+  function(reduce)
+    function(k,vv) {
+      kv = reduce(k,vv)
+      keyval(k[,-1], vv)}
+
+## fast aggregate functions
 
 vsum = 
   function(x) {
@@ -106,4 +125,5 @@ rmr.str =
             str(sc)), 
           match.call() [[2]], 
           capture.output(str(x))), 
-        collapse="\n"))}
+        collapse="\n"))
+    x}

@@ -15,20 +15,23 @@
 #options
 
 rmr.options.env = new.env(parent=emptyenv())
+
 rmr.options.env$backend = "hadoop"
-rmr.options.env$keyval.length = 10000
+rmr.options.env$keyval.length = 10^4
+rmr.options.env$read.size = 10^7
 rmr.options.env$profile.nodes = "off"
+rmr.options.env$dfs.tempdir = tempdir()
 rmr.options.env$depend.check = FALSE
-rmr.options.env$install.args = NULL
-rmr.options.env$update.args = NULL
+rmr.options.env$rscript.cmd = 'Rscript'
 #rmr.options$managed.dir = "/var/rmr/managed"
 
 rmr.options = 
   function(backend = c("hadoop", "local"), 
            profile.nodes = c("off", "calls", "memory", "both"),
-           keyval.length = 1000#,
-           #install.args = NULL,
-           #update.args = NULL, 
+           keyval.length = 10^4,
+           read.size = 10^7,
+           dfs.tempdir = tempdir(),
+           rscript.cmd = 'Rscript'#,
            #depend.check = FALSE, 
            #managed.dir = FALSE
   ) {
@@ -225,7 +228,7 @@ from.dfs = function(input, format = "native") {
 
 # mapreduce
 
-dfs.tempfile = function(pattern = "file", tmpdir = tempdir()) {
+dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
@@ -329,6 +332,8 @@ equijoin =
     right.input = NULL, 
     input = NULL, 
     output = NULL, 
+    input.format = "native",
+    output.format = "native",
     outer = c("", "left", "right", "full"), 
     map.left = to.map(identity), 
     map.right = to.map(identity), 
@@ -398,18 +403,21 @@ equijoin =
     map = map, 
     reduce = eqj.reduce,
     input = c(left.input, right.input), 
-    output = output)}
+    output = output,
+    input.format = input.format,
+    output.format = output.format,)}
 
 status = function(value)
   cat(
-    sprintf("reporter:status:%s\n", 
-            value), 
+    sprintf(
+      "reporter:status:%s\n", 
+      value), 
     file = stderr())
 
 increment.counter =
   function(group, counter, increment = 1)
-      cat(
-        sprintf(
-          "reporter:counter:%s\n", 
-          paste(group, counter, increment, sep=",")), 
-        file = stderr())
+    cat(
+      sprintf(
+        "reporter:counter:%s\n", 
+        paste(group, counter, increment, sep=",")), 
+      file = stderr())

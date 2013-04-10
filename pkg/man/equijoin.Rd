@@ -16,6 +16,8 @@ equijoin(
   right.input = NULL, 
   input = NULL, 
   output = NULL, 
+  input.format = "native",
+  output.format = "native",
   outer = c("", "left", "right", "full"), 
   map.left = to.map(identity), 
   map.right = to.map(identity), 
@@ -24,6 +26,8 @@ equijoin(
   \item{right.input}{The right side input to the join.}
   \item{input}{The only input in case of a self join. Mutually exclusive with the previous two.}
   \item{output}{Where to write the output.}
+  \item{input.format}{Input format specification, see  \code{\link{make.input.format}}}
+  \item{output.format}{Output format specification, see  \code{\link{make.output.format}}}
   \item{outer}{Whether to perform an outer join, one of the usual three types, left, right or full.}
   \item{map.left}{Function to apply to each record from the left input, follows same conventions as any map function. The returned keys
 will become join keys.}

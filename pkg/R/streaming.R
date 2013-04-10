@@ -139,7 +139,7 @@ reduce.loop =
       kv = keyval.reader()}
     if(!is.null(straddler)){
       if(!vectorized) {
-        increment.counter("rmr", "reduce calls", length.keyval(complete))
+        increment.counter("rmr", "reduce calls", length.keyval(straddler))
         out = apply.reduce(straddler, red.as.kv)}
       else{
         increment.counter("rmr", "reduce calls", 1)
@@ -315,11 +315,11 @@ rmr.stream = function(
                            stream.map.output,
                            stream.reduce.input,
                            stream.reduce.output)
- 
+  rscript.cmd = rmr.options('rscript.cmd')
   mapper = paste.options(
     mapper = 
       paste(
-        'Rscript', 
+        rscript.cmd, 
         file.path(work.dir, basename(map.file))))
   m.fl = paste.options(file = map.file)
   if(!is.null(reduce) ) {
@@ -327,7 +327,7 @@ rmr.stream = function(
       paste.options(
         reducer  = 
           paste(
-            'Rscript', 
+            rscript.cmd, 
             file.path(work.dir, basename(reduce.file))))
     r.fl = paste.options(file = reduce.file)}
   else {
@@ -338,7 +338,7 @@ rmr.stream = function(
       paste.options(
         combiner = 
           paste(
-            'Rscript', 
+            rscript.cmd, 
             file.path(work.dir, basename(combine.file))))  
     c.fl =  paste.options(file = combine.file)}
   else {

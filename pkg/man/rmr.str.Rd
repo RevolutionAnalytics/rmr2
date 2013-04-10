@@ -16,7 +16,7 @@ The variable to print
 }
 
 \value{
-NULL
+x
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

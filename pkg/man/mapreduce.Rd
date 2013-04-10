@@ -31,16 +31,16 @@
 \item{output.format}{Output format specification, see  \code{\link{make.output.format}}}
 \item{backend.parameters}{This option is for advanced users only and may be removed in the future. Specify additional, backend-specific
     options, as in \code{backend.parameters = list(hadoop  = list(D = "mapred.reduce.tasks=1"), local = list())}. It is recommended not to use this argument to change the semantics of mapreduce (output should be independent of this argument). Each backend can only see the nested list named after the backend itself.  The interpretation is the following: for the hadoop backend, generate an additional hadoop streaming command line argument for each element of the list, "-name value". If the value is TRUE generate "-name" only, if it is FALSE skip. One possible use is to specify the number of mappers and reducers on a per-job basis. It is not guaranteed that the generated streaming command will be a legal command. In particular, remember to put any generic options before any specific ones, as per hadoop streaming manual. For the local backend, the list is currently ignored.}
-  \item{verbose}{Run hadoop in verbose mode. No effect on the local backend}}
+\item{verbose}{Run hadoop in verbose mode. No effect on the local backend}}
 
-  \value{The value of \code{output}, or, when missing, a \code{\link{big.data.object}}}
+\value{The value of \code{output}, or, when missing, a \code{\link{big.data.object}}}
 
-  \details{Defines and executes a mapreduce job. Jobs can be chained together by simply providing the return value of one as input to the
+\details{Defines and executes a mapreduce job. Jobs can be chained together by simply providing the return value of one as input to the
     other. The map and reduce functions will run in an environment that is a close approximation of the environment of this
     call, even if the actual execution happens in a different interpreter on a different machine.  Changes to the outer
     environemnts performed inside the map and reduce functions with the \code{<<-} operator will only affect a per-process copy of the
     environment, not the original one, in a departure from established but seldom used R semantics. This is unlikely to change in the future
-    because of the challenges inherent in adopting reference semantics in a parallel environment. See also the Tutorial
+    because of the challenges inherent in adopting reference semantics in a parallel environment.  The map function should not read from standard input and write to standard output. Logging and debugging messages should be written to standard error, and will be redirected to the appropriate logs or to console by the backend. If necessary, library functions that can not be prevented from writing into standard output can be surrounded by a pair of \code{sink} calls as in \code{sink(stderr()); library.function(); sink(NULL)}. See also the Tutorial
     \url{https://github.com/RevolutionAnalytics/RHadoop/wiki/Tutorial}}
   
 \seealso{\code{\link{to.map}} and \code{\link{to.reduce}} can be used to convert other functions into suitable arguments for the map and
