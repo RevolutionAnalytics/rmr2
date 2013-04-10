@@ -40,7 +40,7 @@
     call, even if the actual execution happens in a different interpreter on a different machine.  Changes to the outer
     environemnts performed inside the map and reduce functions with the \code{<<-} operator will only affect a per-process copy of the
     environment, not the original one, in a departure from established but seldom used R semantics. This is unlikely to change in the future
-    because of the challenges inherent in adopting reference semantics in a parallel environment. See also the Tutorial
+    because of the challenges inherent in adopting reference semantics in a parallel environment.  The map function should not read from standard input and write to standard output. Logging and debugging messages should be written to standard error, and will be redirected to the appropriate logs or to console by the backend. If necessary, library functions that can not be prevented from writing into standard output can be surrounded by a pair of \code{sink} calls as in \code{sink(stderr()); library.function(); sink(NULL)}. See also the Tutorial
     \url{https://github.com/RevolutionAnalytics/RHadoop/wiki/Tutorial}}
   
 \seealso{\code{\link{to.map}} and \code{\link{to.reduce}} can be used to convert other functions into suitable arguments for the map and
