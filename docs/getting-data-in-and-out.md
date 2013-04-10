@@ -60,13 +60,17 @@ $format
 function (con, keyval.length) 
 {
     df = tryCatch(read.table(file = con, nrows = keyval.length, 
-        header = FALSE, ...), error = function(e) NULL)
+        header = FALSE, ...), error = function(e) {
+        if (e$message != "no lines available in input") 
+            stop(e$message)
+        NULL
+    })
     if (is.null(df) || dim(df)[[1]] == 0) 
         NULL
     else keyval(NULL, df)
 }
-<bytecode: 0x1049ad0d0>
-<environment: 0x1049a4d18>
+<bytecode: 0x104c3e3f8>
+<environment: 0x104c3d6d0>
 
 $streaming.format
 NULL
@@ -97,8 +101,8 @@ function (kv, con)
         v
     else cbind(k, v), ..., row.names = FALSE, col.names = FALSE)
 }
-<bytecode: 0x104c80310>
-<environment: 0x104c808a8>
+<bytecode: 0x1038d1190>
+<environment: 0x1038024e8>
 
 $streaming.format
 NULL
