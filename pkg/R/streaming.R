@@ -120,7 +120,6 @@ reduce.loop =
         reduce.as.keyval, 
         reduce = reduce)
     while(!is.null(kv)){
-      cat(paste(capture.output(gc()), collapse=(""), "\n"), file=stderr())
       if(!is.null(straddler))
         kv = c.keyval(straddler, kv)
       last.key = rmr.slice(keys(kv), rmr.length(keys(kv)))
