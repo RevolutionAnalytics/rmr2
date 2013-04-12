@@ -345,7 +345,28 @@ make.output.format =
         csv = {
           format = make.csv.output.format(...)
           mode = "text"
-          streaming.format = NULL}, 
+          streaming.format = NULL
+          sep = list(...)$sep
+          if(!is.null(sep))
+            backend.parameters = 
+            list(
+              hadoop = 
+                list(
+                  D = 
+                    paste(
+                      "mapred.textoutputformat.separator=",
+                      sep,
+                      sep = ""),
+                  D =
+                    paste(
+                      "stream.map.output.field.separator=",
+                      sep,
+                      sep = ""),
+                  D = 
+                    paste(
+                      "stream.reduce.output.field.separator=",
+                      sep,
+                      sep = "")))}, 
         native = {
           format = make.native.output.format(
             keyval.length = rmr.options('keyval.length'))
