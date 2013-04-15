@@ -71,8 +71,10 @@ rmr.recycle =
     ly = rmr.length(y)
     if(lx == ly) x
     else {
-      if(min(lx,ly) == 0)
-        stop("Can't recycle 0-length argument")
+      if(min(lx,ly) == 0){
+        rmr.str(lx)
+        rmr.str(ly)
+        stop("Can't recycle 0-length argument")}
       else
         rmr.slice(
           c.or.rbind(
