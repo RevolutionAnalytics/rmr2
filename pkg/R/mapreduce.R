@@ -381,8 +381,8 @@ equijoin =
         function(v) lapply(v, function(x)x$val), 
         simplify = FALSE)}
   pad.side =
-    function(vv, side.outer, full.outer) 
-      if (length(vv) == 0 && (side.outer || full.outer)) c(NA) else c.or.rbind(vv)
+    function(vv, outer) 
+      if (length(vv) == 0 && (outer)) c(NA) else c.or.rbind(vv)
   map = 
     if (is.null(input)) {
       function(k, v) {
@@ -395,8 +395,8 @@ equijoin =
   eqj.reduce = 
     function(k, vv) {
       rs = reduce.split(vv)
-      left.side = pad.side(rs$`TRUE`, right.outer, full.outer)
-      right.side = pad.side(rs$`FALSE`, left.outer, full.outer)
+      left.side = pad.side(rs$`TRUE`, right.outer || full.outer)
+      right.side = pad.side(rs$`FALSE`, left.outer || full.outer)
       if(!is.null(left.side) && !is.null(right.side))
         reduce(k[[1]], left.side, right.side)}
   mapreduce(
