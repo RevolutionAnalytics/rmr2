@@ -185,9 +185,10 @@ rmr.stream = function(
   verbose, 
   debug) {
   backend.parameters = 
-    c(backend.parameters, 
+    c(
       input.format$backend.parameters$hadoop, 
-      output.format$backend.parameters$hadoop)
+      output.format$backend.parameters$hadoop,
+      backend.parameters)
   ## prepare map and reduce executables
   work.dir = 
     if(.Platform$OS.type == "windows") "../../jars"
@@ -347,9 +348,9 @@ rmr.stream = function(
     !is.element("mapred.reduce.tasks",
                 sapply(strsplit(as.character(named.slice(backend.parameters, 'D')), '='), 
                        function(x)x[[1]])))
-    backend.parameters = append(backend.parameters, list(D='mapred.reduce.tasks=0'))
+    backend.parameters = c(list(D='mapred.reduce.tasks=0'), backend.parameters)
   #debug.opts = "-mapdebug kdfkdfld -reducexdebug jfkdlfkja"
-  
+
   final.command =
     paste(
       hadoop.command, 
