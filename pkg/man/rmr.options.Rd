@@ -6,7 +6,7 @@ Function to set and get package options}
 \description{
 set and get package options}
 \usage{
-rmr.options(backend = c("hadoop", "local"), profile.nodes = c("off", "calls", "memory", "both"), keyval.length = 10^4, read.size = 10^7, dfs.tempdir = tempdir(), rscript.cmd = 'Rscript')
+rmr.options(backend = c("hadoop", "local"), profile.nodes = c("off", "calls", "memory", "both"), keyval.length = 10^4, read.size = 10^7, dfs.tempdir = tempdir())
 % depend.check = NULL, managed.dir = NULL)
 }
 \arguments{
@@ -16,7 +16,6 @@ rmr.options(backend = c("hadoop", "local"), profile.nodes = c("off", "calls", "m
   \item{keyval.length}{Min number of records to read into a single, key-value pair or how many to write to when the key is \code{NULL}. Controls both \code{\link{from.dfs}} and \code{\link{to.dfs}} and \code{\link{mapreduce}} behavior. Works in combination with the \code{read.size} option. This setting will be ignored at the end of file or partitions, when not enough records are avilable}
   \item{read.size}{Initial number of bytes to read when parsing binary formats (including the default, \code{native} format). If the number of parsed records is different than \code{keyval.length}, the effective read size get adjusted. All parsed records are passed to the user code, so specifically this option and \code{keyval.length} should not be used to precisely partition the data but only to optimize performance and comply with memory limitations. Correctness should be independent of these settings}
   \item{dfs.tempdir}{The directory to use for temporary files, including \code{\link{mapreduce}} intermediate results files, on the distributed file system.}
-  \item{rscript.cmd}{The command used to invoke R on the nodes, allows to specify additional options, it should start with 'Rscript' unless you absolutely know what you are doing}
  % \item{depend.check}{Activate makefile-like dependency checking (under construction)}
  % \item{managed.dir}{Where to put intermediate result when makefile-like features are activated}
 }

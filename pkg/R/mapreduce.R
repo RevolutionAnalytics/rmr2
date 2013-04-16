@@ -22,7 +22,6 @@ rmr.options.env$read.size = 10^7
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = NULL
 rmr.options.env$depend.check = FALSE
-rmr.options.env$rscript.cmd = 'Rscript'
 #rmr.options$managed.dir = "/var/rmr/managed"
 
 rmr.options = 
@@ -30,8 +29,7 @@ rmr.options =
            profile.nodes = c("off", "calls", "memory", "both"),
            keyval.length = 10^4,
            read.size = 10^7,
-           dfs.tempdir = tempdir(),
-           rscript.cmd = 'Rscript'#,
+           dfs.tempdir = tempdir()#,
            #depend.check = FALSE, 
            #managed.dir = FALSE
   ) {
