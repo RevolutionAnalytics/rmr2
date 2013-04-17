@@ -95,7 +95,7 @@ make.typedbytes.input.format = function(recycle = TRUE) {
   obj.buffer = list()
   obj.buffer.rmr.length = 0
   raw.buffer = raw()
-  read.size = rmr.options("read.size")
+  read.size = 100
   function(con, keyval.length) {
     while(length(obj.buffer) < 2 || 
       obj.buffer.rmr.length < keyval.length) {
@@ -345,7 +345,28 @@ make.output.format =
         csv = {
           format = make.csv.output.format(...)
           mode = "text"
-          streaming.format = NULL}, 
+          streaming.format = NULL
+          sep = list(...)$sep
+          if(!is.null(sep))
+            backend.parameters = 
+            list(
+              hadoop = 
+                list(
+                  D = 
+                    paste(
+                      "mapred.textoutputformat.separator=",
+                      sep,
+                      sep = ""),
+                  D =
+                    paste(
+                      "stream.map.output.field.separator=",
+                      sep,
+                      sep = ""),
+                  D = 
+                    paste(
+                      "stream.reduce.output.field.separator=",
+                      sep,
+                      sep = "")))}, 
         native = {
           format = make.native.output.format(
             keyval.length = rmr.options('keyval.length'))

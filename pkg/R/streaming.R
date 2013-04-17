@@ -185,9 +185,10 @@ rmr.stream = function(
   verbose, 
   debug) {
   backend.parameters = 
-    c(backend.parameters, 
+    c(
       input.format$backend.parameters$hadoop, 
-      output.format$backend.parameters$hadoop)
+      output.format$backend.parameters$hadoop,
+      backend.parameters)
   ## prepare map and reduce executables
   work.dir = 
     if(.Platform$OS.type == "windows") "../../jars"
@@ -314,11 +315,10 @@ rmr.stream = function(
                            stream.map.output,
                            stream.reduce.input,
                            stream.reduce.output)
-  rscript.cmd = rmr.options('rscript.cmd')
   mapper = paste.options(
     mapper = 
       paste(
-        rscript.cmd, 
+        'Rscript', 
         file.path(work.dir, basename(map.file))))
   m.fl = paste.options(file = map.file)
   if(!is.null(reduce) ) {
@@ -326,7 +326,7 @@ rmr.stream = function(
       paste.options(
         reducer  = 
           paste(
-            rscript.cmd, 
+            'Rscript', 
             file.path(work.dir, basename(reduce.file))))
     r.fl = paste.options(file = reduce.file)}
   else {
@@ -337,7 +337,7 @@ rmr.stream = function(
       paste.options(
         combiner = 
           paste(
-            rscript.cmd, 
+            'Rscript', 
             file.path(work.dir, basename(combine.file))))  
     c.fl =  paste.options(file = combine.file)}
   else {
@@ -347,9 +347,9 @@ rmr.stream = function(
     !is.element("mapred.reduce.tasks",
                 sapply(strsplit(as.character(named.slice(backend.parameters, 'D')), '='), 
                        function(x)x[[1]])))
-    backend.parameters = append(backend.parameters, list(D='mapred.reduce.tasks=0'))
+    backend.parameters = c(list(D='mapred.reduce.tasks=0'), backend.parameters)
   #debug.opts = "-mapdebug kdfkdfld -reducexdebug jfkdlfkja"
-  
+
   final.command =
     paste(
       hadoop.command, 

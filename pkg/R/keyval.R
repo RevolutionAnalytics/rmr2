@@ -71,8 +71,10 @@ rmr.recycle =
     ly = rmr.length(y)
     if(lx == ly) x
     else {
-      if(min(lx,ly) == 0)
-        stop("Can't recycle 0-length argument")
+      if(min(lx,ly) == 0){
+        rmr.str(lx)
+        rmr.str(ly)
+        stop("Can't recycle 0-length argument")}
       else
         rmr.slice(
           c.or.rbind(
@@ -105,10 +107,11 @@ c.or.rbind =
       else {
         if(length(x) == 0) 
           list()
-        else {
-          if(has.rows(x[[1]])) { 
-            if(is.data.frame(x[[1]]))
-              do.call(rbind.fill,x)
+        else { 
+          if(any(sapply(x, has.rows))) { 
+            if(any(sapply(x, is.data.frame))){
+              x = x[!sapply(x, is.null)]
+              do.call(rbind.fill,x)}
             else
               do.call(rbind, x)}
           else
