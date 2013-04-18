@@ -14,6 +14,8 @@ They work just like IO formats in `mapreduce`.
 
 You can now change the temp directory used on the distributed file system with `rmr.options(dfs.tempdir = some.dfs.path)`. Until now it just used the value returned by `tempdir()`, which is valid for the local file system but not necessarily for the distibuted one (still the default). Trying to find a common ground was a useless exercise in compromise: the two settings should be decoupled and they can be now.
 
+### More explicit error message
+The goal is to have some information about the values that triggered the error and the stack at the time of the error. When the errors are triggered by R or underlying libraries we are using, that is not the case, for performance reasons and because it would a lot of work, but for rmr2-triggered errors we should see something informative in stderr. 
 
 ## Bugs
 
@@ -21,7 +23,6 @@ You can now change the temp directory used on the distributed file system with `
 * `c.keyval` doesn't fail on empty lists and other corner cases for `keyval` objects. Intended semantics is now [documented](https://github.com/RevolutionAnalytics/RHadoop/wiki/Keyval-types-and-combinations).
 * The "reduce calls" counter is now accurate.
 * Fixed bug #18 that prevented outer equijoins from completing in many cases.
-* Made a few error messages more explicit with logging of the values triggering the failure.
 * Fixed a bug that prevented from specifying specific streaming options with the `backend.parameters` option to mapreduce (e.g. `cmdenv`)
 * Fixed bug #20 that added an additional TAB at the end of the line with the CSV output format when the seprator wasn't TAB.
 
