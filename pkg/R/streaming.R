@@ -132,7 +132,7 @@ reduce.loop =
           out = apply.reduce(complete, red.as.kv)}
         else {
           increment.counter("rmr", "reduce calls", 1)
-          out = reduce(keys(complete), values(complete))}
+          out = as.keyval(reduce(keys(complete), values(complete)))}
         if(length.keyval(out) > 0)
           keyval.writer(out)}
       kv = keyval.reader()}
@@ -142,7 +142,7 @@ reduce.loop =
         out = apply.reduce(straddler, red.as.kv)}
       else{
         increment.counter("rmr", "reduce calls", 1)
-        out = reduce(keys(straddler), values(straddler))}
+        out = as.keyval(reduce(keys(straddler), values(straddler)))}
       if(length.keyval(out) > 0)
         keyval.writer(out)}    
     if(profile != "off") close.profiling()
