@@ -24,14 +24,10 @@ rmr.equal =
     else {
       if(is.atomic(xx) && !is.matrix(xx)) xx == y
       else {
-        sapply(
-          1:rmr.length(xx), 
-          function(i) 
-            isTRUE(
-              all.equal(
-                rmr.slice(xx,i), 
-                y, 
-                check.attributes=F)))}}}
+        if(is.matrix(xx) || is.data.frame(xx))
+          rowSums(xx == do.call(rbind, replicate(rmr.length(xx), y, simplify = FALSE))) == ncol(y)
+        else
+          sapply(xx, function(x) isTRUE(all.equal(list(x), y, check.attributes = FALSE)))}}}
     
 length.keyval = 
   function(kv) 
