@@ -103,7 +103,6 @@ make.typedbytes.input.format = function(recycle = TRUE) {
       if(length(raw.buffer) == 0) break;
       parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
       obj.buffer <<- c(obj.buffer, parsed$objects)
-      rmr.str(parsed$objects)
       approx.read.records = {
         if(length(parsed$objects) == 0) 0 
         else 
