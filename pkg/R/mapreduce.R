@@ -312,10 +312,10 @@ reduce.default =
          (is.list(vr) && !is.data.frame(vr)))
       list(left = vl, right = vr)
     else{
-      if(!is.null(names(vl)))
-        names(vl) = paste(names(vl), "l", sep = ".")
-      if(!is.null(names(vr)))
-        names(vr) = paste(names(vr), "r", sep = ".")
+      vl = as.data.frame(vl)
+      vr = as.data.frame(vr)
+      names(vl) = paste(names(vl), "l", sep = ".")
+      names(vr) = paste(names(vr), "r", sep = ".")
       if(all(is.na(vl))) vr
       else {
         if(all(is.na(vr))) vl

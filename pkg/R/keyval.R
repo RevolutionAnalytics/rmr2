@@ -106,12 +106,15 @@ c.or.rbind =
         else { 
           if(any(sapply(x, has.rows))) { 
             if(any(sapply(x, is.data.frame))){
-              x = x[!sapply(x, is.null)]
+              x = lapply(x, as.data.frame)
               do.call(rbind.fill,x)}
             else
               do.call(rbind, x)}
-          else
-            do.call(c,x)}}})
+          else {
+            if(all(sapply(x, is.factor)))
+              as.factor(do.call(c, lapply(x, as.character)))
+            else
+              do.call(c,x)}}}})
 
 c.keyval = 
   Make.single.or.multi.arg(

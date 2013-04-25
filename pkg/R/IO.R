@@ -245,7 +245,15 @@ make.keyval.readwriter =
         else {
           cat  = {
             if(.Platform$OS.type == "windows")
-              system.file(package="rmr2", "bin", .Platform$r_arch, "catwin.exe")
+              paste(
+                "\"", 
+                system.file(
+                  package="rmr2", 
+                  "bin", 
+                  .Platform$r_arch, 
+                  "catwin.exe"), 
+                "\"", 
+                sep="")
             else
               "cat"}
           pipe(cat, ifelse(read, "rb", "wb"))}}
