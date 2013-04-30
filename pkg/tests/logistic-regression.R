@@ -75,4 +75,4 @@ for (be in c("local", "hadoop")) {
   ## max likelihood solution diverges for separable dataset, (-inf, inf) such as the above
 }
 stopifnot(
-  isTRUE(all.equal(out[['local']], out[['hadoop']])))
+  isTRUE(all.equal(out[['local']], out[['hadoop']], tolerance = 1E-7)))
