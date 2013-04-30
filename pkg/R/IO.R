@@ -46,7 +46,7 @@ json.output.format = function(kv, con) {
   ser = function(k, v) paste(gsub("\n", "", toJSON(k, .escapeEscapes=TRUE, collapse = "")),
                              gsub("\n", "", toJSON(v, .escapeEscapes=TRUE, collapse = "")),
                              sep = "\t")
-  out = apply.keyval(kv, ser, rmr.options('keyval.length'))
+  out = reduce.keyval(kv, ser, rmr.options('keyval.length'))
   writeLines(paste(out, collapse = "\n"), sep = "", con = con)}
 
 text.input.format = function(con, keyval.length) {
@@ -56,7 +56,7 @@ text.input.format = function(con, keyval.length) {
 
 text.output.format = function(kv, con) {
   ser = function(k, v) paste(k, v, collapse = "", sep = "\t")
-  out = apply.keyval(kv, ser, length.keyval(kv))
+  out = reduce.keyval(kv, ser, length.keyval(kv))
   writeLines(paste(out, "\n", collapse="", sep = ""), sep = "", con = con)}
 
 make.csv.input.format = function(...) function(con, keyval.length) {

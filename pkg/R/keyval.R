@@ -184,7 +184,7 @@ split.keyval = function(kv, size) {
 unsplit.keyval = function(kv) {
   c.keyval(mapply(keyval, keys(kv), values(kv), SIMPLIFY = FALSE))}
 
-apply.keyval = 
+reduce.keyval = 
   function(
     kv, 
     FUN, 
