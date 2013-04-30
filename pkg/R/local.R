@@ -30,22 +30,25 @@ mr.local = function(map,
   
   get.data =
     function(fname) {
-     kv = from.dfs(fname, format = input.format)
-     attr(kv$val, 'rmr.input') = fname
-     kv}
+      kv = from.dfs(fname, format = input.format)
+      attr(kv$val, 'rmr.input') = fname
+      kv}
   map.out = 
     c.keyval(
       do.call(
         c,    
         lapply(
           in.folder,
-          function(fname)
-            apply.keyval(
-              get.data(fname),
-              function(k, v) {
-                Sys.setenv(map_input_file = fname)
-                as.keyval(map(k, v))}, 
-            keyval.length))))
+          function(fname) {
+            kv = get.data(fname)
+            Sys.setenv(map_input_file = fname)
+              tapply(
+                1:length.keyval(kv),
+                floor(1:length.keyval(kv)/keyval.length),
+                function(r) {
+                  kvr = slice.keyval(kv, r)
+                  as.keyval(map(keys(kvr),values(kvr)))},
+                simplify = FALSE)})))            
   map.out = from.dfs(to.dfs(map.out))
   reduce.helper = 
     function(kk, vv) as.keyval(reduce(rmr.slice(kk,1), vv))
@@ -53,7 +56,7 @@ mr.local = function(map,
     if(!is.null(reduce)){
       if(!vectorized.reduce){
         c.keyval(
-          apply.keyval(
+          reduce.keyval(
             map.out, 
             reduce.helper))}
       else{

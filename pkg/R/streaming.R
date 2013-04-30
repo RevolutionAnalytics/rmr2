@@ -76,7 +76,7 @@ reduce.as.keyval =
 apply.reduce =
   function(kv, reduce)
     c.keyval(
-      apply.keyval(
+      reduce.keyval(
         kv, 
         reduce))
 
