@@ -7,23 +7,13 @@
 `r opts_chunk$set(echo=TRUE, eval=FALSE, cache=FALSE, tidy=FALSE)`
 
 
-## Scalable Analytics in R with rmr
+## R and Hadoop
 ### Revolution Analytics
 ##### Antonio Piccolboni
 
 
-# RHadoop
-
 # <img src="../resources/hadoop-logo.gif">
 
-## <img src = "../resources/Mapreduce.png">
-
-<details>
-operating system of the cloud --
-focus is scalability --
-different from HPC --
-storage, fault tolerance built in, programming model
-</details>
 
 # <img src="../resources/R.png">
 
@@ -55,6 +45,15 @@ combination could be powerful
 why RHadoop for the R dev --
 The data is in Hadoop --
 The biggest cluster is Hadoop
+</details>
+
+## <img src = "../resources/Mapreduce.png">
+
+<details>
+operating system of the cloud --
+focus is scalability --
+different from HPC --
+storage, fault tolerance built in, programming model
 </details>
 
 ##
@@ -227,6 +226,14 @@ public class FindCentroid extends EvalFunc<Double> {
 }
 ```
 
+# A brief history of rmr
+
+##
+
+ * rmr 1.0
+ * rmr 1.3
+ * rmr2 2.0
+
 # Read and Write
 
 ## 
@@ -299,29 +306,17 @@ public class FindCentroid extends EvalFunc<Double> {
 ```{r group-aggregate}
 ```
 
-# Wordcount
+# Live demo
 
-##
-
-<ul class="incremental" style="list-style: none" >
-<li>
-```{r wordcount-signature}
-```
-<li>
-```{r wordcount-mapreduce}
-```
-</ul>
-
-##
 
 <ul class="incremental" style="list-style: none" >
 <li>
-```{r wordcount-map}
+```
+shrink = function(ct) {
+  ct = ddply(ct,c("x", "y"), .fun= function(x) c(Freq = sum(x$Freq)))
+  ct[ct$Freq > 0, ]}
 ```
 <li>
-```{r wordcount-reduce}
-```
-</ul>
 
 # K-means
 

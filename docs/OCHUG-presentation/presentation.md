@@ -7,23 +7,13 @@
 
 
 
-## Scalable Analytics in R with rmr
+## R and Hadoop
 ### Revolution Analytics
 ##### Antonio Piccolboni
 
 
-# RHadoop
-
 # <img src="../resources/hadoop-logo.gif">
 
-## <img src = "../resources/Mapreduce.png">
-
-<details>
-operating system of the cloud --
-focus is scalability --
-different from HPC --
-storage, fault tolerance built in, programming model
-</details>
 
 # <img src="../resources/R.png">
 
@@ -55,6 +45,15 @@ combination could be powerful
 why RHadoop for the R dev --
 The data is in Hadoop --
 The biggest cluster is Hadoop
+</details>
+
+## <img src = "../resources/Mapreduce.png">
+
+<details>
+operating system of the cloud --
+focus is scalability --
+different from HPC --
+storage, fault tolerance built in, programming model
 </details>
 
 ##
@@ -227,6 +226,14 @@ public class FindCentroid extends EvalFunc<Double> {
 }
 ```
 
+# A brief history of rmr
+
+##
+
+ * rmr 1.0
+ * rmr 1.3
+ * rmr2 2.0
+
 # Read and Write
 
 ## 
@@ -372,60 +379,17 @@ public class FindCentroid extends EvalFunc<Double> {
 ```
 
 
-# Wordcount
+# Live demo
 
-##
-
-<ul class="incremental" style="list-style: none" >
-<li>
-
-```r
-wordcount = 
-  function(
-    input, 
-    output = NULL, 
-    pattern = " "){
-```
-
-<li>
-
-```r
-    mapreduce(
-      input = input ,
-      output = output,
-      input.format = "text",
-      map = wc.map,
-      reduce = wc.reduce,
-      combine = T)}
-```
-
-</ul>
-
-##
 
 <ul class="incremental" style="list-style: none" >
 <li>
-
-```r
-    wc.map = 
-      function(., lines) {
-        keyval(
-          unlist(
-            strsplit(
-              x = lines,
-              split = pattern)),
-          1)}
 ```
-
+shrink = function(ct) {
+  ct = ddply(ct,c("x", "y"), .fun= function(x) c(Freq = sum(x$Freq)))
+  ct[ct$Freq > 0, ]}
+```
 <li>
-
-```r
-    wc.reduce =
-      function(word, counts ) {
-        keyval(word, sum(counts))}
-```
-
-</ul>
 
 # K-means
 
