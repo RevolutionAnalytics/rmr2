@@ -308,15 +308,15 @@ public class FindCentroid extends EvalFunc<Double> {
 
 # Live demo
 
-
-<ul class="incremental" style="list-style: none" >
-<li>
 ```
 shrink = function(ct) {
   ct = ddply(ct,c("x", "y"), .fun= function(x) c(Freq = sum(x$Freq)))
   ct[ct$Freq > 0, ]}
 ```
-<li>
+
+```
+from.dfs(mapreduce(DS.big, map = function(k,v) keyval(1,as.data.frame(table(v))), reduce = function(k,vv) keyval(1, shrink(vv)), combine=T))
+```
 
 # K-means
 
