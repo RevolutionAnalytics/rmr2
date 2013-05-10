@@ -18,7 +18,7 @@
 scatter = function(input, output = NULL, ...)
   mapreduce(input, 
             output, 
-            map = function(k, v) keyval(sample(1:1000, size = rmr2:::rmr.length(v), replace = TRUE), v), 
+            map = function(k, v) keyval(cksum(list(v)), v), 
             reduce = function(k, vv) vv)
 
 gather = function(input, output = NULL, ...) {
