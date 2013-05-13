@@ -19,7 +19,8 @@ scatter = function(input, output = NULL, ...)
   mapreduce(input, 
             output, 
             map = function(k, v) keyval(cksum(list(v)), v), 
-            reduce = function(k, vv) vv)
+            reduce = function(k, vv) vv,
+            ...)
 
 gather = function(input, output = NULL, ...) {
   backend.parameters = list(...)['backend.prameters']
