@@ -62,7 +62,7 @@ filter.map = function(., lines) {
       ngram.data$year > 1800,]}
 
 ## @knitr filtered.data
-rmr.option(keyval.length = 10^5)
+rmr.options(keyval.length = 10^5)
 filtered.data = 
   mapreduce(input = source,
             input.format = "text", #comment this on real data
