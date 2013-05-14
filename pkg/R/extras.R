@@ -18,7 +18,7 @@
 scatter = function(input, output = NULL, ...)
   mapreduce(input, 
             output, 
-            map = function(k, v) keyval(cksum(list(v)), v), 
+            map = function(k, v) keyval(runif(1), v), 
             reduce = function(k, vv) vv,
             ...)
 
