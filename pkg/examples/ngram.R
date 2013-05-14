@@ -38,7 +38,6 @@ source = "/tmp/fake-ngram-data"
 ## @knitr distcp
 # hadoop distcp s3n://$AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY@datasets.elasticmapreduce/ngrams/books/20090715/eng-all/1gram/ hdfs:///user/antonio/
 ## @knitr scatter
-library(rmr2)
 source = scatter("/user/antonio/1gram/data")
 
 ## @knitr ngram.format
