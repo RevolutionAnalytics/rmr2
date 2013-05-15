@@ -195,27 +195,12 @@ from.dfs = function(input, format = "native") {
   dumptb = function(src, dest){
     lapply(src, function(x) system(paste(hadoop.streaming(), "dumptb", x, ">>", dest)))}
   
-  getmerge = function(src, dest) {
-    on.exit(unlink(tmp))
-    tmp = tempfile()
-    lapply(src, function(x) {
-      hdfs.get(as.character(x), tmp)
-	if(.Platform$OS.type == "windows") {
-	  cmd = paste('type', tmp, '>>' , dest)
-	  system(paste(Sys.getenv("COMSPEC"),"/c",cmd))
-	}
-	else {
-	  system(paste('cat', tmp, '>>' , dest))
-        }
-      unlink(tmp)})
-    dest}
-  
   fname = to.dfs.path(input)
   if(is.character(format)) format = make.input.format(format)
   if(rmr.options("backend") == "hadoop") {
     tmp = tempfile()
     if(format$mode == "binary") dumptb(part.list(fname), tmp)
-    else getmerge(part.list(fname), tmp)}
+    else hdfs.getmerge(fname, tmp)}
   else
     tmp = fname
   retval = read.file(tmp)
