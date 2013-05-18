@@ -14,6 +14,12 @@
 
 # <img src="../resources/hadoop-logo.gif">
 
+<details>
+operating system of the cloud --
+focus is scalability --
+different from HPC --
+storage, fault tolerance built in, programming model
+</details>
 
 # <img src="../resources/R.png">
 
@@ -41,22 +47,13 @@ combination could be powerful
 * rhbase
 * <em>rmr2</em>
 
-<details>
-why RHadoop for the R dev --
-The data is in Hadoop --
-The biggest cluster is Hadoop
-</details>
+
 
 ## <img src = "../resources/Mapreduce.png">
 
-<details>
-operating system of the cloud --
-focus is scalability --
-different from HPC --
-storage, fault tolerance built in, programming model
-</details>
 
 ##
+
 
 ```r
     library(rmr2)
@@ -65,6 +62,9 @@ storage, fault tolerance built in, programming model
 ```
 
 <details>
+why RHadoop for the R dev --
+The data is in Hadoop --
+The biggest cluster is Hadoop
 Just a library
 Not a special run-time
 Not a different language
@@ -228,11 +228,6 @@ public class FindCentroid extends EvalFunc<Double> {
 
 # A brief history of rmr
 
-##
-
- * rmr 1.0
- * rmr 1.3
- * rmr2 2.0
 
 # Read and Write
 
