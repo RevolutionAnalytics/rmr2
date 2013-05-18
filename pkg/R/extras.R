@@ -53,7 +53,7 @@ rmr.sample = function(input, output = NULL, method = c("any", "Bernoulli"), ...)
       mapreduce(input,
                 output,
                 map = function(k, v) {
-                  filter = rbinom(rmr.length(k), 1, p) == 1
+                  filter = rbinom(rmr.length(v), 1, p) == 1
                   keyval(rmr.slice(k, filter),
                          rmr.slice(v, filter))})}}
 
