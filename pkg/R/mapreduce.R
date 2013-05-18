@@ -135,7 +135,7 @@ dfs.size =
       du = hdfs.du(f)
       if(is.null(du)) 0 
       else
-        sum(as.integer(du[!is.hidden.file(du[,2]), 1]))}
+        sum(as.numeric(du[!is.hidden.file(du[,2]), 1]))}
     else file.info(f)[1, 'size'] }
 
 # dfs bridge
