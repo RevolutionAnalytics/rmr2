@@ -141,6 +141,7 @@ outlier.ngram =
       from.dfs(
         mapreduce(
           input = filtered.data,
+          output = "/user/antonio/1gram/outlier-ngram",
           map = outlier.map,
           reduce = outlier.reduce))))
 
@@ -153,6 +154,7 @@ plot.data =
     from.dfs(
       mapreduce(
         input = filtered.data,
+        output = "/user/antonio/1gram/plot-data-ngram",
         map = 
           function(., ngram.data) 
             ngram.data[
