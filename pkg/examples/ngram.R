@@ -162,7 +162,7 @@ plot.data =
                 as.character(ngram.data$ngram), 
                 outlier.ngram),])))
 ## @knitr end
-# mins
+# 5 mins
 
 ## @knitr plot.data.frame
 plot.data = 
