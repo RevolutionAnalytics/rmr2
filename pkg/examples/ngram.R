@@ -191,6 +191,14 @@ plot.data$average =
 plot.data$ratio = 
   plot.data$freq/plot.data$freq.prev
 plot.data$time = as.integer(as.character(plot.data$time))
+## @knitr end
+
+## cheat and get pre-computed data
+load("../RHadoop.data/ngram.plot.data")
+## throw away some data points
+plot.data = plot.data[log(plot.data$average) > -10, ]
+summary(plot.data)
+
 
 ## @knitr plot
 suppressPackageStartupMessages(library(googleVis))
@@ -199,4 +207,5 @@ motion.chart =
     plot.data[,c("id","time","average","ratio")], 
     options = list(height = 1000, width = 2000))
 plot(motion.chart)
+## @knitr end
 print(motion.chart, "chart")  
