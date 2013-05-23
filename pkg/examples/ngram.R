@@ -17,8 +17,7 @@
 # $WHIRR_HOME/bin/whirr  run-script --script ~/Projects/Revolution/RHadoop/rmr/pkg/tools/whirr/rmr-1.3.sh  --config ~/Projects/Revolution/RHadoop/rmr/pkg/tools/whirr/hadoop-ec2-lzo.properties
 # $WHIRR_HOME/bin/whirr  run-script --script ~/Projects/Revolution/RHadoop/rmr/pkg/tools/whirr/lzo.sh  --config ~/Projects/Revolution/RHadoop/rmr/pkg/tools/whirr/hadoop-ec2-lzo.properties
 
-## @knitr load.rmr2
-library(rmr2)
+
 ## @knitr fake-data
 fake.size = 2000000
 writeLines(
@@ -61,13 +60,18 @@ filter.map = function(., lines) {
       "^[A-Za-z]+$", 
       ngram.data$ngram) > -1 & 
       ngram.data$year > 1800,]}
+## @knitr end
+
+# use 
+# input.format = "text"
+# on fake data
 
 ## @knitr filtered.data
 source = "/user/antonio/1gram/data"
+library(rmr2)
 rmr.options(keyval.length = 10^5)
 filtered.data = 
   mapreduce(input = source,
-           # input.format = "text", #comment this on real data
             map = filter.map)
 ## @knitr end
 #20 mins, 
