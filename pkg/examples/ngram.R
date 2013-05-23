@@ -60,12 +60,16 @@ filter.map = function(., lines) {
       "^[A-za-z+'-]+$", 
       ngram.data$ngram) > -1 & 
       ngram.data$year > 1800,]}
+## @knitr end
+
+# use 
+# input.format = "text"
+# on fake data
 
 ## @knitr filtered.data
 rmr.option(keyval.length = 10^5)
 filtered.data = 
   mapreduce(input = source,
-            input.format = "text", #comment this on real data
             map = filter.map)
 ## @knitr sample-data
 from.dfs(rmr.sample(filtered.data, method="any", n = 50))
