@@ -67,10 +67,8 @@ rmr.recycle =
     ly = rmr.length(y)
     if(lx == ly) x
     else {
-      if(min(lx,ly) == 0){
-        rmr.str(lx)
-        rmr.str(ly)
-        stop("Can't recycle 0-length argument")}
+      if(min(lx,ly) == 0)
+        stop("Can't recycle 0-length argument")
       else
         rmr.slice(
           c.or.rbind(
@@ -121,9 +119,8 @@ c.keyval =
   function(kvs) {
     zero.length = as.logical(sapply(kvs, function(kv) length.keyval(kv) == 0))
     null.keys = as.logical(sapply(kvs, function(kv) is.null(keys(kv))))
-    if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) {
-      rmr.str(kvs)
-      stop("can't mix NULL and not NULL key keyval pairs")}
+    if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) 
+      stop("can't mix NULL and not NULL key keyval pairs")
     kvs = lapply(kvs, recycle.keyval)
     vv = lapply(kvs, values)
     kk = lapply(kvs, keys)
