@@ -15,7 +15,6 @@ mapply.fromJSON =
 avro.input.format = 
   function(con, keyval.length) {
     lines = readLines(con = con, n = keyval.length)
-    rmr.str(lines)
     if  (length(lines) == 0) NULL
     else
       do.call(
@@ -36,7 +35,6 @@ avroIF =
 avro.input.format2 = 
   function(con, keyval.length) {
     lines = readLines(con = con, n = keyval.length)
-    rmr.str(lines)
     if  (length(lines) == 0) NULL
     else
       do.call(
