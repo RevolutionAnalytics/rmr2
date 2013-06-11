@@ -66,8 +66,8 @@ activate.profiling = function(profile) {
 
 close.profiling = 
   function() {
-    Rprof(NULL)
-    Rprofmem(NULL)}
+    try(Rprof(NULL),silent=TRUE)
+    try(Rprofmem(NULL),silent=TRUE)}
 
 reduce.as.keyval = 
   function(k, vv, reduce) 
