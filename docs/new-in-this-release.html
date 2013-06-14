@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>What&#39;s new in 2.2.0</title>
+<title>What&#39;s new in 2.2.1</title>
 
 <style type="text/css">
 body, td {
@@ -141,42 +141,36 @@ hr {
 </head>
 
 <body>
-<h1>What&#39;s new in 2.2.0</h1>
+<h1>What&#39;s new in 2.2.1</h1>
 
-<h2>Features</h2>
-
-<h3><code>rmr.str</code> returns its argument</h3>
-
-<p>The small utility call to safely print expression values and stack information to standard error now returns its argument on top of doing its regular job, making for less intrusive code changes. For instance if you have a map function <code>function(k,v) keyval(k, v/2)</code> and you wonder what&#39;s going on you can change that to <code>function(k,v) rmr.str(keyval(k, v/2))</code> keeping the semantics of the function intact while adding useful information to stderr logs.</p>
-
-<h3>Input and output formats for equijoins</h3>
-
-<p>They work just like IO formats in <code>mapreduce</code>.</p>
-
-<h3>Configure HDFS tempdir</h3>
-
-<p>You can now change the temp directory used on the distributed file system with <code>rmr.options(dfs.tempdir = some.dfs.path)</code>. Until now it just used the value returned by <code>tempdir()</code>, which is valid for the local file system but not necessarily for the distibuted one (still the default). Trying to find a common ground was a useless exercise in compromise: the two settings should be decoupled and they can be now.</p>
-
-<h3>More explicit error message</h3>
-
-<p>The goal is to have some information about the values that triggered the error and the stack at the time of the error. When the errors are triggered by R or underlying libraries we are using, that is not the case, for performance reasons and because it would a lot of work, but for rmr2-triggered errors we should see something informative in stderr. </p>
-
-<h2>Bugs</h2>
+<h2>Compatibility</h2>
 
 <ul>
-<li><code>mapreduce</code> doesn&#39;t drop records silently with malformed CSV files. Now it will stop with error and forward whatever error was produced by <code>read.table</code> to standard error.</li>
-<li><code>c.keyval</code> doesn&#39;t fail on empty lists and other corner cases for <code>keyval</code> objects. Intended semantics is now <a href="https://github.com/RevolutionAnalytics/RHadoop/wiki/Keyval-types-and-combinations">documented</a>.</li>
-<li>The &ldquo;reduce calls&rdquo; counter is now accurate.</li>
-<li>Fixed bug #18 that prevented outer equijoins from completing in many cases.</li>
-<li>Fixed a bug that prevented from specifying specific streaming options with the <code>backend.parameters</code> option to mapreduce (e.g. <code>cmdenv</code>)</li>
-<li>Fixed bug #20 that added an additional TAB at the end of the line with the CSV output format when the seprator wasn&#39;t TAB.</li>
+<li>Compatible with HDP on Windows</li>
+</ul>
+
+<h2>Speed improvements</h2>
+
+<ul>
+<li>Faster when using list of small objects as keys</li>
+<li>Efficiency improvements in <code>scatter</code></li>
+</ul>
+
+<h2>Bug Fixes</h2>
+
+<ul>
+<li>Always convert reduce return value to be a keyval pair</li>
+<li>Pass all additional arguments to <code>mapreduce</code> in <code>scatter</code></li>
+<li><code>rmr.sample</code> works even when the keys are <code>NULL</code> and the method is &ldquo;Bernoulli&rdquo;</li>
+<li><code>dfs.size</code> now returns an accurate size even for large files</li>
+<li>#44, an incorrect behaviour on the local backend when keys are present in the map phase.</li>
+<li>#41, a failure in <code>equijoin</code> when performing an outer join and data to be joined is a vector instead of, say, a data frame.</li>
 </ul>
 
 <h2>Miscellanea</h2>
 
 <ul>
-<li>Added single pass clustering <a href="../pkg/examples/cluster.mr.R">example</a> based on <a href="cran.r-project.org/web/packages/cluster/cluster.pdf">clara</a>, but it should also provide a template for other single pass clustering algorithms. The idea is to cluster the data in chunks as soon as you see the data and then merge the clusters.</li>
-<li>For the git-initiated, we are now managing the dependency from hadoopy-hbase using subtree. You may see a large number of changes related to this (the diff with the previous version is some 15K lines) but most of them are related to this change.</li>
+<li>Added example of how to create Avro IO formats</li>
 </ul>
 
 </body>
