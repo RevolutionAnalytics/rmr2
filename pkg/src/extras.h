@@ -18,5 +18,6 @@
 #include <Rcpp.h>
 
 RcppExport SEXP vsum(SEXP xx);
+RcppExport SEXP null_purge(SEXP xx);
 
 #endif

@@ -24,3 +24,11 @@ SEXP vsum(SEXP xx) {
     for(int j = 0; j < x.size(); j++) {
       results[i] += x[j];}}
   return Rcpp::wrap(results);}
+  
+SEXP null_purge(SEXP xx) {
+  Rcpp::List xx_(xx_);
+  int n = xx_.size();
+  for (int i = 0; i < n; i ++)
+    Rf_isNull(xx_[i]);
+  return Rcpp::wrap(1);
+}

@@ -99,6 +99,10 @@ slice.keyval =
     keyval(rmr.slice(keys(kv), r),
            rmr.slice(values(kv), r))}
 
+purge.nulls = 
+  function(x)
+    .Call("null_purge", x, PACKAGE = "rmr2")
+
 c.or.rbind = 
   Make.single.or.multi.arg(
     function(x) {
