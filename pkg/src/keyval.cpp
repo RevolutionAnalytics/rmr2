@@ -74,8 +74,8 @@ SEXP lapply_key_val(SEXP kvs, std::string slot) {
   Rcpp::List results(_kvs.size());
   for(int i = 0; i < _kvs.size(); i++) {
     Rcpp::List kv(Rcpp::wrap(_kvs[i]));
-    results[i] = kv[slot];
-  return Rcpp::wrap(results);}}
+    results[i] = kv[slot];}
+  return Rcpp::wrap(results);}
 
 SEXP lapply_keys(SEXP kvs) {
   return lapply_key_val(kvs, "key");}
