@@ -47,7 +47,14 @@ int rmr_length(SEXP x) {
       return Rf_length(__x[0]);}}
   return Rf_length(x);}
 
-int keyval_length(SEXP kv) {
+SEXP sapply_rmr_length(SEXP xx) {
+  Rcpp::List _xx(xx);
+  std::vector<int> results(_xx.size());
+  for(int i = 0; i < _xx.size(); i++) {
+    results[i] = rmr_length(_xx[i]);}
+  return(Rcpp::wrap(results));}
+
+int length_keyval(SEXP kv) {
   Rcpp::List kv_(kv);
   int kl = rmr_length(kv_["key"]);
   int vl = rmr_length(kv_["val"]);
@@ -58,7 +65,7 @@ SEXP sapply_length_keyval(SEXP kvs) {
   Rcpp::List _kvs(kvs);
   std::vector<int> results(_kvs.size());
   for(int i = 0; i < _kvs.size(); i++) {
-    results[i] = keyval_length(_kvs[i]);}
+    results[i] = length_keyval(_kvs[i]);}
   return(Rcpp::wrap(results));}
 
 SEXP sapply_null_keys(SEXP kvs) {

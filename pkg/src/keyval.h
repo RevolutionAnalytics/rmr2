@@ -19,6 +19,7 @@
 
 RcppExport SEXP null_purge(SEXP xx);
 RcppExport SEXP lapply_as_character(SEXP xx);
+RcppExport SEXP sapply_rmr_length(SEXP xx);
 RcppExport SEXP sapply_length_keyval(SEXP kvs);
 RcppExport SEXP sapply_null_keys(SEXP kvs);
 RcppExport SEXP lapply_keys(SEXP kvs);

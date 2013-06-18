@@ -120,7 +120,7 @@ make.typedbytes.input.format = function(recycle = TRUE) {
           kk = 
             inverse.rle(
               list(
-                lengths = sapply(vv, rmr.length),
+                lengths = sapply.rmr.length(vv),
                 values = kk))
           keyval(
             c.or.rbind(kk), 

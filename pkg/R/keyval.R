@@ -18,6 +18,10 @@ all.have.rows = Curry(all.predicate, P = has.rows)
 rmr.length = 
   function(x) if(has.rows(x)) nrow(x) else length(x)
 
+sapply.rmr.length = 
+ function(xx)
+   .Call("sapply_rmr_length", xx, PACKAGE = "rmr2")
+
 rmr.equal = 
   function(xx, y) {
     if(rmr.length(xx) == 0) logical()
