@@ -12,12 +12,11 @@
 //See the License for the specific language governing permissions and
 //limitations under the License.
 
-#ifndef _RMR_TYPEDBYTES_H
-#define _RMR_TYPEDBYTES_H
+#ifndef _RMR_EXTRAS_H
+#define _RMR_EXTRAS_H
 
 #include <Rcpp.h>
 
 RcppExport SEXP vsum(SEXP xx);
-RcppExport SEXP null_purge(SEXP xx);
 
 #endif

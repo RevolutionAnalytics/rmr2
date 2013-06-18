@@ -103,38 +103,61 @@ purge.nulls =
   function(x)
     .Call("null_purge", x, PACKAGE = "rmr2")
 
+rbind.anything = 
+  function(xx) 
+    tryCatch(
+      do.call(rbind.fill, xx), 
+      error = function(e) do.call(rbind,xx))
+
+lapply.as.character =
+  function(xx)
+    .Call("lapply_as_character", xx, PACKAGE = "rmr2")
+
 c.or.rbind = 
   Make.single.or.multi.arg(
     function(x) {
       if(is.null(x))
         NULL 
       else {
+        x = purge.nulls(x)
         if(length(x) == 0) 
-          list()
+          NULL
         else { 
-          if(any(sapply(x, has.rows))) { 
-            if(any(sapply(x, is.data.frame))){
-              x = lapply(x, as.data.frame)
-              do.call(rbind.fill,x)}
-            else
-              do.call(rbind, x)}
+          if(has.rows(x[[1]]))
+            rbind.anything(x)          
           else {
-            if(all(sapply(x, is.factor)))
-              as.factor(do.call(c, lapply(x, as.character)))
+            if(is.factor(x[[1]]))
+              as.factor(do.call(c, lapply.as.character(x)))
             else
               do.call(c,x)}}}})
+
+sapply.length.keyval = 
+  function(kvs)
+    .Call("sapply_length_keyval", kvs, PACKAGE = "rmr2")
+
+sapply.null.keys = 
+  function(kvs)
+    .Call("sapply_null_keys", kvs, PACKAGE = "rmr2")
+
+lapply.values = 
+  function(kvs)
+    .Call("lapply_values", kvs, PACKAGE = "rmr2")
+
+lapply.keys = 
+  function(kvs)
+    .Call("lapply_keys", kvs, PACKAGE = "rmr2")
 
 c.keyval = 
   Make.single.or.multi.arg(
   function(kvs) {
-    zero.length = as.logical(sapply(kvs, function(kv) length.keyval(kv) == 0))
-    null.keys = as.logical(sapply(kvs, function(kv) is.null(keys(kv))))
+    zero.length = as.logical(sapply.length.keyval(kvs) == 0)
+    null.keys = as.logical(sapply.null.keys(kvs))
     if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) {
       rmr.str(kvs)
       stop("can't mix NULL and not NULL key keyval pairs")}
     kvs = lapply(kvs, recycle.keyval)
-    vv = lapply(kvs, values)
-    kk = lapply(kvs, keys)
+    vv = lapply.values(kvs)
+    kk = lapply.keys(kvs)
     keyval(c.or.rbind(kk), c.or.rbind(vv))})
   
 rmr.split = 
