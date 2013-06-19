@@ -24,5 +24,8 @@ RcppExport SEXP sapply_length_keyval(SEXP kvs);
 RcppExport SEXP sapply_null_keys(SEXP kvs);
 RcppExport SEXP lapply_keys(SEXP kvs);
 RcppExport SEXP lapply_values(SEXP kvs);
+RcppExport SEXP are_factor(SEXP xx);
+RcppExport SEXP are_data_frame(SEXP xx);
+RcppExport SEXP are_matrix(SEXP xx);
 
 #endif

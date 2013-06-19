@@ -89,3 +89,31 @@ SEXP lapply_keys(SEXP kvs) {
 
 SEXP lapply_values(SEXP kvs) {
   return lapply_key_val(kvs, "val");}
+
+SEXP are_factor(SEXP xx) {
+  Rcpp::List _xx(xx);
+  std::vector<bool> results(_xx.size());
+  for(int i = 0; i < _xx.size(); i++) {
+    results[i] = Rf_isFactor(_xx[i]);}
+  return Rcpp::wrap(results);}
+
+bool is_data_frame(SEXP x) {
+  Rcpp::RObject _x(x);
+  if (_x.hasAttribute("class")) {
+    if(Rcpp::as<std::string>(_x.attr("class")) == "data.frame") {
+      return true;}}
+  return false;}
+  
+SEXP are_data_frame(SEXP xx) {
+  Rcpp::List _xx(xx);
+    std::vector<bool> results(_xx.size());
+  for(int i = 0; i < _xx.size(); i++) {
+    results[i] = is_data_frame(_xx[i]);}
+  return Rcpp::wrap(results);}
+  
+SEXP are_matrix(SEXP xx) {
+  Rcpp::List _xx(xx);
+    std::vector<bool> results(_xx.size());
+  for(int i = 0; i < _xx.size(); i++) {
+    results[i] = Rf_isMatrix(_xx[i]);}
+  return Rcpp::wrap(results);}

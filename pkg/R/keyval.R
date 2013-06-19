@@ -117,6 +117,18 @@ lapply.as.character =
   function(xx)
     .Call("lapply_as_character", xx, PACKAGE = "rmr2")
 
+are.data.frame = 
+  function(xx)
+    .Call("are_data_frame", xx, PACKAGE = "rmr2")
+
+are.matrix = 
+  function(xx)
+    .Call("are_matrix", xx, PACKAGE = "rmr2")
+
+are.factor = 
+  function(xx) 
+    .Call("are_factor", xx, PACKAGE = "rmr2")
+
 c.or.rbind = 
   Make.single.or.multi.arg(
     function(x) {
@@ -127,13 +139,16 @@ c.or.rbind =
         if(length(x) == 0) 
           NULL
         else { 
-          if(has.rows(x[[1]]))
-            rbind.anything(x)          
+          if(any(are.data.frame(x)))
+            do.call(rbind.fill, lapply(x, as.data.frame))          
           else {
-            if(is.factor(x[[1]]))
-              as.factor(do.call(c, lapply.as.character(x)))
-            else
-              do.call(c,x)}}}})
+            if(any(are.matrix(x)))
+              do.call(rbind,x)
+            else {
+              if(all(are.factor(x)))
+                as.factor(do.call(c, lapply.as.character(x)))
+              else
+                do.call(c,x)}}}}})
 
 sapply.length.keyval = 
   function(kvs)
