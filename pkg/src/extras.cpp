@@ -17,10 +17,10 @@
 #include <Rcpp.h>
 
 SEXP vsum(SEXP xx) {
-  Rcpp::List xx_ (xx);
-  std::vector<double> results(xx_.size());
-  for(int i = 0; i < xx_.size(); i ++) {
-    std::vector<double> x = Rcpp::as<std::vector<double> >(xx_[i]);
+  Rcpp::List _xx (xx);
+  std::vector<double> results(_xx.size());
+  for(int i = 0; i < _xx.size(); i ++) {
+    std::vector<double> x = Rcpp::as<std::vector<double> >(_xx[i]);
     for(int j = 0; j < x.size(); j++) {
       results[i] += x[j];}}
   return Rcpp::wrap(results);}

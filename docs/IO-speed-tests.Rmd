@@ -1,6 +1,6 @@
 Knit document for some timing results:
 
-```{r}
+```{r, echo=TRUE}
 zz = rmr2:::interleave(1:10^6, 1:10^6)
 con = file("/tmp/n-test", "wb")
 system.time({rmr2:::typedbytes.writer(zz, con, TRUE)})

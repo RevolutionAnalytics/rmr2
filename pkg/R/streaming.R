@@ -55,19 +55,21 @@ make.input.files = function(infiles) {
 activate.profiling = function(profile) {
   dir = file.path("/tmp/Rprof", Sys.getenv('mapred_job_id'), Sys.getenv('mapred_tip_id'))
   dir.create(dir, recursive = T)
-  if(is.element(profile, c("calls", "memory"))) {
+  if(is.element(profile, c("calls", "both"))) {
     prof.file = file.path(dir, paste(Sys.getenv('mapred_task_id'), Sys.time(), sep = "-")) 
     warning("Profiling data in ", prof.file)
     Rprof(prof.file)}
-  else {
+  if(is.element(profile, c("memory", "both"))) {
     mem.prof.file = file.path(dir, paste(Sys.getenv('mapred_task_id'), Sys.time(), "mem", sep = "-")) 
     warning("Memory profiling data in ", mem.prof.file)
     Rprofmem(mem.prof.file)}}
 
 close.profiling = 
-  function() {
-    Rprof(NULL)
-    Rprofmem(NULL)}
+  function(profile) {
+    if(is.element(profile, c("calls", "both")))
+      Rprof(NULL)
+    if(is.element(profile, c("memory", "both")))
+      Rprofmem(NULL)}
 
 reduce.as.keyval = 
   function(k, vv, reduce) 
@@ -107,7 +109,7 @@ map.loop =
             out = combine.as.kv(keys(out), values(out))}}
         keyval.writer(as.keyval(out))}
       kv = keyval.reader()}
-    if(profile != "off") close.profiling()
+    if(profile != "off") close.profiling(profile)
     invisible()}
 
 reduce.loop = 
@@ -145,7 +147,7 @@ reduce.loop =
         out = as.keyval(reduce(keys(straddler), values(straddler)))}
       if(length.keyval(out) > 0)
         keyval.writer(out)}    
-    if(profile != "off") close.profiling()
+    if(profile != "off") close.profiling(profile)
     invisible()}
 
 # the main function for the hadoop backend

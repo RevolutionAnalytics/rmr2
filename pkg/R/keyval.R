@@ -18,6 +18,10 @@ all.have.rows = Curry(all.predicate, P = has.rows)
 rmr.length = 
   function(x) if(has.rows(x)) nrow(x) else length(x)
 
+sapply.rmr.length = 
+ function(xx)
+   .Call("sapply_rmr_length", xx, PACKAGE = "rmr2")
+
 rmr.equal = 
   function(xx, y) {
     if(rmr.length(xx) == 0) logical()
@@ -67,8 +71,10 @@ rmr.recycle =
     ly = rmr.length(y)
     if(lx == ly) x
     else {
-      if(min(lx,ly) == 0)
-        stop("Can't recycle 0-length argument")
+      if(min(lx,ly) == 0){
+        rmr.str(lx)
+        rmr.str(ly)
+        stop("Can't recycle 0-length argument")}
       else
         rmr.slice(
           c.or.rbind(
@@ -93,37 +99,80 @@ slice.keyval =
     keyval(rmr.slice(keys(kv), r),
            rmr.slice(values(kv), r))}
 
+purge.nulls = 
+  function(x)
+    .Call("null_purge", x, PACKAGE = "rmr2")
+
+rbind.anything = 
+  function(xx) 
+    tryCatch(
+      do.call(rbind.fill, xx), 
+      error = function(e) do.call(rbind,xx))
+
+lapply.as.character =
+  function(xx)
+    .Call("lapply_as_character", xx, PACKAGE = "rmr2")
+
+are.data.frame = 
+  function(xx)
+    .Call("are_data_frame", xx, PACKAGE = "rmr2")
+
+are.matrix = 
+  function(xx)
+    .Call("are_matrix", xx, PACKAGE = "rmr2")
+
+are.factor = 
+  function(xx) 
+    .Call("are_factor", xx, PACKAGE = "rmr2")
+
 c.or.rbind = 
   Make.single.or.multi.arg(
     function(x) {
       if(is.null(x))
         NULL 
       else {
+        x = purge.nulls(x)
         if(length(x) == 0) 
-          list()
+          NULL
         else { 
-          if(any(sapply(x, has.rows))) { 
-            if(any(sapply(x, is.data.frame))){
-              x = lapply(x, as.data.frame)
-              do.call(rbind.fill,x)}
-            else
-              do.call(rbind, x)}
+          if(any(are.data.frame(x)))
+            do.call(rbind.fill, lapply(x, as.data.frame))          
           else {
-            if(all(sapply(x, is.factor)))
-              as.factor(do.call(c, lapply(x, as.character)))
-            else
-              do.call(c,x)}}}})
+            if(any(are.matrix(x)))
+              do.call(rbind,x)
+            else {
+              if(all(are.factor(x)))
+                as.factor(do.call(c, lapply.as.character(x)))
+              else
+                do.call(c,x)}}}}})
+
+sapply.length.keyval = 
+  function(kvs)
+    .Call("sapply_length_keyval", kvs, PACKAGE = "rmr2")
+
+sapply.null.keys = 
+  function(kvs)
+    .Call("sapply_null_keys", kvs, PACKAGE = "rmr2")
+
+lapply.values = 
+  function(kvs)
+    .Call("lapply_values", kvs, PACKAGE = "rmr2")
+
+lapply.keys = 
+  function(kvs)
+    .Call("lapply_keys", kvs, PACKAGE = "rmr2")
 
 c.keyval = 
   Make.single.or.multi.arg(
   function(kvs) {
-    zero.length = as.logical(sapply(kvs, function(kv) length.keyval(kv) == 0))
-    null.keys = as.logical(sapply(kvs, function(kv) is.null(keys(kv))))
-    if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) 
-      stop("can't mix NULL and not NULL key keyval pairs")
+    zero.length = as.logical(sapply.length.keyval(kvs) == 0)
+    null.keys = as.logical(sapply.null.keys(kvs))
+    if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) {
+      rmr.str(kvs)
+      stop("can't mix NULL and not NULL key keyval pairs")}
     kvs = lapply(kvs, recycle.keyval)
-    vv = lapply(kvs, values)
-    kk = lapply(kvs, keys)
+    vv = lapply.values(kvs)
+    kk = lapply.keys(kvs)
     keyval(c.or.rbind(kk), c.or.rbind(vv))})
   
 rmr.split = 

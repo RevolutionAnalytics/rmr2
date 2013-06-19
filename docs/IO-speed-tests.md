@@ -11,7 +11,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   0.614   0.073   0.909
+##   0.582   0.033   0.615
 ```
 
 ```r
@@ -24,7 +24,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   0.310   0.036   0.419
+##   0.295   0.023   0.317
 ```
 
 ```r
@@ -36,7 +36,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   2.448   0.055   2.585
+##   2.365   0.022   2.390
 ```
 
 ```r
@@ -47,7 +47,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   9.211   0.438  11.081
+##   9.229   0.374   9.603
 ```
 
 ```r
@@ -62,7 +62,7 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   5.724   0.144   7.060
+##   7.387   0.328   7.716
 ```
 
 ```r
@@ -77,6 +77,6 @@ system.time({
 
 ```
 ##    user  system elapsed 
-##   0.693   0.022   0.920
+##   0.652   0.001   0.653
 ```
 
