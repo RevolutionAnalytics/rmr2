@@ -268,7 +268,8 @@ make.keyval.reader = Curry(make.keyval.readwriter, read = TRUE)
 make.keyval.writer = Curry(make.keyval.readwriter, keyval.length = NULL, read = FALSE)
 
 IO.formats = c("text", "json", "csv", "native",
-               "sequence.typedbytes", "hbase")
+               "sequence.typedbytes", "hbase", 
+               "pig.hive")
 
 make.input.format = 
   function(
@@ -297,6 +298,15 @@ make.input.format =
         sequence.typedbytes = {
           format = make.typedbytes.input.format() 
           mode = "binary"},
+        pig.hive = {
+          format = 
+            make.csv.input.format(
+              sep = "\001",
+              comment.char = "",
+              fill = TRUE,
+              flush = TRUE,
+              quote = "")
+          mode = "text"},
         hbase = {
           optlist = list(...)
           format = 
@@ -335,6 +345,28 @@ make.input.format =
          streaming.format = streaming.format, 
          backend.parameters = backend.parameters)}
 
+set.separator.options =
+  function(sep) {
+    if(!is.null(sep))
+      list(
+        hadoop = 
+          list(
+            D = 
+              paste(
+                "mapred.textoutputformat.separator=",
+                sep,
+                sep = ""),
+            D =
+              paste(
+                "stream.map.output.field.separator=",
+                sep,
+                sep = ""),
+            D = 
+              paste(
+                "stream.reduce.output.field.separator=",
+                sep,
+                sep = "")))}
+
 make.output.format = 
   function(
     format = make.native.output.format(keyval.length = rmr.options('keyval.length')),
@@ -360,26 +392,15 @@ make.output.format =
           mode = "text"
           streaming.format = NULL
           sep = list(...)$sep
-          if(!is.null(sep))
-            backend.parameters = 
-            list(
-              hadoop = 
-                list(
-                  D = 
-                    paste(
-                      "mapred.textoutputformat.separator=",
-                      sep,
-                      sep = ""),
-                  D =
-                    paste(
-                      "stream.map.output.field.separator=",
-                      sep,
-                      sep = ""),
-                  D = 
-                    paste(
-                      "stream.reduce.output.field.separator=",
-                      sep,
-                      sep = "")))}, 
+          backend.parameters = set.separator.options(sep)}, 
+        pig.hive = {
+          format = 
+            make.csv.output.format(  
+              sep = "\001",
+              quote = FALSE)
+          mode = "text"
+          streaming.format = NULL
+          backend.parameters = set.separator.options("\001")}, 
         native = {
           format = make.native.output.format(
             keyval.length = rmr.options('keyval.length'))
