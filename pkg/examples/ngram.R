@@ -94,10 +94,11 @@ totals.reduce =
 ## @knitr year.totals
 year.totals.kv = 
   from.dfs(
-    mapreduce(input = filtered.data,
-              map = totals.map,
-              reduce = totals.reduce,
-              combine = TRUE))
+    mapreduce(
+      input = filtered.data,
+      map = totals.map,
+      reduce = totals.reduce,
+      combine = TRUE))
 ## @knitr end
 #9 mins
 
@@ -197,9 +198,10 @@ plot.data$ratio =
 plot.data$time = as.integer(as.character(plot.data$time))
 ## @knitr end
 
-## cheat and get pre-computed data
-load("../RHadoop.data/ngram.plot.data")
-## throw away some data points
+## save and reload, this is not necessary unless you take a break
+##save(plot.data, file = "../RHadoop.data/ngram.plot.data")
+##load("../RHadoop.data/ngram.plot.data")
+## throw away some data points -- graphics can only use so many
 plot.data = plot.data[log(plot.data$average) > -10, ]
 summary(plot.data)
 
@@ -209,7 +211,7 @@ suppressPackageStartupMessages(library(googleVis))
 motion.chart = 
   gvisMotionChart(
     plot.data[,c("id","time","average","ratio")], 
-    options = list(height = 1000, width = 2000))
+    options = list(height = 768, width = 1024))
 plot(motion.chart)
 ## @knitr end
 print(motion.chart, "chart")  
