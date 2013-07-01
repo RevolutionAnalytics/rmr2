@@ -9,5 +9,7 @@ If you are interested in the compatibility chart for other releases, choose one 
 </thead>
 <tbody>
 <tr><td>CDH4.3.0</td><td>2.14.2 (Revolution R 6.0)</td><td>CentOS 6.3</td><td>mr1</td><td>Revolution</td></tr>
-<tr><td>HDP 1.1 for Windows</td><td>R 3.0</td><td>Windows</td><td></td><td>Revolution</td></tr>
+<tr><td>HDP 1.1 for Windows</td><td>R 3.0</td><td>Windows</td><td>mr1</td><td>Revolution</td></tr>
+<tr><td>HDP 1.3 (Sandbox)</td><td>R 3.0.1</td><td>CentOS 6.4</td><td>mr1</td><td>Revolution</td></tr>
+<tr><td>CDH4.2.0</td><td>R 3.0.1</td><td>OS X 10.8.4</td><td>mr1</td><td>A mac enthusiast</td></tr>
 </table>
