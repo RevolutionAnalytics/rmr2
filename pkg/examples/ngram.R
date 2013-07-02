@@ -202,9 +202,11 @@ plot.data$time = as.integer(as.character(plot.data$time))
 ##save(plot.data, file = "../RHadoop.data/ngram.plot.data")
 ##load("../RHadoop.data/ngram.plot.data")
 ## throw away some data points -- graphics can only use so many
+
+## @knitr trim
 plot.data = plot.data[log(plot.data$average) > -10, ]
 summary(plot.data)
-
+## @knitr end
 
 ## @knitr plot
 suppressPackageStartupMessages(library(googleVis))
