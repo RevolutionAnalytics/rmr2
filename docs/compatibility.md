@@ -9,5 +9,6 @@ If you are interested in the compatibility chart for other releases, choose one 
 </thead>
 <tbody>
 <tr><td>CDH4.3.0</td><td>2.14.2 (Revolution R 6.0)</td><td>CentOS 6.3</td><td>mr1</td><td>Revolution</td></tr>
+<tr><td>HDP 1.1 for Windows</td><td>R 3.0</td><td>Windows</td><td></td><td>Revolution</td></tr>
 
 </table>
