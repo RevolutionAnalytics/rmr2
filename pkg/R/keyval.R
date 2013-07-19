@@ -191,7 +191,7 @@ rmr.split =
             as.character(unique(ind))
           else {
             if (is.matrix(ind))
-              ind = apply(M, 2, list)
+              ind = apply(ind, 2, list)
             unique(do.call(paste,c(ind, sep = ".")))})]}}
 
 key.normalize= function(k) {
