@@ -49,13 +49,9 @@ wordcount =
 ## @knitr end
 
 rmr.options(backend = "local")
-sourceFile = "/etc/passwd"
-tempFile = "/tmp/wordcount-test"
+sourceFile = file.path(Sys.getenv("HADOOP_HOME"), "LICENSE.txt")
+tempFile = tempfile()
 
-if(.Platform$OS.type == "windows") {
-    sourceFile = paste(Sys.getenv("HADOOP_HOME"),"/LICENSE.txt",sep="")
-    tempFile = tempfile()
-}
 file.copy(sourceFile, tempFile)
 out.local = from.dfs(wordcount(tempFile, pattern = " +"))
 file.remove(tempFile)

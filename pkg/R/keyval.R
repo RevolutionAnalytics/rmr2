@@ -181,7 +181,14 @@ rmr.split =
       list(x)
     else {
       spl = if(has.rows(x)) split.data.frame else split
-      spl(x,ind, drop = TRUE)}}
+      spl(x,ind, drop = TRUE)[
+        order(
+          if(!has.rows(ind))
+            as.character(unique(ind))
+          else {
+            if (is.matrix(ind))
+              ind = apply(M, 2, list)
+            unique(do.call(paste,c(ind, sep = ".")))})]}}
 
 key.normalize= function(k) {
   k = rmr.slice(k, 1)

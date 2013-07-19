@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-<title>What&#39;s new in 2.2.1</title>
+<title>What&#39;s new in 2.3.0</title>
 
 <style type="text/css">
 body, td {
@@ -141,36 +141,10 @@ hr {
 </head>
 
 <body>
-<h1>What&#39;s new in 2.2.1</h1>
-
-<h2>Compatibility</h2>
+<h1>What&#39;s new in 2.3.0</h1>
 
 <ul>
-<li>Compatible with HDP on Windows</li>
-</ul>
-
-<h2>Speed improvements</h2>
-
-<ul>
-<li>Faster when using list of small objects as keys</li>
-<li>Efficiency improvements in <code>scatter</code></li>
-</ul>
-
-<h2>Bug Fixes</h2>
-
-<ul>
-<li>Always convert reduce return value to be a keyval pair</li>
-<li>Pass all additional arguments to <code>mapreduce</code> in <code>scatter</code></li>
-<li><code>rmr.sample</code> works even when the keys are <code>NULL</code> and the method is &ldquo;Bernoulli&rdquo;</li>
-<li><code>dfs.size</code> now returns an accurate size even for large files</li>
-<li>#44, an incorrect behaviour on the local backend when keys are present in the map phase.</li>
-<li>#41, a failure in <code>equijoin</code> when performing an outer join and data to be joined is a vector instead of, say, a data frame.</li>
-</ul>
-
-<h2>Miscellanea</h2>
-
-<ul>
-<li>Added example of how to create Avro IO formats</li>
+<li>Interchange format with hive and pig (&ldquo;pig.hive&rdquo;)</li>
 </ul>
 
 </body>

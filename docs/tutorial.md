@@ -344,7 +344,8 @@ Let's get some data first, potentially big data matrix `X` and a regular vector 
 
 
 ```r
-X = to.dfs(matrix(rnorm(2000), ncol = 10))
+X = matrix(rnorm(2000), ncol = 10)
+X.index = to.dfs(cbind(1:nrow(X), X))
 y = as.matrix(rnorm(200))
 ```
 
@@ -367,10 +368,12 @@ XtX =
   values(
     from.dfs(
       mapreduce(
-        input = X,
+        input = X.index,
         map = 
-          function(., Xi) 
-            keyval(1, list(t(Xi) %*% Xi)),
+          function(., Xi) {
+            yi = y[Xi[,1],]
+            Xi = Xi[,-1]
+            keyval(1, list(t(Xi) %*% Xi))},
         reduce = Sum,
         combine = TRUE)))[[1]]
 ```
@@ -384,9 +387,11 @@ Xty =
   values(
     from.dfs(
       mapreduce(
-        input = X,
-        map = function(., Xi)
-          keyval(1, list(t(Xi) %*% y)),
+        input = X.index,
+        map = function(., Xi) {
+          yi = y[Xi[,1],]
+          Xi = Xi[,-1]
+          keyval(1, list(t(Xi) %*% yi))},
         reduce = Sum,
         combine = TRUE)))[[1]]
 ```

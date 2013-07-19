@@ -456,7 +456,8 @@ hljs.initHighlightingOnLoad();
 
 <p>Let&#39;s get some data first, potentially big data matrix <code>X</code> and a regular vector <code>y</code>:</p>
 
-<pre><code class="r">X = to.dfs(matrix(rnorm(2000), ncol = 10))
+<pre><code class="r">X = matrix(rnorm(2000), ncol = 10)
+X.index = to.dfs(cbind(1:nrow(X), X))
 y = as.matrix(rnorm(200))
 </code></pre>
 
@@ -473,10 +474,12 @@ y = as.matrix(rnorm(200))
   values(
     from.dfs(
       mapreduce(
-        input = X,
+        input = X.index,
         map = 
-          function(., Xi) 
-            keyval(1, list(t(Xi) %*% Xi)),
+          function(., Xi) {
+            yi = y[Xi[,1],]
+            Xi = Xi[,-1]
+            keyval(1, list(t(Xi) %*% Xi))},
         reduce = Sum,
         combine = TRUE)))[[1]]
 </code></pre>
@@ -487,9 +490,11 @@ y = as.matrix(rnorm(200))
   values(
     from.dfs(
       mapreduce(
-        input = X,
-        map = function(., Xi)
-          keyval(1, list(t(Xi) %*% y)),
+        input = X.index,
+        map = function(., Xi) {
+          yi = y[Xi[,1],]
+          Xi = Xi[,-1]
+          keyval(1, list(t(Xi) %*% yi))},
         reduce = Sum,
         combine = TRUE)))[[1]]
 </code></pre>
