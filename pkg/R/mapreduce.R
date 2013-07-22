@@ -19,18 +19,19 @@ rmr.options.env = new.env(parent=emptyenv())
 rmr.options.env$backend = "hadoop"
 rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
-rmr.options.env$dfs.tempdir = tempdir()
+rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
 rmr.options.env$depend.check = FALSE
 #rmr.options$managed.dir = "/var/rmr/managed"
 
 rmr.options = 
-  function(backend = c("hadoop", "local"), 
-           profile.nodes = c("off", "calls", "memory", "both"),
-           keyval.length = 10^4,
-           dfs.tempdir = tempdir()#,
-           #depend.check = FALSE, 
-           #managed.dir = FALSE
-  ) {
+  function(
+    backend = c("hadoop", "local"), 
+    profile.nodes = c("off", "calls", "memory", "both"),
+    keyval.length = 10^4,
+    dfs.tempdir = tempdir()#,
+    #depend.check = FALSE, 
+    #managed.dir = FALSE
+    ) {
     args = as.list(sys.call())[-1]
     this.call = match.call()
     if (is.logical(profile.nodes)) {
@@ -225,6 +226,8 @@ from.dfs = function(input, format = "native") {
 # mapreduce
 
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
+  if(is.null(tmpdir)) 
+    tmpdir = tempdir()
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
