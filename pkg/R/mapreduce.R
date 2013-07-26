@@ -28,7 +28,7 @@ rmr.options =
     backend = c("hadoop", "local"), 
     profile.nodes = c("off", "calls", "memory", "both"),
     keyval.length = 10^4,
-    dfs.tempdir = tempdir()#,
+    dfs.tempdir = NULL#,
     #depend.check = FALSE, 
     #managed.dir = FALSE
     ) {
