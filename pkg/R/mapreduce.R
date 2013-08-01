@@ -176,7 +176,11 @@ to.dfs =
       if(format$mode == "binary")
         system(paste(hadoop.streaming(),  "loadtb", dfsOutput, "<", tmp))
       else  hdfs.put(tmp, dfsOutput)}
-    else file.copy(tmp, dfsOutput)
+    else {
+      if(file.exists(dfsOutput))
+        stop("Can't overwrite ", dfsOutput)
+      else
+        file.copy(tmp, dfsOutput, overwrite = FALSE)}
     file.remove(tmp)
     output}
 
