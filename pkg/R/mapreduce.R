@@ -19,18 +19,19 @@ rmr.options.env = new.env(parent=emptyenv())
 rmr.options.env$backend = "hadoop"
 rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
-rmr.options.env$dfs.tempdir = NULL
+rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
 rmr.options.env$depend.check = FALSE
 #rmr.options$managed.dir = "/var/rmr/managed"
 
 rmr.options = 
-  function(backend = c("hadoop", "local"), 
-           profile.nodes = c("off", "calls", "memory", "both"),
-           keyval.length = 10^4,
-           dfs.tempdir = tempdir()#,
-           #depend.check = FALSE, 
-           #managed.dir = FALSE
-  ) {
+  function(
+    backend = c("hadoop", "local"), 
+    profile.nodes = c("off", "calls", "memory", "both"),
+    keyval.length = 10^4,
+    dfs.tempdir = NULL#,
+    #depend.check = FALSE, 
+    #managed.dir = FALSE
+    ) {
     args = as.list(sys.call())[-1]
     this.call = match.call()
     if (is.logical(profile.nodes)) {
@@ -94,8 +95,8 @@ cmp =
 # backend independent dfs section
 
 is.hidden.file = 
-  function(f)
-    regexpr("[\\._]", basename(f)) == 1
+  function(fname)
+    regexpr("[\\._]", basename(fname)) == 1
 
 part.list = 
   function(fname) {
@@ -107,37 +108,45 @@ part.list =
         else fname}}
 
 dfs.exists = 
-  function(f) {
+  function(fname) {
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.test(e = f) 
-    else file.exists(f)}
+      hdfs.test(e = fname) 
+    else file.exists(fname)}
 
 dfs.rmr = 
-  function(f) {
+  function(fname) {
     if(rmr.options('backend') == 'hadoop')
-      hdfs.rmr(f)
-    else unlink(f, recursive = TRUE)}
+      hdfs.rmr(fname)
+    else unlink(fname, recursive = TRUE)}
 
 dfs.is.dir = 
-  function(f) { 
+  function(fname) { 
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.test(d = f)
-    else file.info(f)['isdir']}
+      hdfs.test(d = fname)
+    else file.info(fname)['isdir']}
 
 dfs.empty = 
-  function(f) 
-    dfs.size(f) == 0
+  function(fname) 
+    dfs.size(fname) == 0
 
 dfs.size = 
-  function(f) {
-    f = to.dfs.path(f)
+  function(fname) {
+    fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop') {
-      du = hdfs.du(f)
+      du = hdfs.du(fname)
       if(is.null(du)) 0 
       else
         sum(as.numeric(du[!is.hidden.file(du[,2]), 1]))}
-    else file.info(f)[1, 'size'] }
+    else file.info(fname)[1, 'size'] }
 
+dfs.mv = 
+  function(from, to) { 
+    fname = to.dfs.path(from)
+    if(rmr.options('backend') == 'hadoop') 
+      hdfs.mv(fname, to)
+    else 
+      file.rename(fname, to)}
+    
 # dfs bridge
 
 to.dfs.path = 
@@ -161,8 +170,8 @@ to.dfs =
     if(is.character(format)) format = make.output.format(format)
     
     write.file = 
-      function(kv, f) {
-        con = file(f, if(format$mode == "text") "w" else "wb")
+      function(kv, fname) {
+        con = file(fname, if(format$mode == "text") "w" else "wb")
         keyval.writer = make.keyval.writer(format$mode, 
                                            format$format, 
                                            con)
@@ -175,14 +184,18 @@ to.dfs =
       if(format$mode == "binary")
         system(paste(hadoop.streaming(),  "loadtb", dfsOutput, "<", tmp))
       else  hdfs.put(tmp, dfsOutput)}
-    else file.copy(tmp, dfsOutput)
+    else {
+      if(file.exists(dfsOutput))
+        stop("Can't overwrite ", dfsOutput)
+      else
+        file.copy(tmp, dfsOutput, overwrite = FALSE)}
     file.remove(tmp)
     output}
 
 from.dfs = function(input, format = "native") {
   
-  read.file = function(f) {
-    con = file(f, if(format$mode == "text") "r" else "rb")
+  read.file = function(fname) {
+    con = file(fname, if(format$mode == "text") "r" else "rb")
     keyval.reader = make.keyval.reader(format$mode, format$format, rmr.options('keyval.length'), con)
     retval = make.fast.list()
     kv = keyval.reader()
@@ -224,8 +237,11 @@ from.dfs = function(input, format = "native") {
 
 # mapreduce
 
-dfs.tempfile = function(pattern = "file", tmpdir = NULL) {
-  if (is.null(tmpdir)) tmpdir = tempdir()
+dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
+  if(is.null(tmpdir)) {
+    tmpdir = tempdir()
+    if(rmr.options("backend") == "hadoop")
+      on.exit(bquote(hdfs.rmr(.(tmpdir))), add = TRUE)}
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]

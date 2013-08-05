@@ -135,8 +135,10 @@ c.or.rbind =
         if(length(x) == 0) 
           NULL
         else { 
-          if(any(are.data.frame(x)))
-            do.call(rbind.fill, lapply(x, as.data.frame))          
+          if(any(are.data.frame(x))) {
+            X = do.call(rbind.fill, lapply(x, as.data.frame))
+            rownames(X) = make.names(unlist(sapply(x, rownames)), unique = TRUE)
+            X}          
           else {
             if(any(are.matrix(x)))
               do.call(rbind,x)
