@@ -238,8 +238,10 @@ from.dfs = function(input, format = "native") {
 # mapreduce
 
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
-  if(is.null(tmpdir)) 
+  if(is.null(tmpdir)) {
     tmpdir = tempdir()
+    if(rmr.options("backend") == "hadoop")
+      on.exit(bquote(hdfs.rmr(.(tmpdir))), add = TRUE)}
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
