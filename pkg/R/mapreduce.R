@@ -95,8 +95,8 @@ cmp =
 # backend independent dfs section
 
 is.hidden.file = 
-  function(f)
-    regexpr("[\\._]", basename(f)) == 1
+  function(fname)
+    regexpr("[\\._]", basename(fname)) == 1
 
 part.list = 
   function(fname) {
@@ -108,36 +108,36 @@ part.list =
         else fname}}
 
 dfs.exists = 
-  function(f) {
+  function(fname) {
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.test(e = f) 
-    else file.exists(f)}
+      hdfs.test(e = fname) 
+    else file.exists(fname)}
 
 dfs.rmr = 
-  function(f) {
+  function(fname) {
     if(rmr.options('backend') == 'hadoop')
-      hdfs.rmr(f)
-    else unlink(f, recursive = TRUE)}
+      hdfs.rmr(fname)
+    else unlink(fname, recursive = TRUE)}
 
 dfs.is.dir = 
-  function(f) { 
+  function(fname) { 
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.test(d = f)
-    else file.info(f)['isdir']}
+      hdfs.test(d = fname)
+    else file.info(fname)['isdir']}
 
 dfs.empty = 
-  function(f) 
-    dfs.size(f) == 0
+  function(fname) 
+    dfs.size(fname) == 0
 
 dfs.size = 
-  function(f) {
-    f = to.dfs.path(f)
+  function(fname) {
+    f = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop') {
-      du = hdfs.du(f)
+      du = hdfs.du(fname)
       if(is.null(du)) 0 
       else
         sum(as.numeric(du[!is.hidden.file(du[,2]), 1]))}
-    else file.info(f)[1, 'size'] }
+    else file.info(fname)[1, 'size'] }
 
 # dfs bridge
 
@@ -162,8 +162,8 @@ to.dfs =
     if(is.character(format)) format = make.output.format(format)
     
     write.file = 
-      function(kv, f) {
-        con = file(f, if(format$mode == "text") "w" else "wb")
+      function(kv, fname) {
+        con = file(fname, if(format$mode == "text") "w" else "wb")
         keyval.writer = make.keyval.writer(format$mode, 
                                            format$format, 
                                            con)
@@ -186,8 +186,8 @@ to.dfs =
 
 from.dfs = function(input, format = "native") {
   
-  read.file = function(f) {
-    con = file(f, if(format$mode == "text") "r" else "rb")
+  read.file = function(fname) {
+    con = file(fname, if(format$mode == "text") "r" else "rb")
     keyval.reader = make.keyval.reader(format$mode, format$format, rmr.options('keyval.length'), con)
     retval = make.fast.list()
     kv = keyval.reader()
