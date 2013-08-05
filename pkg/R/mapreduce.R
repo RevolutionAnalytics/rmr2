@@ -131,7 +131,7 @@ dfs.empty =
 
 dfs.size = 
   function(fname) {
-    f = to.dfs.path(fname)
+    fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop') {
       du = hdfs.du(fname)
       if(is.null(du)) 0 
@@ -139,6 +139,14 @@ dfs.size =
         sum(as.numeric(du[!is.hidden.file(du[,2]), 1]))}
     else file.info(fname)[1, 'size'] }
 
+dfs.mv = 
+  function(from, to) { 
+    fname = to.dfs.path(from)
+    if(rmr.options('backend') == 'hadoop') 
+      hdfs.mv(fname, to)
+    else 
+      file.rename(fname, to)}
+    
 # dfs bridge
 
 to.dfs.path = 
