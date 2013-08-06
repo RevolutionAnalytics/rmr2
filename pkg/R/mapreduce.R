@@ -31,7 +31,7 @@ rmr.options =
     dfs.tempdir = NULL#,
     #depend.check = FALSE, 
     #managed.dir = FALSE
-    ) {
+  ) {
     args = as.list(sys.call())[-1]
     this.call = match.call()
     if (is.logical(profile.nodes)) {
@@ -110,7 +110,7 @@ part.list =
       if(dfs.is.dir(fname)) {
         du = hdfs.du(fname)
         du[!is.hidden.file(du[,2]),2]}
-        else fname}}
+      else fname}}
 
 dfs.exists = 
   function(fname) {
@@ -154,7 +154,7 @@ dfs.mv =
       hdfs.mv(fname, to)
     else 
       file.rename(fname, to)}
-    
+
 dfs.mkdir = 
   function(fname) { 
     fname = to.dfs.path(fname)
@@ -229,13 +229,13 @@ from.dfs = function(input, format = "native") {
     tmp = tempfile()
     lapply(src, function(x) {
       hdfs.get(as.character(x), tmp)
-	if(.Platform$OS.type == "windows") {
-	  cmd = paste('type', tmp, '>>' , dest)
-	  system(paste(Sys.getenv("COMSPEC"),"/c",cmd))
-	}
-	else {
-	  system(paste('cat', tmp, '>>' , dest))
-        }
+      if(.Platform$OS.type == "windows") {
+        cmd = paste('type', tmp, '>>' , dest)
+        system(paste(Sys.getenv("COMSPEC"),"/c",cmd))
+      }
+      else {
+        system(paste('cat', tmp, '>>' , dest))
+      }
       unlink(tmp)})
     dest}
   
@@ -256,6 +256,7 @@ add.last =
   function(action) {
     old.Last = {
       if (exists(".Last")) 
+        .Last
       else
         function() NULL}
     .Last <<-
@@ -377,73 +378,73 @@ equijoin =
     map.right = to.map(identity), 
     reduce  = reduce.default) { 
     
-  stopifnot(xor(!is.null(left.input), !is.null(input) &&
-    (is.null(left.input) == is.null(right.input))))
-  outer = match.arg(outer)
-  left.outer = outer == "left"
-  right.outer = outer == "right"
-  full.outer = outer == "full"
-  if (is.null(left.input)) {
-    left.input = input}
-  mark.side =
-    function(kv, is.left) {
-      kv = split.keyval(kv)
-      keyval(keys(kv),
-             lapply(values(kv),
-                    function(v) {
-                      list(val = v, is.left = is.left)}))}
-  rmr.normalize.path = 
-    function(url.or.path) {
-      if(.Platform$OS.type == "windows")
-        url.or.path = gsub("\\\\","/", url.or.path)
-      gsub(
-        "/+", 
-        "/", 
-        paste(
+    stopifnot(xor(!is.null(left.input), !is.null(input) &&
+                    (is.null(left.input) == is.null(right.input))))
+    outer = match.arg(outer)
+    left.outer = outer == "left"
+    right.outer = outer == "right"
+    full.outer = outer == "full"
+    if (is.null(left.input)) {
+      left.input = input}
+    mark.side =
+      function(kv, is.left) {
+        kv = split.keyval(kv)
+        keyval(keys(kv),
+               lapply(values(kv),
+                      function(v) {
+                        list(val = v, is.left = is.left)}))}
+    rmr.normalize.path = 
+      function(url.or.path) {
+        if(.Platform$OS.type == "windows")
+          url.or.path = gsub("\\\\","/", url.or.path)
+        gsub(
+          "/+", 
           "/", 
-          gsub(
-            "part-[0-9]+$", 
-            "", 
-            parse_url(url.or.path)$path), 
-          "/", 
-          sep = ""))}
-  is.left.side = 
-    function(left.input) {
-      rmr.normalize.path(to.dfs.path(left.input)) ==
-        rmr.normalize.path(Sys.getenv("map_input_file"))}
-  reduce.split =
-    function(vv) {
-      tapply(
-        vv, 
-        sapply(vv, function(v) v$is.left), 
-        function(v) lapply(v, function(x)x$val), 
-        simplify = FALSE)}
-  pad.side =
-    function(vv, outer) 
-      if (length(vv) == 0 && (outer)) c(NA) else c.or.rbind(vv)
-  map = 
-    if (is.null(input)) {
+          paste(
+            "/", 
+            gsub(
+              "part-[0-9]+$", 
+              "", 
+              parse_url(url.or.path)$path), 
+            "/", 
+            sep = ""))}
+    is.left.side = 
+      function(left.input) {
+        rmr.normalize.path(to.dfs.path(left.input)) ==
+          rmr.normalize.path(Sys.getenv("map_input_file"))}
+    reduce.split =
+      function(vv) {
+        tapply(
+          vv, 
+          sapply(vv, function(v) v$is.left), 
+          function(v) lapply(v, function(x)x$val), 
+          simplify = FALSE)}
+    pad.side =
+      function(vv, outer) 
+        if (length(vv) == 0 && (outer)) c(NA) else c.or.rbind(vv)
+    map = 
+      if (is.null(input)) {
+        function(k, v) {
+          ils = is.left.side(left.input)
+          mark.side(if(ils) map.left(k, v) else map.right(k, v), ils)}}
+    else {
       function(k, v) {
-        ils = is.left.side(left.input)
-        mark.side(if(ils) map.left(k, v) else map.right(k, v), ils)}}
-  else {
-    function(k, v) {
-      c.keyval(mark.side(map.left(k, v), TRUE), 
-               mark.side(map.right(k, v), FALSE))}}
-  eqj.reduce = 
-    function(k, vv) {
-      rs = reduce.split(vv)
-      left.side = pad.side(rs$`TRUE`, right.outer || full.outer)
-      right.side = pad.side(rs$`FALSE`, left.outer || full.outer)
-      if(!is.null(left.side) && !is.null(right.side))
-        reduce(k[[1]], left.side, right.side)}
-  mapreduce(
-    map = map, 
-    reduce = eqj.reduce,
-    input = c(left.input, right.input), 
-    output = output,
-    input.format = input.format,
-    output.format = output.format,)}
+        c.keyval(mark.side(map.left(k, v), TRUE), 
+                 mark.side(map.right(k, v), FALSE))}}
+    eqj.reduce = 
+      function(k, vv) {
+        rs = reduce.split(vv)
+        left.side = pad.side(rs$`TRUE`, right.outer || full.outer)
+        right.side = pad.side(rs$`FALSE`, left.outer || full.outer)
+        if(!is.null(left.side) && !is.null(right.side))
+          reduce(k[[1]], left.side, right.side)}
+    mapreduce(
+      map = map, 
+      reduce = eqj.reduce,
+      input = c(left.input, right.input), 
+      output = output,
+      input.format = input.format,
+      output.format = output.format,)}
 
 status = function(value)
   cat(
