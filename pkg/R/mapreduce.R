@@ -104,6 +104,7 @@ is.hidden.file =
 
 part.list = 
   function(fname) {
+    fname = to.dfs.path(fname)
     if(rmr.options('backend') == "local") fname
     else {
       if(dfs.is.dir(fname)) {
@@ -113,18 +114,21 @@ part.list =
 
 dfs.exists = 
   function(fname) {
+    fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
       hdfs.test(e = fname) 
     else file.exists(fname)}
 
 dfs.rmr = 
   function(fname) {
+    fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop')
       hdfs.rmr(fname)
     else unlink(fname, recursive = TRUE)}
 
 dfs.is.dir = 
   function(fname) { 
+    fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
       hdfs.test(d = fname)
     else file.info(fname)['isdir']}
