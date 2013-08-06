@@ -17,7 +17,7 @@ dfs.size(fname)
 \arguments{
   \item{fname}{A valid path or \code{\link{big.data.object}}}}
 %  \item{to}{A valid path}
-\value{For \code{dfs.size} an number of bytes; for \code{dfs.empty} a logical}
+\value{For \code{dfs.size} a number of bytes; for \code{dfs.empty} a logical}
 
 \details{
 The size of a directory, for the sake of this commands, is the size of the files contained therein with the exception of hidden files starting with "." and "_". This is not well documented in Hadoop but there is a private call that implements this pattern.  }
