@@ -40,6 +40,10 @@ rmr.options =
           "calls"
         else
           "off"}}
+    if(!is.null(dfs.tempdir)) {
+      if(!dfs.exists(dfs.tempdir)) {
+        dfs.mkdir(dfs.tempdir)
+        add.last(function() dfs.rmr(dfs.tempdir))}}
     lapply(
       names(args),
       function(x) {
@@ -147,6 +151,14 @@ dfs.mv =
     else 
       file.rename(fname, to)}
     
+dfs.mkdir = 
+  function(fname) { 
+    fname = to.dfs.path(fname)
+    if (rmr.options('backend') == 'hadoop') 
+      hdfs.mkdir(fname)
+    else
+      dir.create(fname)}
+
 # dfs bridge
 
 to.dfs.path = 
@@ -236,12 +248,22 @@ from.dfs = function(input, format = "native") {
   retval}
 
 # mapreduce
+add.last =
+  function(action) {
+    old.Last = {
+      if (exists(".Last")) 
+      else
+        function() NULL}
+    .Last <<-
+      function() {
+        action() 
+        old.Last()}}
 
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
-  if(is.null(tmpdir)) {
+  if(is.null(tmpdir)) { 
     tmpdir = tempdir()
     if(rmr.options("backend") == "hadoop")
-      on.exit(bquote(hdfs.rmr(.(tmpdir))), add = TRUE)}
+      add.last(function() hdfs.rmr(tmpdir))}
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
