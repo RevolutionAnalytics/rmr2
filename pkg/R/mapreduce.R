@@ -20,40 +20,39 @@ rmr.options.env$backend = "hadoop"
 rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
-rmr.options.env$depend.check = FALSE
-#rmr.options$managed.dir = "/var/rmr/managed"
 
 rmr.options = 
   function(
     backend = c("hadoop", "local"), 
     profile.nodes = c("off", "calls", "memory", "both"),
     keyval.length = 10^4,
-    dfs.tempdir = NULL#,
-    #depend.check = FALSE, 
-    #managed.dir = FALSE
-  ) {
+    dfs.tempdir = NULL) {
     args = as.list(sys.call())[-1]
-    this.call = match.call()
-    if (is.logical(profile.nodes)) {
-      this.call[["profile.nodes"]] = {
-        if(profile.nodes)
-          "calls"
-        else
-          "off"}}
-    if(!is.null(dfs.tempdir)) {
-      if(!dfs.exists(dfs.tempdir)) {
-        dfs.mkdir(dfs.tempdir)
-        add.last(function() dfs.rmr(dfs.tempdir))}}
-    lapply(
-      names(args),
-      function(x) {
-        if(x != "")
-          assign(x, eval(this.call[[x]]), envir = rmr.options.env)})
-    read.args =
+    is.named.arg = function(x) is.element(x, names(args))
+    if(is.named.arg("backend"))
+      assign("backend", match.arg(backend), envir = rmr.options.env)
+    if(is.named.arg("keyval.length"))
+      assign("keyval.length", keyval.length, envir = rmr.options.env)
+    if(is.named.arg("profile.nodes")) {
+      if (is.logical(profile.nodes)) {
+        profile.nodes = {
+          if(profile.nodes)
+            "calls"
+          else
+            "off"}}
+      else
+        assign("profile.nodes", match.arg(profile.nodes), envir = rmr.options.env)}
+    if(is.named.arg("dfs.tempdir")) {
+      if(!is.null(dfs.tempdir)) {
+        if(!dfs.exists(dfs.tempdir)) {
+          dfs.mkdir(dfs.tempdir)
+          add.last(function() dfs.rmr(dfs.tempdir))}
+        assign("dfs.tempdir", dfs.tempdir, envir = rmr.options.env)}}
+    read.args = {
       if(is.null(names(args)))
         args
-    else 
-      named.slice(args, "")
+      else 
+        named.slice(args, "")}
     if(length(read.args) > 0) {
       read.args = simplify2array(read.args)
       retval = as.list(rmr.options.env)[read.args]
@@ -267,8 +266,7 @@ add.last =
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   if(is.null(tmpdir)) { 
     tmpdir = tempdir()
-    if(rmr.options("backend") == "hadoop")
-      add.last(function() hdfs.rmr(tmpdir))}
+    rmr.options(dfs.tempdir = tmpdir)}
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
@@ -299,11 +297,7 @@ mapreduce = function(
   
   on.exit(expr = gc(), add = TRUE) #this is here to trigger cleanup of tempfiles
   if (is.null(output)) 
-    output = {
-      if(rmr.options('depend.check'))
-        dfs.managed.file(match.call())
-      else
-        dfs.tempfile()}
+    output = dfs.tempfile()
   if(is.character(input.format)) input.format = make.input.format(input.format)
   if(is.character(output.format)) output.format = make.output.format(output.format)
   if(!missing(backend.parameters)) warning("backend.parameters is deprecated.")
