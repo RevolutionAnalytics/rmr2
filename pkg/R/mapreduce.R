@@ -20,36 +20,39 @@ rmr.options.env$backend = "hadoop"
 rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
-rmr.options.env$depend.check = FALSE
-#rmr.options$managed.dir = "/var/rmr/managed"
 
 rmr.options = 
   function(
     backend = c("hadoop", "local"), 
     profile.nodes = c("off", "calls", "memory", "both"),
     keyval.length = 10^4,
-    dfs.tempdir = NULL#,
-    #depend.check = FALSE, 
-    #managed.dir = FALSE
-    ) {
+    dfs.tempdir = NULL) {
     args = as.list(sys.call())[-1]
-    this.call = match.call()
-    if (is.logical(profile.nodes)) {
-      this.call[["profile.nodes"]] = {
-        if(profile.nodes)
-          "calls"
-        else
-          "off"}}
-    lapply(
-      names(args),
-      function(x) {
-        if(x != "")
-          assign(x, eval(this.call[[x]]), envir = rmr.options.env)})
-    read.args =
+    is.named.arg = function(x) is.element(x, names(args))
+    if(is.named.arg("backend"))
+      assign("backend", match.arg(backend), envir = rmr.options.env)
+    if(is.named.arg("keyval.length"))
+      assign("keyval.length", keyval.length, envir = rmr.options.env)
+    if(is.named.arg("profile.nodes")) {
+      if (is.logical(profile.nodes)) {
+        profile.nodes = {
+          if(profile.nodes)
+            "calls"
+          else
+            "off"}}
+      else
+        assign("profile.nodes", match.arg(profile.nodes), envir = rmr.options.env)}
+    if(is.named.arg("dfs.tempdir")) {
+      if(!is.null(dfs.tempdir)) {
+        if(!dfs.exists(dfs.tempdir)) {
+          dfs.mkdir(dfs.tempdir)
+          add.last(function() dfs.rmr(dfs.tempdir))}
+        assign("dfs.tempdir", dfs.tempdir, envir = rmr.options.env)}}
+    read.args = {
       if(is.null(names(args)))
         args
-    else 
-      named.slice(args, "")
+      else 
+        named.slice(args, "")}
     if(length(read.args) > 0) {
       read.args = simplify2array(read.args)
       retval = as.list(rmr.options.env)[read.args]
@@ -100,27 +103,31 @@ is.hidden.file =
 
 part.list = 
   function(fname) {
+    fname = to.dfs.path(fname)
     if(rmr.options('backend') == "local") fname
     else {
       if(dfs.is.dir(fname)) {
         du = hdfs.du(fname)
         du[!is.hidden.file(du[,2]),2]}
-        else fname}}
+      else fname}}
 
 dfs.exists = 
   function(fname) {
+    fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
       hdfs.test(e = fname) 
     else file.exists(fname)}
 
 dfs.rmr = 
   function(fname) {
+    fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop')
       hdfs.rmr(fname)
     else unlink(fname, recursive = TRUE)}
 
 dfs.is.dir = 
   function(fname) { 
+    fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
       hdfs.test(d = fname)
     else file.info(fname)['isdir']}
@@ -146,7 +153,15 @@ dfs.mv =
       hdfs.mv(fname, to)
     else 
       file.rename(fname, to)}
-    
+
+dfs.mkdir = 
+  function(fname) { 
+    fname = to.dfs.path(fname)
+    if (rmr.options('backend') == 'hadoop') 
+      hdfs.mkdir(fname)
+    else
+      dir.create(fname)}
+
 # dfs bridge
 
 to.dfs.path = 
@@ -213,13 +228,13 @@ from.dfs = function(input, format = "native") {
     tmp = tempfile()
     lapply(src, function(x) {
       hdfs.get(as.character(x), tmp)
-	if(.Platform$OS.type == "windows") {
-	  cmd = paste('type', tmp, '>>' , dest)
-	  system(paste(Sys.getenv("COMSPEC"),"/c",cmd))
-	}
-	else {
-	  system(paste('cat', tmp, '>>' , dest))
-        }
+      if(.Platform$OS.type == "windows") {
+        cmd = paste('type', tmp, '>>' , dest)
+        system(paste(Sys.getenv("COMSPEC"),"/c",cmd))
+      }
+      else {
+        system(paste('cat', tmp, '>>' , dest))
+      }
       unlink(tmp)})
     dest}
   
@@ -236,12 +251,22 @@ from.dfs = function(input, format = "native") {
   retval}
 
 # mapreduce
+add.last =
+  function(action) {
+    old.Last = {
+      if (exists(".Last")) 
+        .Last
+      else
+        function() NULL}
+    .Last <<-
+      function() {
+        action() 
+        old.Last()}}
 
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
-  if(is.null(tmpdir)) {
+  if(is.null(tmpdir)) { 
     tmpdir = tempdir()
-    if(rmr.options("backend") == "hadoop")
-      on.exit(bquote(hdfs.rmr(.(tmpdir))), add = TRUE)}
+    rmr.options(dfs.tempdir = tmpdir)}
   fname  = tempfile(pattern, tmpdir)
   subfname = strsplit(fname, ":")
   if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
@@ -272,11 +297,7 @@ mapreduce = function(
   
   on.exit(expr = gc(), add = TRUE) #this is here to trigger cleanup of tempfiles
   if (is.null(output)) 
-    output = {
-      if(rmr.options('depend.check'))
-        dfs.managed.file(match.call())
-      else
-        dfs.tempfile()}
+    output = dfs.tempfile()
   if(is.character(input.format)) input.format = make.input.format(input.format)
   if(is.character(output.format)) output.format = make.output.format(output.format)
   if(!missing(backend.parameters)) warning("backend.parameters is deprecated.")
@@ -351,73 +372,73 @@ equijoin =
     map.right = to.map(identity), 
     reduce  = reduce.default) { 
     
-  stopifnot(xor(!is.null(left.input), !is.null(input) &&
-    (is.null(left.input) == is.null(right.input))))
-  outer = match.arg(outer)
-  left.outer = outer == "left"
-  right.outer = outer == "right"
-  full.outer = outer == "full"
-  if (is.null(left.input)) {
-    left.input = input}
-  mark.side =
-    function(kv, is.left) {
-      kv = split.keyval(kv)
-      keyval(keys(kv),
-             lapply(values(kv),
-                    function(v) {
-                      list(val = v, is.left = is.left)}))}
-  rmr.normalize.path = 
-    function(url.or.path) {
-      if(.Platform$OS.type == "windows")
-        url.or.path = gsub("\\\\","/", url.or.path)
-      gsub(
-        "/+", 
-        "/", 
-        paste(
+    stopifnot(xor(!is.null(left.input), !is.null(input) &&
+                    (is.null(left.input) == is.null(right.input))))
+    outer = match.arg(outer)
+    left.outer = outer == "left"
+    right.outer = outer == "right"
+    full.outer = outer == "full"
+    if (is.null(left.input)) {
+      left.input = input}
+    mark.side =
+      function(kv, is.left) {
+        kv = split.keyval(kv)
+        keyval(keys(kv),
+               lapply(values(kv),
+                      function(v) {
+                        list(val = v, is.left = is.left)}))}
+    rmr.normalize.path = 
+      function(url.or.path) {
+        if(.Platform$OS.type == "windows")
+          url.or.path = gsub("\\\\","/", url.or.path)
+        gsub(
+          "/+", 
           "/", 
-          gsub(
-            "part-[0-9]+$", 
-            "", 
-            parse_url(url.or.path)$path), 
-          "/", 
-          sep = ""))}
-  is.left.side = 
-    function(left.input) {
-      rmr.normalize.path(to.dfs.path(left.input)) ==
-        rmr.normalize.path(Sys.getenv("map_input_file"))}
-  reduce.split =
-    function(vv) {
-      tapply(
-        vv, 
-        sapply(vv, function(v) v$is.left), 
-        function(v) lapply(v, function(x)x$val), 
-        simplify = FALSE)}
-  pad.side =
-    function(vv, outer) 
-      if (length(vv) == 0 && (outer)) c(NA) else c.or.rbind(vv)
-  map = 
-    if (is.null(input)) {
+          paste(
+            "/", 
+            gsub(
+              "part-[0-9]+$", 
+              "", 
+              parse_url(url.or.path)$path), 
+            "/", 
+            sep = ""))}
+    is.left.side = 
+      function(left.input) {
+        rmr.normalize.path(to.dfs.path(left.input)) ==
+          rmr.normalize.path(Sys.getenv("map_input_file"))}
+    reduce.split =
+      function(vv) {
+        tapply(
+          vv, 
+          sapply(vv, function(v) v$is.left), 
+          function(v) lapply(v, function(x)x$val), 
+          simplify = FALSE)}
+    pad.side =
+      function(vv, outer) 
+        if (length(vv) == 0 && (outer)) c(NA) else c.or.rbind(vv)
+    map = 
+      if (is.null(input)) {
+        function(k, v) {
+          ils = is.left.side(left.input)
+          mark.side(if(ils) map.left(k, v) else map.right(k, v), ils)}}
+    else {
       function(k, v) {
-        ils = is.left.side(left.input)
-        mark.side(if(ils) map.left(k, v) else map.right(k, v), ils)}}
-  else {
-    function(k, v) {
-      c.keyval(mark.side(map.left(k, v), TRUE), 
-               mark.side(map.right(k, v), FALSE))}}
-  eqj.reduce = 
-    function(k, vv) {
-      rs = reduce.split(vv)
-      left.side = pad.side(rs$`TRUE`, right.outer || full.outer)
-      right.side = pad.side(rs$`FALSE`, left.outer || full.outer)
-      if(!is.null(left.side) && !is.null(right.side))
-        reduce(k[[1]], left.side, right.side)}
-  mapreduce(
-    map = map, 
-    reduce = eqj.reduce,
-    input = c(left.input, right.input), 
-    output = output,
-    input.format = input.format,
-    output.format = output.format,)}
+        c.keyval(mark.side(map.left(k, v), TRUE), 
+                 mark.side(map.right(k, v), FALSE))}}
+    eqj.reduce = 
+      function(k, vv) {
+        rs = reduce.split(vv)
+        left.side = pad.side(rs$`TRUE`, right.outer || full.outer)
+        right.side = pad.side(rs$`FALSE`, left.outer || full.outer)
+        if(!is.null(left.side) && !is.null(right.side))
+          reduce(k[[1]], left.side, right.side)}
+    mapreduce(
+      map = map, 
+      reduce = eqj.reduce,
+      input = c(left.input, right.input), 
+      output = output,
+      input.format = input.format,
+      output.format = output.format,)}
 
 status = function(value)
   cat(
