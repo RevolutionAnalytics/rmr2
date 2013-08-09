@@ -25,5 +25,12 @@ reducers. Profiling data is collected in the following files: \code{file.path("/
 old.backend = rmr.options("backend")
 rmr.options(backend = "hadoop")
 rmr.options(backend = old.backend)
+rmr.options(
+  dfs.tempdir = 
+    file.path(
+      "/user", 
+      system("whoami", TRUE),
+      "tmp-rmr2", 
+      basename(tempdir())))
 }
  

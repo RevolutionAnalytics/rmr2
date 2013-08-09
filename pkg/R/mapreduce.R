@@ -45,7 +45,7 @@ rmr.options =
     if(is.named.arg("dfs.tempdir")) {
       if(!is.null(dfs.tempdir)) {
         if(!dfs.exists(dfs.tempdir)) {
-          dfs.mkdir(dfs.tempdir)
+          stopifnot(dfs.mkdir(dfs.tempdir))
           add.last(function() dfs.rmr(dfs.tempdir))}
         assign("dfs.tempdir", dfs.tempdir, envir = rmr.options.env)}}
     read.args = {
