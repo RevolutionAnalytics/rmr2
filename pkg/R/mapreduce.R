@@ -21,6 +21,19 @@ rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
 
+add.last =
+  function(action) {
+    old.Last = {
+      if (exists(".Last")) 
+        .Last
+      else
+        function() NULL}
+    .Last <<-
+      function() {
+        action()
+        .Last <<- old.Last
+        .Last()}}
+
 rmr.options = 
   function(
     backend = c("hadoop", "local"), 
@@ -251,18 +264,6 @@ from.dfs = function(input, format = "native") {
   retval}
 
 # mapreduce
-add.last =
-  function(action) {
-    old.Last = {
-      if (exists(".Last")) 
-        .Last
-      else
-        function() NULL}
-    .Last <<-
-      function() {
-        action() 
-        old.Last()}}
-
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   if(is.null(tmpdir)) { 
     tmpdir = tempdir()
