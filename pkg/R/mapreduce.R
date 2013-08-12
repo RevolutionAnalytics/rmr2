@@ -59,7 +59,7 @@ rmr.options =
       if(!is.null(dfs.tempdir)) {
         if(!dfs.exists(dfs.tempdir)) {
           stopifnot(dfs.mkdir(dfs.tempdir))
-          add.last(function() dfs.rmr(dfs.tempdir))}
+          add.last(function() if(!in.a.task()) dfs.rmr(dfs.tempdir))}
         assign("dfs.tempdir", dfs.tempdir, envir = rmr.options.env)}}
     read.args = {
       if(is.null(names(args)))
@@ -264,6 +264,11 @@ from.dfs = function(input, format = "native") {
   retval}
 
 # mapreduce
+
+in.a.task = 
+  function()
+    Sys.getenv("mapred_task_id") != ""
+
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   if(is.null(tmpdir)) { 
     tmpdir = tempdir()
@@ -275,7 +280,7 @@ dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   reg.finalizer(environment(namefun), 
                 function(e) {
                   fname = eval(expression(fname), envir = e)
-                  if(Sys.getenv("mapred_task_id") == "" && dfs.exists(fname)) dfs.rmr(fname)
+                  if(!in.a.task() && dfs.exists(fname)) dfs.rmr(fname)
                 },
                 onexit = TRUE)
   namefun}
