@@ -72,7 +72,7 @@ named.slice = function(x, n) x[which(names(x) == n)]
 
 #data frame manip
 
-fast.rbind.fill = 
+rbind.fill.fast = 
   function(...) {
     x = list(...)
     cols = unique(unlist(lapply(x, names)))

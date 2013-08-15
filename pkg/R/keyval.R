@@ -105,10 +105,9 @@ purge.nulls =
 
 rbind.anything = 
   function(...) {
-    xx = list(...)
     tryCatch(
-      do.call(rbind, xx), 
-      error = function(e) do.call(fast.rbind.fill,xx))}
+      rbind(...), 
+      error = function(e) rbind.fill.fast(...))}
 
 lapply.as.character =
   function(xx)
@@ -137,7 +136,7 @@ c.or.rbind =
           NULL
         else { 
           if(any(are.data.frame(x))) {
-            X = do.call(rbind.anything, lapply(x, as.data.frame))
+            X = do.call(rbind.fill.fast, lapply(x, as.data.frame))
             rownames(X) = make.names(unlist(sapply(x, rownames)), unique = TRUE)
             X}          
           else {
@@ -186,13 +185,31 @@ c.keyval =
     vv = lapply.values(kvs)
     kk = lapply.keys(kvs)
     keyval(c.or.rbind(kk), c.or.rbind(vv))})
+
+split.data.frame.fast = 
+  function(x, ind, drop)
+    do.call(
+      Curry(
+        mapply, 
+        function(...) 
+          quickdf(list(...)), 
+        SIMPLIFY=FALSE), 
+      lapply(
+        x, 
+        Curry(split, f = ind, drop = drop)))
+
   
 rmr.split = 
   function(x, ind) {
     if(rmr.length(ind) == 1)
       list(x)
     else {
-      spl = if(has.rows(x)) split.data.frame else split
+      spl = 
+        switch(
+          class(x),
+          matrix = split.data.frame,
+          data.frame = split.data.frame.fast,
+          split)
       spl(x,ind, drop = TRUE)[
         order(
           if(!has.rows(ind))
