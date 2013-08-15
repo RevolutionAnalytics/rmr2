@@ -67,6 +67,5 @@ unit.test(
 #     
 
 #named.slice TODO
-#catply TODO
 #interleave TODO
 

@@ -77,9 +77,9 @@ rmr.recycle =
         stop("Can't recycle 0-length argument")}
       else
         rmr.slice(
-          c.or.rbind(
-            rep(list(x),
-                ceiling(ly/lx))),
+          c.or.rbind.rep(
+            list(x),
+            ceiling(ly/lx)),
           1:max(ly, lx))}}
 
 recycle.keyval =
@@ -104,10 +104,11 @@ purge.nulls =
     .Call("null_purge", x, PACKAGE = "rmr2")
 
 rbind.anything = 
-  function(xx) 
+  function(...) {
+    xx = list(...)
     tryCatch(
-      do.call(rbind.fill, xx), 
-      error = function(e) do.call(rbind,xx))
+      do.call(rbind, xx), 
+      error = function(e) do.call(fast.rbind.fill,xx))}
 
 lapply.as.character =
   function(xx)
@@ -136,7 +137,7 @@ c.or.rbind =
           NULL
         else { 
           if(any(are.data.frame(x))) {
-            X = do.call(rbind.fill, lapply(x, as.data.frame))
+            X = do.call(rbind.anything, lapply(x, as.data.frame))
             rownames(X) = make.names(unlist(sapply(x, rownames)), unique = TRUE)
             X}          
           else {
@@ -147,6 +148,15 @@ c.or.rbind =
                 as.factor(do.call(c, lapply.as.character(x)))
               else
                 do.call(c,x)}}}}})
+
+c.or.rbind.rep =
+  function(x, n) {
+    ind = rep(1:length(x), n)
+    y = rmr2:::c.or.rbind(x)
+    if(rmr2:::has.rows(y))
+      y[ind, , drop = FALSE]
+    else
+      y[ind]}
 
 sapply.length.keyval = 
   function(kvs)

@@ -122,13 +122,8 @@ make.typedbytes.input.format = function(recycle = TRUE) {
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
         if(recycle) {
-          kk = 
-            inverse.rle(
-              list(
-                lengths = sapply.rmr.length(vv),
-                values = kk))
           keyval(
-            c.or.rbind(kk), 
+            c.or.rbind.rep(kk, sapply.rmr.length(vv)), 
             c.or.rbind(vv))}
         else {
           keyval(kk, vv)}}
