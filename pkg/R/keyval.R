@@ -223,6 +223,7 @@ key.normalize= function(k) {
   k = rmr.slice(k, 1)
   if (is.data.frame(k) || is.matrix(k))
     rownames(k) = NULL
+  attributes(k) = attributes(k)[sort(names(attributes(k)))]
   k}
 
 split.keyval = function(kv, size) {
