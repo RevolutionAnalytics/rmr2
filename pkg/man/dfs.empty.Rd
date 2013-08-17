@@ -15,8 +15,9 @@ dfs.rmr(fname)
 }
 
 \arguments{
-  \item{fname}{A valid path or \code{\link{big.data.object}}}}
-  \item{to}{A valid path}
+  \item{fname}{A valid path or \code{\link{big.data.object}}}
+  \item{from, to}{A valid path}
+}
 
 \value{For \code{dfs.size} a number of bytes; for \code{dfs.empty} a logical}
 
