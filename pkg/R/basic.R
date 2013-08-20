@@ -72,25 +72,32 @@ named.slice = function(x, n) x[which(names(x) == n)]
 
 #data frame manip
 
+sane.c = 
+  function(...) {
+    if(all(are.factor(list(...))))
+      unlist(...)
+    else
+      c(...)}
+
 rbind.fill.fast = 
   function(...) {
-    x = list(...)
-    cols = unique(unlist(lapply(x, names)))
+    xx = list(...)
+    cols = unique(unlist(lapply(xx, names)))
     ll =  
       lapply(
         cols, 
         function(n) 
           do.call(
-            c,
+            sane.c,
             lapply(
-              x, 
+              xx, 
               function(x){
                 if(is.null(x[[n]]))
                   rep(NA, nrow(x))
                 else
                   x[[n]]})))
     names(ll) = cols
-    as.data.frame(ll)}
+    as.data.frame(ll, stringsAsFactors = F)}
 
 
 
