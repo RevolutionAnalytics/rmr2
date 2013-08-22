@@ -75,7 +75,7 @@ named.slice = function(x, n) x[which(names(x) == n)]
 sane.c = 
   function(...) {
     if(all(are.factor(list(...))))
-      unlist(...)
+      unlist(list(...))
     else
       c(...)}
 
