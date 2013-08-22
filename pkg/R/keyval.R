@@ -183,16 +183,19 @@ c.keyval =
     keyval(c.or.rbind(kk), c.or.rbind(vv))})
 
 split.data.frame.fast = 
-  function(x, ind, drop)
-    do.call(
-      Curry(
-        mapply, 
-        function(...) 
-          quickdf(list(...)), 
-        SIMPLIFY=FALSE), 
-      lapply(
-        x, 
-        Curry(split, f = ind, drop = drop)))
+  function(x, ind, drop) {
+    y = 
+      do.call(
+        Curry(
+          mapply, 
+          function(...) 
+            quickdf(list(...)), 
+          SIMPLIFY=FALSE), 
+        lapply(
+          x, 
+          Curry(split, f = ind, drop = drop)))
+    rn = split(rownames(x), f = ind)
+    mapply(function(a, na) {rownames(a) = na; a}, y, rn, SIMPLIFY = FALSE)}
 
   
 rmr.split = 
