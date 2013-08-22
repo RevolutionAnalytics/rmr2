@@ -151,11 +151,7 @@ c.or.rbind =
 c.or.rbind.rep =
   function(x, n) {
     ind = rep(1:length(x), n)
-    y = rmr2:::c.or.rbind(x)
-    if(rmr2:::has.rows(y))
-      y[ind, , drop = FALSE]
-    else
-      y[ind]}
+    c.or.rbind(x[ind])}
 
 sapply.length.keyval = 
   function(kvs)
