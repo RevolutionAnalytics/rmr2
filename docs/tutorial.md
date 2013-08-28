@@ -196,7 +196,7 @@ To make this example production-level there are several things one needs to do, 
 
 We are now going to cover a simple but significant clustering algorithm and the complexity will go up just a little bit. To cheer yourself up, you can take a look at [this alternative implementation](http://www.hortonworks.com/new-apache-pig-features-part-2-embedding/) which requires three languages, python, pig and java, to get the job done and is hailed as a model of simplicity.
 
-We are talking about k-means. This is not a production ready implementation, but should be illustrative of the power of this package. You simply can not do this in pig or hive alone and it would take hundreds of lines of code in java.
+We are talking about k-means. This is not a production ready implementation, but should be illustrative of the power of this package. You simply can not do this in pig or hive alone and it would take hundreds of lines of code in java. Please note the code has been slightly rearranged for presentation purposes and won't work if you cut and paste it into the R console. See [kmeans.R](../pkg/tests/kmeans.R) for working code.
 
 
 ```r

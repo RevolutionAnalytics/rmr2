@@ -332,7 +332,7 @@ hljs.initHighlightingOnLoad();
 
 <p>We are now going to cover a simple but significant clustering algorithm and the complexity will go up just a little bit. To cheer yourself up, you can take a look at <a href="http://www.hortonworks.com/new-apache-pig-features-part-2-embedding/">this alternative implementation</a> which requires three languages, python, pig and java, to get the job done and is hailed as a model of simplicity.</p>
 
-<p>We are talking about k-means. This is not a production ready implementation, but should be illustrative of the power of this package. You simply can not do this in pig or hive alone and it would take hundreds of lines of code in java.</p>
+<p>We are talking about k-means. This is not a production ready implementation, but should be illustrative of the power of this package. You simply can not do this in pig or hive alone and it would take hundreds of lines of code in java. Please note the code has been slightly rearranged for presentation purposes and won&#39;t work if you cut and paste it into the R console. See <a href="../pkg/tests/kmeans.R">kmeans.R</a> for working code.</p>
 
 <pre><code class="r">    dist.fun = 
       function(C, P) {
