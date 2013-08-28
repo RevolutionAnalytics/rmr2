@@ -137,7 +137,7 @@ c.or.rbind =
         else { 
           if(any(are.data.frame(x))) {
             X = do.call(rbind.fill.fast, lapply(x, as.data.frame))
-            rownames(X) = make.names(unlist(sapply(x, rownames)), unique = TRUE)
+            rownames(X) = make.unique(unlist(sapply(x, rownames)))
             X}          
           else {
             if(any(are.matrix(x)))
