@@ -1,4 +1,3 @@
-
 `r read_chunk('../pkg/tests/basic-examples.R')`
 `r read_chunk('../pkg/tests/wordcount.R')`
 `r read_chunk('../pkg/tests/logistic-regression.R')`
@@ -121,7 +120,7 @@ The role of the map function is to compute distances between some points and all
 ```{r kmeans.reduce}
 ```
 
-The reduce function couldn't be simpler as it just computes column averages of a matrix of points sharing a center, which is the key.
+The reduce function couldn't be simpler as it just computes column averages of a matrix of points sharing a center, which is the key. Please do not simply cut and paste this code into the console since it has been slightly rearranged from the original and won't work if you just do that. Please refer to the "kmeans.R" file in the "tests" directory in the package.
 
 ```{r kmeans-signature}
 ```
