@@ -77,9 +77,9 @@ rmr.recycle =
         stop("Can't recycle 0-length argument")}
       else
         rmr.slice(
-          c.or.rbind.rep(
-            list(x),
-            ceiling(ly/lx)),
+          rmr.slice(
+            x,
+            rep(1:rmr.length(x), ceiling(ly/lx))),
           1:max(ly, lx))}}
 
 recycle.keyval =
@@ -151,7 +151,7 @@ c.or.rbind =
 c.or.rbind.rep =
   function(x, n) {
     ind = rep(1:length(x), n)
-    c.or.rbind(x[ind])}
+    rmr.slice(c.or.rbind(x), ind)}
 
 sapply.length.keyval = 
   function(kvs)
@@ -194,7 +194,7 @@ split.data.frame.fast =
         lapply(
           x, 
           Curry(split, f = ind, drop = drop)))
-    rn = split(rownames(x), f = ind)
+    rn = split(rownames(x), f = ind, drop = drop)
     mapply(function(a, na) {rownames(a) = na; a}, y, rn, SIMPLIFY = FALSE)}
 
   
