@@ -156,7 +156,7 @@ hadoop.cmd = function() {
   hadoop_cmd = Sys.getenv("HADOOP_CMD")
   if( hadoop_cmd == "") {
     hadoop_home = Sys.getenv("HADOOP_HOME")
-    if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_CMD or HADOOP_HOME are set")
+    if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_CMD is set")
     file.path(hadoop_home, "bin", "hadoop")}
   else hadoop_cmd}
 
@@ -164,7 +164,7 @@ hadoop.streaming = function() {
   hadoop_streaming = Sys.getenv("HADOOP_STREAMING")
   if(hadoop_streaming == ""){
     hadoop_home = Sys.getenv("HADOOP_HOME")
-    if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_STREAMING or HADOOP_HOME are set")
+    if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_STREAMING is set")
     stream.jar = list.files(path =  file.path(hadoop_home, "contrib", "streaming"), pattern = "jar$", full.names = TRUE)
     paste(hadoop.cmd(), "jar", stream.jar)}
   else paste(hadoop.cmd(), "jar", hadoop_streaming)}
