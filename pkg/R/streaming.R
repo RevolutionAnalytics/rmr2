@@ -196,43 +196,42 @@ rmr.stream = function(
   rmr.local.env = tempfile(pattern = "rmr-local-env")
   rmr.global.env = tempfile(pattern = "rmr-global-env")
   
-  preamble = paste(sep = "", 'options(warn=1)
-
- 
-  load("',file.path(work.dir, basename(rmr.global.env)),'")
-  (function(){
-  load("',file.path(work.dir, basename(rmr.local.env)),'")  
+  preamble = paste(sep = "", 'options(warn=1) 
   sink(file = stderr())
   invisible(
+  load("',file.path(work.dir, basename(rmr.global.env)),'", verbose = TRUE))
+  (function(){
+    invisible(
+      load("',file.path(work.dir, basename(rmr.local.env)),'", verbose = TRUE))
     lapply(
       libs, 
         function(l)
           if (!require(l, character.only = T)) 
-            warning(paste("can\'t load", l))))
-  sink(NULL)
-  input.reader = 
-    function()
-      rmr2:::make.keyval.reader(
-        input.format$mode, 
-        input.format$format, 
-        keyval.length = keyval.length)
-  output.writer = 
-    function()
-      rmr2:::make.keyval.writer(
-        output.format$mode, 
-        output.format$format)
-    
-  default.reader = 
-    function() 
-      rmr2:::make.keyval.reader(
-        default.input.format$mode, 
-        default.input.format$format, 
-        keyval.length = keyval.length)
-  default.writer = 
-    function() 
-      rmr2:::make.keyval.writer(
-        default.output.format$mode, 
-        default.output.format$format)
+            warning(paste("can\'t load", l)))
+    sink(NULL)
+    input.reader = 
+      function()
+        rmr2:::make.keyval.reader(
+          input.format$mode, 
+          input.format$format, 
+          keyval.length = keyval.length)
+    output.writer = 
+      function()
+        rmr2:::make.keyval.writer(
+          output.format$mode, 
+          output.format$format)
+      
+    default.reader = 
+      function() 
+        rmr2:::make.keyval.reader(
+          default.input.format$mode, 
+          default.input.format$format, 
+          keyval.length = keyval.length)
+    default.writer = 
+      function() 
+        rmr2:::make.keyval.writer(
+          default.output.format$mode, 
+          default.output.format$format)
  
   ')  
   map.line = '  
