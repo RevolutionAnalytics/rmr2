@@ -119,3 +119,22 @@ interleave =
     l[2*(1:length(l1)) - 1] = l1
     l[2*(1:length(l1))] = l2
     l}
+
+# reflection
+
+all.functions = 
+  function(expr)
+    setdiff(
+      all.names(expr=expr, functions = TRUE, unique =  TRUE),
+      all.names(expr=expr, functions = FALSE, unique =  TRUE))
+
+all.names.recursive = 
+  function(expr, env) {
+    c(
+      all.names(expr),
+      unlist(
+        lapply(
+          intersect(
+            all.functions(expr), 
+            ls(envir=env)),
+          function(x) all.names.recursive(body(match.fun(x)), env))))}

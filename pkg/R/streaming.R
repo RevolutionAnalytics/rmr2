@@ -277,22 +277,39 @@ rmr.stream = function(
         combine 
       else 
         reduce}}
-  save.env = function(fun = NULL, name) {
-    envir = 
-      if(is.null(fun)) parent.env(environment()) else {
-        if (is.function(fun)) environment(fun)
-        else fun}
-    save(list = ls(all.names = TRUE, envir = envir), file = name, envir = envir)
-    name}
+  save.env = function(fun, fname, obj.names) {
+    envir = {
+      if (is.function(fun)) environment(fun)
+      else fun}
+    all.names =  ls(all.names = TRUE, envir = envir)
+    obj.names = {
+      if(is.null(obj.names))
+        all.names
+      else
+        intersect(obj.names, all.names)}
+    save(list = obj.names, file = fname, envir = envir)
+    fname}
   
   default.input.format = make.input.format("native")
   default.output.format = make.output.format("native", keyval.length = keyval.length)
   
   libs = sub("package:", "", grep("package", search(), value = T))
-  image.cmd.line = paste("-file",
-                         c(save.env(name = rmr.local.env),
-                           save.env(.GlobalEnv, rmr.global.env)),
-                         collapse = " ")
+  image.cmd.line = 
+    paste(
+      "-file",
+      c(
+        save.env(
+          environment(), 
+          rmr.local.env, 
+          NULL),
+        save.env(
+          .GlobalEnv, 
+          rmr.global.env, 
+          unlist(
+            sapply(
+              list(map, combine, reduce, input.format$format, output.format$format), 
+              function(f) all.names.recursive(body(f), .GlobalEnv))))),
+      collapse = " ")
   ## prepare hadoop streaming command
   hadoop.command = hadoop.streaming()
   input =  make.input.files(in.folder)
