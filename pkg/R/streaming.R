@@ -170,21 +170,19 @@ hadoop.streaming = function() {
   else paste(hadoop.cmd(), "jar", hadoop_streaming)}
 
 rmr.stream = function(
-  map, 
-  reduce, 
-  combine, 
-  vectorized.reduce,
   in.folder, 
   out.folder, 
-  profile.nodes, 
-  keyval.length,
-  rmr.install,
-  rmr.update,
+  map, 
+  reduce, 
+  vectorized.reduce,
+  combine, 
+  in.memory.combine,
   input.format, 
   output.format, 
   backend.parameters, 
-  in.memory.combine,
   verbose, 
+  profile.nodes, 
+  keyval.length,
   debug) {
   backend.parameters = 
     c(
