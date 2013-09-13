@@ -11,6 +11,7 @@ rmr.options(backend = c("hadoop", "local"), profile.nodes = c("off", "calls", "m
   \item{profile.nodes}{Collect profiling and memory information when running additional R interpreters (besides the current one) on the cluster. No effect on the local backend, use Rprof instead. For backward compatibility, \code{"calls"} is equivalent to \code{TRUE} and \code{"off"} to \code{FALSE}}
   \item{keyval.length}{Min number of records to read into a single, key-value pair or how many to write to when the key is \code{NULL}. Controls both \code{\link{from.dfs}} and \code{\link{to.dfs}} and \code{\link{mapreduce}} behavior. This setting will be ignored at the end of file or partitions, when not enough records are avilable}
   \item{dfs.tempdir}{The directory to use for temporary files, including \code{\link{mapreduce}} intermediate results files, on the distributed file system.}
+  \item{backend.parameters}{Parameters to pass directly to the backend. See equally named argument for the function \code{\link{mapreduce}}}
 }
 \details{
  Mapreduce has come to mean massive, fault tolerant distributed computing because of its use by Google and Hadoop, but it is also

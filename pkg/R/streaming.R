@@ -186,6 +186,7 @@ rmr.stream = function(
   debug) {
   backend.parameters = 
     c(
+      rmr.options("backend.parameters")$hadoop,
       input.format$backend.parameters$hadoop, 
       output.format$backend.parameters$hadoop,
       backend.parameters)
