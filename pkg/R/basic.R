@@ -97,7 +97,15 @@ rbind.fill.fast =
                 else
                   x[[n]]})))
     names(ll) = cols
-    as.data.frame(ll, stringsAsFactors = F)}
+    do.call(
+      data.frame, 
+      c(
+        lapply(
+          ll, 
+          function(x) 
+            if (is.atomic(x)) x
+                else I(x)), 
+        stringsAsFactors = F))}
 
 
 
