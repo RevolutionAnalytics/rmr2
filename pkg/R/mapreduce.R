@@ -21,6 +21,7 @@ rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
 rmr.options.env$backend.parameters = list()
+rmr.options.env$exclude.objects = NULL
 
 add.last =
   function(action) {
@@ -66,6 +67,8 @@ rmr.options =
         opt.assign("dfs.tempdir", dfs.tempdir)}}
     if(is.named.arg("backend.parameters"))
       opt.assign("backend.parameters", backend.parameters)
+    if(is.named.arg("exclude.objects"))
+      opt.assign("exclude.objects", exclude.objects)
     read.args = {
       if(is.null(names(args)))
         args
@@ -326,8 +329,6 @@ mapreduce = function(
      vectorized.reduce,
      in.folder = if(is.list(input)) {lapply(input, to.dfs.path)} else to.dfs.path(input), 
      out.folder = to.dfs.path(output), 
-     profile.nodes = rmr.options('profile.nodes'), 
-     keyval.length = rmr.options('keyval.length'),
      input.format = input.format, 
      output.format = output.format, 
      in.memory.combine = in.memory.combine,

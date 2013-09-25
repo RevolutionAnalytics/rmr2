@@ -181,9 +181,11 @@ rmr.stream = function(
   output.format, 
   backend.parameters, 
   verbose, 
-  profile.nodes, 
-  keyval.length,
   debug) {
+  pkg.opts = as.list(rmr.options.env)
+  keyval.length = pkg.opts$keyval.length
+  profile.nodes = pkg.opts$profile.nodes
+  
   backend.parameters = 
     c(
       rmr.options("backend.parameters")$hadoop,
@@ -306,11 +308,8 @@ rmr.stream = function(
         save.env(
           .GlobalEnv, 
           rmr.global.env, 
-          unlist(
-            sapply(
-              list(map, combine, reduce, input.format$format, output.format$format), 
-              function(f) all.names.recursive(body(f), .GlobalEnv))))),
-      collapse = " ")
+          pkg.opts$exclude.objects),
+      collapse = " "))
   ## prepare hadoop streaming command
   hadoop.command = hadoop.streaming()
   input =  make.input.files(in.folder)

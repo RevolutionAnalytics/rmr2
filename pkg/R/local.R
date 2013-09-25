@@ -23,10 +23,10 @@ mr.local = function(
   input.format, 
   output.format, 
   backend.parameters, 
-  verbose,
-  profile.nodes, 
-  keyval.length) {
+  verbose) {
   
+  profile.nodes = rmr.options("profile.nodes")
+  keyval.length = rmr.options("keyval.length")
   get.data =
     function(fname) {
       kv = from.dfs(fname, format = input.format)
