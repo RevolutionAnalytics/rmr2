@@ -308,8 +308,8 @@ rmr.stream = function(
         save.env(
           .GlobalEnv, 
           rmr.global.env, 
-          pkg.opts$exclude.objects),
-      collapse = " "))
+          pkg.opts$exclude.objects)),
+      collapse = " ")
   ## prepare hadoop streaming command
   hadoop.command = hadoop.streaming()
   input =  make.input.files(in.folder)

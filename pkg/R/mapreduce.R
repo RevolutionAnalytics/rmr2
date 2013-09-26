@@ -20,8 +20,8 @@ rmr.options.env$backend = "hadoop"
 rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
-rmr.options.env$backend.parameters = list()
 rmr.options.env$exclude.objects = NULL
+rmr.options.env$backend.parameters = list()
 
 add.last =
   function(action) {
@@ -42,6 +42,7 @@ rmr.options =
     profile.nodes = c("off", "calls", "memory", "both"),
     keyval.length = 10^4,
     dfs.tempdir = NULL,
+    exclude.objects = NULL,
     backend.parameters = list()) {
     opt.assign = Curry(assign, envir = rmr.options.env)
     args = as.list(sys.call())[-1]
