@@ -32,25 +32,6 @@ avroIF =
     mode = "text",
     streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat")
 
-avro.input.format2 = 
-  function(con, keyval.length) {
-    lines = readLines(con = con, n = keyval.length)
-    if  (length(lines) == 0) NULL
-    else
-      do.call(
-        keyval,
-        unname(
-          do.call(
-            mapply.fromJSON,
-            strsplit(
-              lines,
-              "\t"))))}
-
-avroIF2 = 
-  make.input.format(
-    format = rmr2:::make.native.input.format(),
-    mode = "binary",
-    streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat")
 
 avro.output.format =
   function(kv, con)
