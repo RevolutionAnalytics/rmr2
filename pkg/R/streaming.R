@@ -280,16 +280,16 @@ rmr.stream = function(
         combine 
       else 
         reduce}}
-  save.env = function(fun, fname, obj.names) {
+  save.env = function(fun, fname, exclude) {
     envir = {
       if (is.function(fun)) environment(fun)
       else fun}
     all.names =  ls(all.names = TRUE, envir = envir)
     obj.names = {
-      if(is.null(obj.names))
+      if(is.null(exclude))
         all.names
       else
-        intersect(obj.names, all.names)}
+        setdiff(all.names, exclude)}
     save(list = obj.names, file = fname, envir = envir)
     fname}
   
