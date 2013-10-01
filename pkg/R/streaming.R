@@ -201,10 +201,17 @@ rmr.stream = function(
   
   preamble = paste(sep = "", 'options(warn=1) 
   sink(file = stderr())
+  library(functional)
   invisible(
-  load("',file.path(work.dir, basename(rmr.global.env)),'", verbose = TRUE))
-  (function(){
-    invisible(
+    if(is.null(formals(load)$verbose)) #recent R change
+      load("',file.path(work.dir, basename(rmr.global.env)),'")
+    else 
+      load("',file.path(work.dir, basename(rmr.global.env)),'", verbose = TRUE))
+(function(){  
+  invisible(
+    if(is.null(formals(load)$verbose)) #recent R change
+      load("',file.path(work.dir, basename(rmr.local.env)),'")
+    else 
       load("',file.path(work.dir, basename(rmr.local.env)),'", verbose = TRUE))
     lapply(
       libs, 
