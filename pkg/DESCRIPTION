@@ -2,7 +2,7 @@ Package: rmr2
 Type: Package
 Title: R and Hadoop Streaming Connector
 Version: 2.3.0
-Date: 2013-4-10
+Date: 2013-10-1
 Author: Revolution Analytics
 Depends: R (>= 2.6.0), Rcpp, RJSONIO (>= 0.8-2),  bitops, digest, functional, stringr, plyr, reshape2
 Suggests: quickcheck
