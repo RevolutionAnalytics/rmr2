@@ -28,14 +28,10 @@ rmr.equal =
     else {
       if(is.atomic(xx) && !is.matrix(xx)) xx == y
       else {
-        sapply(
-          1:rmr.length(xx), 
-          function(i) 
-            isTRUE(
-              all.equal(
-                rmr.slice(xx,i), 
-                y, 
-                check.attributes=F)))}}}
+        if(is.matrix(xx) || is.data.frame(xx))
+          rowSums(xx == do.call(rbind, replicate(rmr.length(xx), y, simplify = FALSE))) == ncol(y)
+        else
+          sapply(xx, function(x) isTRUE(all.equal(list(x), y, check.attributes = FALSE)))}}}
     
 length.keyval = 
   function(kv) 
@@ -81,9 +77,9 @@ rmr.recycle =
         stop("Can't recycle 0-length argument")}
       else
         rmr.slice(
-          c.or.rbind(
-            rep(list(x),
-                ceiling(ly/lx))),
+          rmr.slice(
+            x,
+            rep(1:rmr.length(x), ceiling(ly/lx))),
           1:max(ly, lx))}}
 
 recycle.keyval =
@@ -108,10 +104,10 @@ purge.nulls =
     .Call("null_purge", x, PACKAGE = "rmr2")
 
 rbind.anything = 
-  function(xx) 
+  function(...) {
     tryCatch(
-      do.call(rbind.fill, xx), 
-      error = function(e) do.call(rbind,xx))
+      rbind(...), 
+      error = function(e) rbind.fill.fast(...))}
 
 lapply.as.character =
   function(xx)
@@ -140,8 +136,8 @@ c.or.rbind =
           NULL
         else { 
           if(any(are.data.frame(x))) {
-            X = do.call(rbind.fill, lapply(x, as.data.frame))
-            rownames(X) = make.names(unlist(sapply(x, rownames)), unique = TRUE)
+            X = do.call(rbind.fill.fast, lapply(x, as.data.frame))
+            rownames(X) = make.unique(unlist(sapply(x, rownames)))
             X}          
           else {
             if(any(are.matrix(x)))
@@ -151,6 +147,11 @@ c.or.rbind =
                 as.factor(do.call(c, lapply.as.character(x)))
               else
                 do.call(c,x)}}}}})
+
+c.or.rbind.rep =
+  function(x, n) {
+    ind = rep(1:length(x), n)
+    rmr.slice(c.or.rbind(x), ind)}
 
 sapply.length.keyval = 
   function(kvs)
@@ -180,13 +181,34 @@ c.keyval =
     vv = lapply.values(kvs)
     kk = lapply.keys(kvs)
     keyval(c.or.rbind(kk), c.or.rbind(vv))})
+
+split.data.frame.fast = 
+  function(x, ind, drop) {
+    y = 
+      do.call(
+        Curry(
+          mapply, 
+          function(...) 
+            quickdf(list(...)), 
+          SIMPLIFY=FALSE), 
+        lapply(
+          x, 
+          Curry(split, f = ind, drop = drop)))
+    rn = split(rownames(x), f = ind, drop = drop)
+    mapply(function(a, na) {rownames(a) = na; a}, y, rn, SIMPLIFY = FALSE)}
+
   
 rmr.split = 
   function(x, ind) {
     if(rmr.length(ind) == 1)
       list(x)
     else {
-      spl = if(has.rows(x)) split.data.frame else split
+      spl = 
+        switch(
+          class(x),
+          matrix = split.data.frame,
+          data.frame = split.data.frame.fast,
+          split)
       spl(x,ind, drop = TRUE)[
         order(
           if(!has.rows(ind))
@@ -200,6 +222,8 @@ key.normalize= function(k) {
   k = rmr.slice(k, 1)
   if (is.data.frame(k) || is.matrix(k))
     rownames(k) = NULL
+  if(!is.null(attributes(k)))
+    attributes(k) = attributes(k)[sort(names(attributes(k)))]
   k}
 
 split.keyval = function(kv, size) {

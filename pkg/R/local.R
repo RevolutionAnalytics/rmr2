@@ -12,22 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-mr.local = function(map, 
-                    reduce, 
-                    combine, 
-                    vectorized.reduce,
-                    in.folder, 
-                    out.folder, 
-                    profile.nodes, 
-                    keyval.length,
-                    rmr.install,
-                    rmr.update,
-                    input.format, 
-                    output.format, 
-                    in.memory.combine,
-                    backend.parameters, 
-                    verbose = verbose) {
+mr.local = function(
+  in.folder, 
+  out.folder, 
+  map, 
+  reduce, 
+  vectorized.reduce,
+  combine, 
+  in.memory.combine,
+  input.format, 
+  output.format, 
+  backend.parameters, 
+  verbose) {
   
+  profile.nodes = rmr.options("profile.nodes")
+  keyval.length = rmr.options("keyval.length")
   get.data =
     function(fname) {
       kv = from.dfs(fname, format = input.format)

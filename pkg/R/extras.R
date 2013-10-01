@@ -117,7 +117,7 @@ reload =
     library(rmr2)}
 
 rmr.str = 
-  function(x) {
+  function(x, ...) {
     sc = sys.calls()
     message(
       paste(
@@ -125,6 +125,6 @@ rmr.str =
           capture.output(
             str(sc)), 
           match.call() [[2]], 
-          capture.output(str(x))), 
+          capture.output(str(x, ...))), 
         collapse="\n"))
     x}

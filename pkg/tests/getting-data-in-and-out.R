@@ -90,7 +90,7 @@ tsv.format =
     format = tsv.reader,
     mode = "text")
 ## @knitr getting-data.named.column.access
-freq.counts =
+freq.counts = 
   mapreduce(
     input = tsv.data,
     input.format = tsv.format,
@@ -131,7 +131,7 @@ fwf.reader <- function(con, nrecs) {
     NULL}
   else {
     split.lines = unlist(strsplit(lines, ""))
-    df =
+    df = 
       as.data.frame(
         matrix(
           sapply(
@@ -139,13 +139,13 @@ fwf.reader <- function(con, nrecs) {
               split.lines, 
               ceiling(1:length(split.lines)/field.size)), 
             paste, collapse = ""), 
-          ncol=length(fields), byrow=T))
+          ncol = length(fields), byrow = T))
     names(df) = fields
     keyval(NULL, df)}} 
 fwf.input.format = make.input.format(mode = "text", format = fwf.reader)
 ## @knitr getting-data.fwf.writer
 fwf.writer <- function(kv, con, keyval.size) {
-  ser =
+  ser = 
     function(df) 
       paste(
           apply(

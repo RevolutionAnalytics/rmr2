@@ -20,6 +20,8 @@ rmr.options.env$backend = "hadoop"
 rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
+rmr.options.env$exclude.objects = NULL
+rmr.options.env$backend.parameters = list()
 
 add.last =
   function(action) {
@@ -39,13 +41,16 @@ rmr.options =
     backend = c("hadoop", "local"), 
     profile.nodes = c("off", "calls", "memory", "both"),
     keyval.length = 10^4,
-    dfs.tempdir = NULL) {
+    dfs.tempdir = NULL,
+    exclude.objects = NULL,
+    backend.parameters = list()) {
+    opt.assign = Curry(assign, envir = rmr.options.env)
     args = as.list(sys.call())[-1]
     is.named.arg = function(x) is.element(x, names(args))
     if(is.named.arg("backend"))
-      assign("backend", match.arg(backend), envir = rmr.options.env)
+      opt.assign("backend", match.arg(backend))
     if(is.named.arg("keyval.length"))
-      assign("keyval.length", keyval.length, envir = rmr.options.env)
+      opt.assign("keyval.length", keyval.length)
     if(is.named.arg("profile.nodes")) {
       if (is.logical(profile.nodes)) {
         profile.nodes = {
@@ -54,13 +59,17 @@ rmr.options =
           else
             "off"}}
       else
-        assign("profile.nodes", match.arg(profile.nodes), envir = rmr.options.env)}
+        opt.assign("profile.nodes", match.arg(profile.nodes))}
     if(is.named.arg("dfs.tempdir")) {
       if(!is.null(dfs.tempdir)) {
         if(!dfs.exists(dfs.tempdir)) {
           stopifnot(dfs.mkdir(dfs.tempdir))
           add.last(function() if(!in.a.task()) dfs.rmr(dfs.tempdir))}
-        assign("dfs.tempdir", dfs.tempdir, envir = rmr.options.env)}}
+        opt.assign("dfs.tempdir", dfs.tempdir)}}
+    if(is.named.arg("backend.parameters"))
+      opt.assign("backend.parameters", backend.parameters)
+    if(is.named.arg("exclude.objects"))
+      opt.assign("exclude.objects", exclude.objects)
     read.args = {
       if(is.null(names(args)))
         args
@@ -321,16 +330,6 @@ mapreduce = function(
      vectorized.reduce,
      in.folder = if(is.list(input)) {lapply(input, to.dfs.path)} else to.dfs.path(input), 
      out.folder = to.dfs.path(output), 
-     profile.nodes = rmr.options('profile.nodes'), 
-     keyval.length = rmr.options('keyval.length'),
-     rmr.install = {
-       if(!is.null(rmr.options('install.args')))
-         do.call(Curry, c(install.packages,rmr.options('install.args')))
-       else NULL},
-     rmr.update = {
-       if(!is.null(rmr.options('update.args')))
-         do.call(Curry, c(update.packages, rmr.options('update.args')))
-       else NULL}, 
      input.format = input.format, 
      output.format = output.format, 
      in.memory.combine = in.memory.combine,

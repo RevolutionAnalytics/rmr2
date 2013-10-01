@@ -103,9 +103,14 @@ make.typedbytes.input.format = function(recycle = TRUE) {
       if(length(raw.buffer) == 0) break;
       parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
       obj.buffer <<- c(obj.buffer, parsed$objects)
-      approx.read.records = sum(sapply(sample(even(obj.buffer), 10, replace = T), rmr.length))
-      obj.buffer.rmr.length <<- approx.read.records * length(obj.buffer)/20
-      read.size <<- ceiling(1.1^sign(keyval.length - approx.read.records) * read.size)
+      approx.read.records = {
+        if(length(parsed$objects) == 0) 0 
+        else 
+          sum(
+            sapply(sample(parsed$objects, 10, replace = T), rmr.length)) * 
+          length(parsed$objects)/10.0 }
+      obj.buffer.rmr.length <<- obj.buffer.rmr.length + approx.read.records 
+      read.size <<- ceiling(1.1^sign(keyval.length - obj.buffer.rmr.length) * read.size)
       if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
     straddler = list()
     retval = 
@@ -117,13 +122,8 @@ make.typedbytes.input.format = function(recycle = TRUE) {
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
         if(recycle) {
-          kk = 
-            inverse.rle(
-              list(
-                lengths = sapply.rmr.length(vv),
-                values = kk))
           keyval(
-            c.or.rbind(kk), 
+            c.or.rbind.rep(kk, sapply.rmr.length(vv)), 
             c.or.rbind(vv))}
         else {
           keyval(kk, vv)}}
@@ -263,7 +263,8 @@ make.keyval.reader = Curry(make.keyval.readwriter, read = TRUE)
 make.keyval.writer = Curry(make.keyval.readwriter, keyval.length = NULL, read = FALSE)
 
 IO.formats = c("text", "json", "csv", "native",
-               "sequence.typedbytes", "hbase")
+               "sequence.typedbytes", "hbase", 
+               "pig.hive")
 
 make.input.format = 
   function(
@@ -292,6 +293,15 @@ make.input.format =
         sequence.typedbytes = {
           format = make.typedbytes.input.format() 
           mode = "binary"},
+        pig.hive = {
+          format = 
+            make.csv.input.format(
+              sep = "\001",
+              comment.char = "",
+              fill = TRUE,
+              flush = TRUE,
+              quote = "")
+          mode = "text"},
         hbase = {
           optlist = list(...)
           format = 
@@ -330,6 +340,28 @@ make.input.format =
          streaming.format = streaming.format, 
          backend.parameters = backend.parameters)}
 
+set.separator.options =
+  function(sep) {
+    if(!is.null(sep))
+      list(
+        hadoop = 
+          list(
+            D = 
+              paste(
+                "mapred.textoutputformat.separator=",
+                sep,
+                sep = ""),
+            D =
+              paste(
+                "stream.map.output.field.separator=",
+                sep,
+                sep = ""),
+            D = 
+              paste(
+                "stream.reduce.output.field.separator=",
+                sep,
+                sep = "")))}
+
 make.output.format = 
   function(
     format = make.native.output.format(keyval.length = rmr.options('keyval.length')),
@@ -355,26 +387,14 @@ make.output.format =
           mode = "text"
           streaming.format = NULL
           sep = list(...)$sep
-          if(!is.null(sep))
-            backend.parameters = 
-            list(
-              hadoop = 
-                list(
-                  D = 
-                    paste(
-                      "mapred.textoutputformat.separator=",
-                      sep,
-                      sep = ""),
-                  D =
-                    paste(
-                      "stream.map.output.field.separator=",
-                      sep,
-                      sep = ""),
-                  D = 
-                    paste(
-                      "stream.reduce.output.field.separator=",
-                      sep,
-                      sep = "")))}, 
+          backend.parameters = set.separator.options(sep)}, 
+        pig.hive = {
+          format = 
+            make.csv.output.format(  
+              sep = "\001",
+              quote = FALSE)
+          mode = "text"
+          streaming.format = NULL}, 
         native = {
           format = make.native.output.format(
             keyval.length = rmr.options('keyval.length'))

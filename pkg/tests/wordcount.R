@@ -42,25 +42,14 @@ wordcount =
     mapreduce(
       input = input ,
       output = output,
-      input.format = "text",
       map = wc.map,
       reduce = wc.reduce,
       combine = T)}
 ## @knitr end
 
-rmr.options(backend = "local")
-sourceFile = file.path(Sys.getenv("HADOOP_HOME"), "LICENSE.txt")
-tempFile = tempfile()
-
-file.copy(sourceFile, tempFile)
-out.local = from.dfs(wordcount(tempFile, pattern = " +"))
-file.remove(tempFile)
-rmr.options(backend = "hadoop")
-
-subtempFile = strsplit(tempFile, ":")
-if(length(subtempFile[[1]]) > 1) tempFile = subtempFile[[1]][2]
-
-rmr2:::hdfs.put(sourceFile, tempFile)
-out.hadoop = from.dfs(wordcount(tempFile, pattern = " +"))
-rmr2:::hdfs.rmr(tempFile)
-stopifnot(rmr2:::cmp(out.hadoop, out.local))
+text = capture.output(license())
+out = list()
+for(be in c("local", "hadoop")) {
+  rmr.options(backend = be)
+  out[[be]] = from.dfs(wordcount(to.dfs(keyval(NULL, text)), pattern = " +"))}
+stopifnot(rmr2:::cmp(out$hadoop, out$local))

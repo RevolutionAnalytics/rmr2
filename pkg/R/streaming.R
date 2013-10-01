@@ -156,7 +156,7 @@ hadoop.cmd = function() {
   hadoop_cmd = Sys.getenv("HADOOP_CMD")
   if( hadoop_cmd == "") {
     hadoop_home = Sys.getenv("HADOOP_HOME")
-    if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_CMD or HADOOP_HOME are set")
+    if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_CMD is set")
     file.path(hadoop_home, "bin", "hadoop")}
   else hadoop_cmd}
 
@@ -164,30 +164,31 @@ hadoop.streaming = function() {
   hadoop_streaming = Sys.getenv("HADOOP_STREAMING")
   if(hadoop_streaming == ""){
     hadoop_home = Sys.getenv("HADOOP_HOME")
-    if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_STREAMING or HADOOP_HOME are set")
+    if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_STREAMING is set")
     stream.jar = list.files(path =  file.path(hadoop_home, "contrib", "streaming"), pattern = "jar$", full.names = TRUE)
     paste(hadoop.cmd(), "jar", stream.jar)}
   else paste(hadoop.cmd(), "jar", hadoop_streaming)}
 
 rmr.stream = function(
-  map, 
-  reduce, 
-  combine, 
-  vectorized.reduce,
   in.folder, 
   out.folder, 
-  profile.nodes, 
-  keyval.length,
-  rmr.install,
-  rmr.update,
+  map, 
+  reduce, 
+  vectorized.reduce,
+  combine, 
+  in.memory.combine,
   input.format, 
   output.format, 
   backend.parameters, 
-  in.memory.combine,
   verbose, 
   debug) {
+  pkg.opts = as.list(rmr.options.env)
+  keyval.length = pkg.opts$keyval.length
+  profile.nodes = pkg.opts$profile.nodes
+  
   backend.parameters = 
     c(
+      rmr.options("backend.parameters")$hadoop,
       input.format$backend.parameters$hadoop, 
       output.format$backend.parameters$hadoop,
       backend.parameters)
@@ -198,43 +199,42 @@ rmr.stream = function(
   rmr.local.env = tempfile(pattern = "rmr-local-env")
   rmr.global.env = tempfile(pattern = "rmr-global-env")
   
-  preamble = paste(sep = "", 'options(warn=1)
-
- 
-  load("',file.path(work.dir, basename(rmr.global.env)),'")
-  (function(){
-  load("',file.path(work.dir, basename(rmr.local.env)),'")  
+  preamble = paste(sep = "", 'options(warn=1) 
   sink(file = stderr())
   invisible(
+  load("',file.path(work.dir, basename(rmr.global.env)),'", verbose = TRUE))
+  (function(){
+    invisible(
+      load("',file.path(work.dir, basename(rmr.local.env)),'", verbose = TRUE))
     lapply(
       libs, 
         function(l)
           if (!require(l, character.only = T)) 
-            warning(paste("can\'t load", l))))
-  sink(NULL)
-  input.reader = 
-    function()
-      rmr2:::make.keyval.reader(
-        input.format$mode, 
-        input.format$format, 
-        keyval.length = keyval.length)
-  output.writer = 
-    function()
-      rmr2:::make.keyval.writer(
-        output.format$mode, 
-        output.format$format)
-    
-  default.reader = 
-    function() 
-      rmr2:::make.keyval.reader(
-        default.input.format$mode, 
-        default.input.format$format, 
-        keyval.length = keyval.length)
-  default.writer = 
-    function() 
-      rmr2:::make.keyval.writer(
-        default.output.format$mode, 
-        default.output.format$format)
+            warning(paste("can\'t load", l)))
+    sink(NULL)
+    input.reader = 
+      function()
+        rmr2:::make.keyval.reader(
+          input.format$mode, 
+          input.format$format, 
+          keyval.length = keyval.length)
+    output.writer = 
+      function()
+        rmr2:::make.keyval.writer(
+          output.format$mode, 
+          output.format$format)
+      
+    default.reader = 
+      function() 
+        rmr2:::make.keyval.reader(
+          default.input.format$mode, 
+          default.input.format$format, 
+          keyval.length = keyval.length)
+    default.writer = 
+      function() 
+        rmr2:::make.keyval.writer(
+          default.output.format$mode, 
+          default.output.format$format)
  
   ')  
   map.line = '  
@@ -280,22 +280,36 @@ rmr.stream = function(
         combine 
       else 
         reduce}}
-  save.env = function(fun = NULL, name) {
-    envir = 
-      if(is.null(fun)) parent.env(environment()) else {
-        if (is.function(fun)) environment(fun)
-        else fun}
-    save(list = ls(all.names = TRUE, envir = envir), file = name, envir = envir)
-    name}
+  save.env = function(fun, fname, exclude) {
+    envir = {
+      if (is.function(fun)) environment(fun)
+      else fun}
+    all.names =  ls(all.names = TRUE, envir = envir)
+    obj.names = {
+      if(is.null(exclude))
+        all.names
+      else
+        setdiff(all.names, exclude)}
+    save(list = obj.names, file = fname, envir = envir)
+    fname}
   
   default.input.format = make.input.format("native")
   default.output.format = make.output.format("native", keyval.length = keyval.length)
   
   libs = sub("package:", "", grep("package", search(), value = T))
-  image.cmd.line = paste("-file",
-                         c(save.env(name = rmr.local.env),
-                           save.env(.GlobalEnv, rmr.global.env)),
-                         collapse = " ")
+  image.cmd.line = 
+    paste(
+      "-file",
+      c(
+        save.env(
+          environment(), 
+          rmr.local.env, 
+          NULL),
+        save.env(
+          .GlobalEnv, 
+          rmr.global.env, 
+          pkg.opts$exclude.objects)),
+      collapse = " ")
   ## prepare hadoop streaming command
   hadoop.command = hadoop.streaming()
   input =  make.input.files(in.folder)

@@ -1,7 +1,3 @@
-# What's new in 2.2.3
+# What's new in 2.3.0
 
-
-## Bug Fixes
-
-* #58, whereby records with identical keys were not grouped together under particular circumstances. Because of this bug, which can be hard to detect and reproduce, we recommend upgrading.
-* #57, a mistake in the LLS example that made it work only on fairly small examples
+* Interchange format with hive and pig ("pig.hive")

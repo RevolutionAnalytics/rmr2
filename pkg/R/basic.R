@@ -70,7 +70,42 @@ make.fast.list = function(l = list()) {
 
 named.slice = function(x, n) x[which(names(x) == n)]
 
-#list manip
+#data frame manip
+
+sane.c = 
+  function(...) {
+    if(all(are.factor(list(...))))
+      unlist(list(...))
+    else
+      c(...)}
+
+rbind.fill.fast = 
+  function(...) {
+    xx = list(...)
+    cols = unique(unlist(lapply(xx, names)))
+    ll =  
+      lapply(
+        cols, 
+        function(n) 
+          do.call(
+            sane.c,
+            lapply(
+              xx, 
+              function(x){
+                if(is.null(x[[n]]))
+                  rep(NA, nrow(x))
+                else
+                  x[[n]]})))
+    names(ll) = cols
+    do.call(
+      data.frame, 
+      c(
+        lapply(
+          ll, 
+          function(x) 
+            if (is.atomic(x)) x
+                else I(x)), 
+        stringsAsFactors = F))}
 
 
 
@@ -85,8 +120,6 @@ every.second =
 
 odd = every.second(c(T,F))
 even = every.second(c(F,T))
-
-catply = function(x, fun) do.call(c, lapply(x, fun))
 
 interleave = 
   function(l1, l2) {
