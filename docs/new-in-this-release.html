@@ -3,6 +3,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
 
 <title>What&#39;s new in 2.3.0</title>
 
@@ -145,6 +146,11 @@ hr {
 
 <ul>
 <li>Interchange format with hive and pig (&ldquo;pig.hive&rdquo;)</li>
+<li>exclude large objects from being broadcasted to the cluster with <code>rmr.options(exclude.objects = ...)</code></li>
+<li>environment setup now leave a trail in stderr, to more easily identify problems (R3.x only).</li>
+<li>better key normalization: in some instances absolutely identical R objects still serialized in a different way, which made Hadoop believe it was dealing with separate keys.</li>
+<li>speed improvements, specifically as related to data.frame as keys and values</li>
+<li><code>dfs.mv</code> and <code>dfs.rmr</code> to move and delete files, backend independent.</li>
 </ul>
 
 </body>

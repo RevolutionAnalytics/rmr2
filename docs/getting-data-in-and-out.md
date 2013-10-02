@@ -19,6 +19,7 @@ The complete list is:
 ```
 [1] "text"                "json"                "csv"                
 [4] "native"              "sequence.typedbytes" "hbase"              
+[7] "pig.hive"           
 ```
 
 
@@ -69,8 +70,8 @@ function (con, keyval.length)
         NULL
     else keyval(NULL, df)
 }
-<bytecode: 0x104c3e3f8>
-<environment: 0x104c3d6d0>
+<bytecode: 0x104b20b20>
+<environment: 0x104b227f0>
 
 $streaming.format
 NULL
@@ -101,8 +102,8 @@ function (kv, con)
         v
     else cbind(k, v), ..., row.names = FALSE, col.names = FALSE)
 }
-<bytecode: 0x1038d1190>
-<environment: 0x1038024e8>
+<bytecode: 0x1049cb118>
+<environment: 0x1049cb720>
 
 $streaming.format
 NULL
@@ -203,7 +204,7 @@ tsv.reader =
 You can then use the list names to directly access your column of interest for manipulations
 
 ```r
-freq.counts =
+freq.counts = 
   mapreduce(
     input = tsv.data,
     input.format = tsv.format,
@@ -224,7 +225,7 @@ fwf.reader <- function(con, nrecs) {
     NULL}
   else {
     split.lines = unlist(strsplit(lines, ""))
-    df =
+    df = 
       as.data.frame(
         matrix(
           sapply(
@@ -232,7 +233,7 @@ fwf.reader <- function(con, nrecs) {
               split.lines, 
               ceiling(1:length(split.lines)/field.size)), 
             paste, collapse = ""), 
-          ncol=length(fields), byrow=T))
+          ncol = length(fields), byrow = T))
     names(df) = fields
     keyval(NULL, df)}} 
 fwf.input.format = make.input.format(mode = "text", format = fwf.reader)
@@ -243,7 +244,7 @@ Using the text `output.format` as a template, we modify it slightly to write fix
 
 ```r
 fwf.writer <- function(kv, con, keyval.size) {
-  ser =
+  ser = 
     function(df) 
       paste(
           apply(

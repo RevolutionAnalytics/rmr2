@@ -11,7 +11,7 @@ rmr.str(x, ...)
 }
 \arguments{
   \item{x}{The variable to print}
-  \item{x}{Additional arguments to \code{str} (called by \code{rmr.str})}
+  \item{...}{Additional arguments to \code{str} (called by \code{rmr.str})}
 }
 
 \value{x}

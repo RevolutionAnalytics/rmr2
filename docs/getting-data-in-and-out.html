@@ -3,6 +3,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
 
 <title>Built in formats</title>
 
@@ -193,6 +194,7 @@ system, when you need to get non-rmr data in and out of it? Of course <code>rmr<
 
 <pre><code>[1] &quot;text&quot;                &quot;json&quot;                &quot;csv&quot;                
 [4] &quot;native&quot;              &quot;sequence.typedbytes&quot; &quot;hbase&quot;              
+[7] &quot;pig.hive&quot;           
 </code></pre>
 
 <ol>
@@ -244,8 +246,8 @@ function (con, keyval.length)
         NULL
     else keyval(NULL, df)
 }
-&lt;bytecode: 0x104c3e3f8&gt;
-&lt;environment: 0x104c3d6d0&gt;
+&lt;bytecode: 0x104b20b20&gt;
+&lt;environment: 0x104b227f0&gt;
 
 $streaming.format
 NULL
@@ -272,8 +274,8 @@ function (kv, con)
         v
     else cbind(k, v), ..., row.names = FALSE, col.names = FALSE)
 }
-&lt;bytecode: 0x1038d1190&gt;
-&lt;environment: 0x1038024e8&gt;
+&lt;bytecode: 0x1049cb118&gt;
+&lt;environment: 0x1049cb720&gt;
 
 $streaming.format
 NULL
@@ -351,7 +353,7 @@ from.dfs(result)
 
 <p>You can then use the list names to directly access your column of interest for manipulations</p>
 
-<pre><code class="r">freq.counts =
+<pre><code class="r">freq.counts = 
   mapreduce(
     input = tsv.data,
     input.format = tsv.format,
@@ -370,7 +372,7 @@ from.dfs(result)
     NULL}
   else {
     split.lines = unlist(strsplit(lines, &quot;&quot;))
-    df =
+    df = 
       as.data.frame(
         matrix(
           sapply(
@@ -378,7 +380,7 @@ from.dfs(result)
               split.lines, 
               ceiling(1:length(split.lines)/field.size)), 
             paste, collapse = &quot;&quot;), 
-          ncol=length(fields), byrow=T))
+          ncol = length(fields), byrow = T))
     names(df) = fields
     keyval(NULL, df)}} 
 fwf.input.format = make.input.format(mode = &quot;text&quot;, format = fwf.reader)
@@ -387,7 +389,7 @@ fwf.input.format = make.input.format(mode = &quot;text&quot;, format = fwf.reade
 <p>Using the text <code>output.format</code> as a template, we modify it slightly to write fixed width data without tab seperation:</p>
 
 <pre><code class="r">fwf.writer &lt;- function(kv, con, keyval.size) {
-  ser =
+  ser = 
     function(df) 
       paste(
           apply(
