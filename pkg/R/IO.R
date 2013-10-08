@@ -320,7 +320,7 @@ make.input.format =
                 list(
                   D = 
                     paste(
-                      "hbase.mapred.tablecolumns=",
+                      "hbase.mapred.tablecolumnsb64=",
                       sep = "",
                       paste(
                         collapse = " ",
@@ -328,8 +328,8 @@ make.input.format =
                           names(family.columns), 
                           function(fam) 
                             paste(
-                              fam, 
-                              family.columns[[fam]],
+                              base64encode(fam), 
+                              sapply(family.columns[[fam]], base64encode),
                               sep = ":", 
                               collapse = " ")))),
                   libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))})}
@@ -414,7 +414,7 @@ make.output.format =
               hadoop = 
                 list(
                   D = paste(
-                    "hbase.mapred.tablecolumns=", 
+                    "hbase.mapred.tablecolumnsb64=", 
                     list(...)$family, 
                     ":", 
                     list(...)$column, 
