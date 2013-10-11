@@ -322,16 +322,16 @@ make.input.format =
                     paste(
                       "hbase.mapred.tablecolumnsb64=",
                       sep = "",
-                      paste(
+                      base64encode(paste(
                         collapse = " ",
                         sapply(
                           names(family.columns), 
                           function(fam) 
                             paste(
-                              base64encode(fam), 
-                              sapply(family.columns[[fam]], base64encode),
+                              fam, 
+                              family.columns[[fam]],
                               sep = ":", 
-                              collapse = " ")))),
+                              collapse = " "))))),
                   libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))})}
     if(is.null(streaming.format) && mode == "binary") 
       streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
