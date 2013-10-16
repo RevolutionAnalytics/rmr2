@@ -3,6 +3,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=9" >
 
 <title>RHadoop Tutorial</title>
 
@@ -289,7 +290,7 @@ hljs.initHighlightingOnLoad();
     input, 
     map = 
       function(k, v) {
-        filter = predicate(k, v); 
+        filter = predicate(k, v)
         keyval(k[filter], v[filter])}
 &rdquo;
 
@@ -350,7 +351,6 @@ hljs.initHighlightingOnLoad();
 
 <pre><code class="r">  group = function(x) x%%10
   aggregate = function(x) sum(x)
-  rmr.options(keyval.length=10^4)
 </code></pre>
 
 <pre><code class="r">  mapreduce(
@@ -385,11 +385,10 @@ wordcount =
     mapreduce(
       input = input ,
       output = output,
-      input.format = &quot;text&rdquo;,
       map = wc.map,
       reduce = wc.reduce,
       combine = T)}
-&ldquo;
+&rdquo;
 
 </ul>
 
@@ -398,7 +397,7 @@ wordcount =
 <ul class="incremental" style="list-style: none" >
 <li>
 
-&rdquo;r
+&ldquo;r
     wc.map = 
       function(., lines) {
         keyval(
@@ -407,15 +406,15 @@ wordcount =
               x = lines,
               split = pattern)),
           1)}
-&ldquo;
+&rdquo;
 
 <li>
 
-&rdquo;r
+&ldquo;r
     wc.reduce =
       function(word, counts ) {
         keyval(word, sum(counts))}
-&ldquo;
+&rdquo;
 
 </ul>
 
@@ -427,14 +426,14 @@ wordcount =
 
 <li>
 
-&rdquo;r
+&ldquo;r
 logistic.regression = 
   function(input, iterations, dims, alpha){
-&ldquo;
+&rdquo;
 
 <li>
 
-&rdquo;r
+&ldquo;r
   plane = t(rep(0, dims))
   g = function(z) 1/(1 + exp(-z))
   for (i in 1:iterations) {
@@ -448,7 +447,7 @@ logistic.regression =
             combine = T)))
     plane = plane + alpha * gradient }
   plane }
-&ldquo;
+&rdquo;
 
 </ul>
 
@@ -458,7 +457,7 @@ logistic.regression =
 
 <li>
 
-&rdquo;r
+&ldquo;r
   lr.map =          
     function(., M) {
       Y = M[,1] 
@@ -467,15 +466,15 @@ logistic.regression =
         1,
         Y * X * 
           g(-Y * as.numeric(X %*% t(plane))))}
-&ldquo;
+&rdquo;
 
 </li>
 
-&rdquo;r
+&ldquo;r
   lr.reduce =
     function(k, Z) 
       keyval(k, t(as.matrix(apply(Z,2,sum))))
-&ldquo;
+&rdquo;
 
 </ul>
 
@@ -485,7 +484,7 @@ logistic.regression =
 
 <li>
 
-&rdquo;r
+&ldquo;r
   eps = rnorm(test.size)
   testdata = 
     to.dfs(
@@ -494,14 +493,14 @@ logistic.regression =
           y = 2 * (eps > 0) - 1,
           x1 = 1:test.size, 
           x2 = 1:test.size + eps)))
-&ldquo;
+&rdquo;
 
 </li>
 
-&rdquo;r
+&ldquo;r
     logistic.regression(
       testdata, 3, 2, 0.05)
-&ldquo;
+&rdquo;
 
 </ul>
 
@@ -511,12 +510,11 @@ logistic.regression =
 
 <pre><code class="r">    dist.fun = 
       function(C, P) {
-        apply(C,
-              1, 
-              function(x) 
-                matrix(
-                  rowSums((t(t(P) - x))^2), 
-                  ncol = length(x)))}
+        apply(
+          C,
+          1, 
+          function(x) 
+            colSums((t(P) - x)^2))}
 </code></pre>
 
 <p>##</p>
@@ -532,7 +530,7 @@ logistic.regression =
           else {
             D = dist.fun(C, P)
             nearest = max.col(-D)}}
-        if(!(combine || in.mem.combine))
+        if(!(combine || in.memory.combine))
           keyval(nearest, P) 
         else 
           keyval(nearest, cbind(1, P))}
@@ -541,12 +539,14 @@ logistic.regression =
 <p>##</p>
 
 <pre><code class="r">    kmeans.reduce = {
-      if (!(combine || in.mem.combine) ) 
-        function(x, P) 
+      if (!(combine || in.memory.combine) ) 
+        function(., P) 
           t(as.matrix(apply(P, 2, mean)))
       else 
         function(k, P) 
-          keyval(k, t(as.matrix(apply(P, 2, sum))))}
+          keyval(
+            k, 
+            t(as.matrix(apply(P, 2, sum))))}
 </code></pre>
 
 <p>##</p>
@@ -557,7 +557,7 @@ logistic.regression =
     num.clusters, 
     num.iter, 
     combine, 
-    in.mem.combine) {
+    in.memory.combine) {
 </code></pre>
 
 <p>##</p>
@@ -571,9 +571,8 @@ logistic.regression =
               P, 
               map = kmeans.map,
               reduce = kmeans.reduce)))
-      if(combine || in.mem.combine)
+      if(combine || in.memory.combine)
         C = C[, -1]/C[, 1]
-      points(C, col = i + 1, pch = 19)
 </code></pre>
 
 <p>##</p>
@@ -584,7 +583,8 @@ logistic.regression =
             C,
             matrix(
               rnorm(
-                (num.clusters - nrow(C)) * nrow(C)), 
+                (num.clusters - 
+                   nrow(C)) * nrow(C)), 
               ncol = nrow(C)) %*% C) }}
         C}
 </code></pre>
@@ -594,7 +594,7 @@ logistic.regression =
 <ul class="incremental" style="list-style: none" >
 <li>
 
-&rdquo;r
+&ldquo;r
   P = 
     do.call(
       rbind, 
@@ -605,19 +605,18 @@ logistic.regression =
             ncol=2)), 
         20)) + 
     matrix(rnorm(200), ncol =2)
-  plot(P)
-&ldquo;
+&rdquo;
 
 <li>
 
-&rdquo;r
+&ldquo;r
     kmeans.mr(
       to.dfs(P),
-      num.clusters  = 12, 
-      num.iter= 5,
+      num.clusters = 12, 
+      num.iter = 5,
       combine = FALSE,
-      in.mem.combine = FALSE)
-&ldquo;
+      in.memory.combine = FALSE)
+&rdquo;
 
 </ul>
 
@@ -643,10 +642,12 @@ logistic.regression =
   values(
     from.dfs(
       mapreduce(
-        input = X,
+        input = X.index,
         map = 
-          function(., Xi) 
-            keyval(1, list(t(Xi) %*% Xi)),
+          function(., Xi) {
+            yi = y[Xi[,1],]
+            Xi = Xi[,-1]
+            keyval(1, list(t(Xi) %*% Xi))},
         reduce = Sum,
         combine = TRUE)))[[1]]
 </code></pre>
@@ -657,9 +658,11 @@ logistic.regression =
   values(
     from.dfs(
       mapreduce(
-        input = X,
-        map = function(., Xi)
-          keyval(1, list(t(Xi) %*% y)),
+        input = X.index,
+        map = function(., Xi) {
+          yi = y[Xi[,1],]
+          Xi = Xi[,-1]
+          keyval(1, list(t(Xi) %*% yi))},
         reduce = Sum,
         combine = TRUE)))[[1]]
 </code></pre>
@@ -670,17 +673,18 @@ logistic.regression =
 
 <li>
 
-&rdquo;r
+&ldquo;r
 solve(XtX, Xty)
-&ldquo;
+&rdquo;
 
 <li>   
 
 
-&rdquo;r
-X = to.dfs(matrix(rnorm(2000), ncol = 10))
+&ldquo;r
+X = matrix(rnorm(2000), ncol = 10)
+X.index = to.dfs(cbind(1:nrow(X), X))
 y = as.matrix(rnorm(200))
-&ldquo;
+&rdquo;
 
 </ul>
 
