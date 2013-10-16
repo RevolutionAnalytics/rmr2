@@ -81,9 +81,9 @@ for (be in c("local", "hadoop")) {
     map = 
       function(k, v) {
         filter = predicate(k, v)
-        keyval(k[filter], v[filter])}
+        keyval(k[filter], v[filter])})
 ## @knitr end                               
-          )}))
+          }))
   stopifnot(
     all(
       2*(1:(input.size/2)) == 
