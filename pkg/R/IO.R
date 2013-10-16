@@ -330,12 +330,13 @@ make.input.format =
                                 1:length(family.columns[[fam]]),
                                 function(i) 
                                   base64encode(
-                                    paste(
-                                      fam,
-                                      ":",
-                                      family.columns[[fam]][i],
-                                      sep = "",
-                                      collapse = ""))),
+                                    charToRaw(
+                                      paste(
+                                        fam,
+                                        ":",
+                                        family.columns[[fam]][i],
+                                        sep = "",
+                                        collapse = "")))),
                               sep = "",
                               collapse = " ")),
                         collapse = " "),
