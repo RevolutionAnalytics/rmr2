@@ -328,10 +328,11 @@ make.input.format =
                           names(family.columns), 
                           function(fam) 
                             paste(
-                              base64encode(fam), 
-                              sapply(family.columns[[fam]], base64encode),
-                              sep = ":", 
-                              collapse = " ")))),
+							sapply(1:length(family.columns[[fam]]),
+							function(w) 
+							base64encode(
+							paste(fam,":",family.columns[[fam]][w],sep = "",collapse = "")
+							)),sep="",collapse=" ")))),
                   libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))})}
     if(is.null(streaming.format) && mode == "binary") 
       streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
