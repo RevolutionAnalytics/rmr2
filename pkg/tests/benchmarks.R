@@ -166,8 +166,32 @@ for (be in c("local", "hadoop")) {
         function(k, vv) 
           keyval(k, aggregate(vv)),
       combine = TRUE)
-## @knitr end                                   
+## @knitr end        
       }))
+  report[[be]] =
+    rbind(
+      report[[be]],
+      df1 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1), data.frame(x =1:10^5))))))
+  report[[be]] =
+    rbind(
+      report[[be]],
+      df10 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:10), data.frame(x =1:10^5))))))
+  report[[be]] =
+    rbind(
+      report[[be]],
+      df100 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:100), data.frame(x =1:10^5))))))
+  report[[be]] =
+    rbind(
+      report[[be]],
+      df1000 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:1000), data.frame(x =1:10^5))))))
+  report[[be]] =
+    rbind(
+      report[[be]],
+      df10E4 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:10000), data.frame(x =1:10^5))))))
+  report[[be]] =
+    rbind(
+      report[[be]],
+      df10E5 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:100000), data.frame(x =1:10^5))))))
 }
 print(report)
 # 
