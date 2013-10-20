@@ -15,6 +15,10 @@
 #limitations under the License.
 
 
+if [ ! "$BASH_VERSION" ] ; then
+    exec /bin/bash "$0" "$@"
+fi
+
 ARGS=$(getopt -o h -l "hadoop_path:,hbase_path:" -n "build_linux.sh" -- "$@");
 eval set -- "$ARGS";
 
