@@ -40,7 +40,7 @@ wordcount =
         keyval(word, sum(counts))}
 ## @knitr wordcount-mapreduce
     mapreduce(
-      input = input ,
+      input = input,
       output = output,
       map = wc.map,
       reduce = wc.reduce,
