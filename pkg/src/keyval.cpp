@@ -44,7 +44,10 @@ int rmr_length(SEXP x) {
   if (_x.hasAttribute("class")) {
     if(Rcpp::as<std::string>(_x.attr("class")) == "data.frame") {
       Rcpp::List __x(x);
-      return Rf_length(__x[0]);}}
+      if(Rf_length(__x) == 0) {
+        return(0);}
+      else {
+        return(Rf_length(__x[0]));}}}
   return Rf_length(x);}
 
 SEXP sapply_rmr_length(SEXP xx) {
