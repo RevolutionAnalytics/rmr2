@@ -116,7 +116,7 @@
     input, 
     map = 
       function(k, v) {
-        filter = predicate(k, v); 
+        filter = predicate(k, v)
         keyval(k[filter], v[filter])}
 ```
 
@@ -182,7 +182,6 @@
 ```r
   group = function(x) x%%10
   aggregate = function(x) sum(x)
-  rmr.options(keyval.length=10^4)
 ```
 
 ## 
@@ -220,7 +219,6 @@ wordcount =
     mapreduce(
       input = input ,
       output = output,
-      input.format = "text",
       map = wc.map,
       reduce = wc.reduce,
       combine = T)}
@@ -349,12 +347,11 @@ logistic.regression =
 ```r
     dist.fun = 
       function(C, P) {
-        apply(C,
-              1, 
-              function(x) 
-                matrix(
-                  rowSums((t(t(P) - x))^2), 
-                  ncol = length(x)))}
+        apply(
+          C,
+          1, 
+          function(x) 
+            colSums((t(P) - x)^2))}
 ```
 
  
@@ -373,7 +370,7 @@ logistic.regression =
           else {
             D = dist.fun(C, P)
             nearest = max.col(-D)}}
-        if(!(combine || in.mem.combine))
+        if(!(combine || in.memory.combine))
           keyval(nearest, P) 
         else 
           keyval(nearest, cbind(1, P))}
@@ -385,12 +382,14 @@ logistic.regression =
 
 ```r
     kmeans.reduce = {
-      if (!(combine || in.mem.combine) ) 
-        function(x, P) 
+      if (!(combine || in.memory.combine) ) 
+        function(., P) 
           t(as.matrix(apply(P, 2, mean)))
       else 
         function(k, P) 
-          keyval(k, t(as.matrix(apply(P, 2, sum))))}
+          keyval(
+            k, 
+            t(as.matrix(apply(P, 2, sum))))}
 ```
 
 
@@ -404,7 +403,7 @@ kmeans.mr =
     num.clusters, 
     num.iter, 
     combine, 
-    in.mem.combine) {
+    in.memory.combine) {
 ```
 
 
@@ -421,9 +420,8 @@ kmeans.mr =
               P, 
               map = kmeans.map,
               reduce = kmeans.reduce)))
-      if(combine || in.mem.combine)
+      if(combine || in.memory.combine)
         C = C[, -1]/C[, 1]
-      points(C, col = i + 1, pch = 19)
 ```
 
 
@@ -437,7 +435,8 @@ kmeans.mr =
             C,
             matrix(
               rnorm(
-                (num.clusters - nrow(C)) * nrow(C)), 
+                (num.clusters - 
+                   nrow(C)) * nrow(C)), 
               ncol = nrow(C)) %*% C) }}
         C}
 ```
@@ -459,7 +458,6 @@ kmeans.mr =
             ncol=2)), 
         20)) + 
     matrix(rnorm(200), ncol =2)
-  plot(P)
 ```
 
 <li>
@@ -467,10 +465,10 @@ kmeans.mr =
 ```r
     kmeans.mr(
       to.dfs(P),
-      num.clusters  = 12, 
-      num.iter= 5,
+      num.clusters = 12, 
+      num.iter = 5,
       combine = FALSE,
-      in.mem.combine = FALSE)
+      in.memory.combine = FALSE)
 ```
 
 </ul>
@@ -502,10 +500,12 @@ XtX =
   values(
     from.dfs(
       mapreduce(
-        input = X,
+        input = X.index,
         map = 
-          function(., Xi) 
-            keyval(1, list(t(Xi) %*% Xi)),
+          function(., Xi) {
+            yi = y[Xi[,1],]
+            Xi = Xi[,-1]
+            keyval(1, list(t(Xi) %*% Xi))},
         reduce = Sum,
         combine = TRUE)))[[1]]
 ```
@@ -518,9 +518,11 @@ Xty =
   values(
     from.dfs(
       mapreduce(
-        input = X,
-        map = function(., Xi)
-          keyval(1, list(t(Xi) %*% y)),
+        input = X.index,
+        map = function(., Xi) {
+          yi = y[Xi[,1],]
+          Xi = Xi[,-1]
+          keyval(1, list(t(Xi) %*% yi))},
         reduce = Sum,
         combine = TRUE)))[[1]]
 ```
@@ -539,7 +541,8 @@ solve(XtX, Xty)
 
 
 ```r
-X = to.dfs(matrix(rnorm(2000), ncol = 10))
+X = matrix(rnorm(2000), ncol = 10)
+X.index = to.dfs(cbind(1:nrow(X), X))
 y = as.matrix(rnorm(200))
 ```
 

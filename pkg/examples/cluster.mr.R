@@ -12,64 +12,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-library(cluster)
 
+
+## @knitr cluster-napply
+library(cluster)
 napply = function(ll, a.name) lapply(ll, function(l) l[[a.name]])
 
+## @knitr cluster-mr
 cluster.mr = 
-  function(data, subcluster, merge) 
-    mapreduce(
-      data,
-      map = 
-        function(., data.chunk) {
-          rmr.str(data.chunk)
-          keyval(1, list(subcluster(data.chunk)))},
-      combine = T,
-      reduce = 
-        function(., clusters)
-          keyval(1, list(merge(clusters))))
+	function(data, subcluster, merge) 
+		mapreduce(
+			data,
+			map = 
+				function(., data.chunk) 
+					keyval(1, list(subcluster(data.chunk))),
+			combine = T,
+			reduce = 
+				function(., clusterings)
+					keyval(1, list(merge(clusterings))))
 
-
+## @knitr cluster-subclara
 subclara = 
-  function(n.clusters)
-    function(data) {
-      clust = 
-        clara(
-          rmr.str(data), 
-          n.clusters, 
-          keep.data=F)
-      list(
-        size = nrow(data),
-        sample = data[clust$sample,],
-        medoids = clust$medoids)}
+	function(data, n.centers) {
+		clust = 
+			clara(
+				data, 
+				n.centers, 
+				keep.data=F)
+		list(
+			size = nrow(data),
+			sample = data[clust$sample,],
+			medoids = clust$medoids)}
 
+## @knitr cluster-merge-clara
 merge.clara =
-  function(n.clusters)
-    function(clusters){
-      sizes = unlist(napply(clusters, 'size'))
-      total.size = sum(sizes)
-      size.range = range(sizes)
-      size.ratio = max(size.range)/min(size.range)
-      clust = 
-        subclara(n.clusters)(
-          do.call(
-            rbind, 
-            lapply(
-              clusters, 
-              function(x) 
-                x$sample[
-                  sample(
-                    1:nrow(x$sample), 
-                    round(nrow(x$sample) * size.ratio),
-                    replace = TRUE),
-                  ])))
-      clust$size = total.size
-      clust}        
+	function(clusterings, n.centers){
+		sizes = unlist(napply(clusterings, 'size'))
+		total.size = sum(sizes)
+		size.range = range(sizes)
+		size.ratio = max(size.range)/min(size.range)
+		resample = 
+			function(x) 
+				x$sample[
+					sample(
+						1:nrow(x$sample), 
+						round(nrow(x$sample) * size.ratio),
+						replace = TRUE)]
+		clust = 
+			subclara(
+				do.call(
+					rbind, 
+					lapply(
+						clusterings, 
+						resample)),
+				n.centers)
+		clust$size = total.size
+		clust}        
 
-clara.mr = function(data, n.clusters)
-  values(
-    from.dfs(
-      cluster.mr(
-        data, 
-        subclara(n.clusters), 
-        merge.clara(n.clusters))))[[1]]
+## @knitr cluster-clara
+clara.mr = 
+	function(data, n.centers)
+		values(
+			from.dfs(
+				cluster.mr(
+					data, 
+					Curry(subclara, n.centers = n.centers), 
+					Curry(merge.clara, n.centers = n.centers))))[[1]]

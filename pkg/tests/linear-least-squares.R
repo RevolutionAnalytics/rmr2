@@ -30,7 +30,6 @@ XtX =
         input = X.index,
         map = 
           function(., Xi) {
-            yi = y[Xi[,1],]
             Xi = Xi[,-1]
             keyval(1, list(t(Xi) %*% Xi))},
         reduce = Sum,
