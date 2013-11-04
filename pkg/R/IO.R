@@ -332,26 +332,25 @@ make.input.format =
                                 1:length(family.columns[[fam]]),
                                 function(i) 
                                   base64encode(
-                                    charToRaw(
                                       paste(
                                         fam,
                                         ":",
                                         family.columns[[fam]][i],
                                         sep = "",
-                                        collapse = "")))),
+                                        collapse = ""))),
                               sep = "",
                               collapse = " ")),
                         collapse = " "),
                       sep = ""),
-		  D = 
+                  D = 
                     paste(
                       "hbase.mapred.startrowb64=",
-                      base64encode(charToRaw(start.row)),
+                      base64encode(start.row),
                       sep = ""),
-		  D = 
+                  D = 
                     paste(
                       "hbase.mapred.stoprowb64=",
-                      base64encode(charToRaw(stop.row)),
+                      base64encode(stop.row),
                       sep = ""),
                   libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))})}
     if(is.null(streaming.format) && mode == "binary") 
