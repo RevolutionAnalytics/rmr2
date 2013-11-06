@@ -412,6 +412,10 @@ void serialize(const SEXP & object, raw & serialized, bool native) {
           Rcpp::IntegerVector data(object);  
           serialize_vector(data, 3, serialized, TRUE);}
         break;
+        case VECSXP: { //list
+          Rcpp::List data(object);
+          serialize_list(data, serialized);}
+        break;
         default:
           serialize_native(object, serialized);}}}
     else {
