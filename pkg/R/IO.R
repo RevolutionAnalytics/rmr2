@@ -98,7 +98,7 @@ make.typedbytes.input.format = function(recycle = TRUE) {
   read.size = 100
   function(con, keyval.length) {
     while(length(obj.buffer) < 2 || 
-      obj.buffer.rmr.length < keyval.length) {
+            obj.buffer.rmr.length < keyval.length) {
       raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
       if(length(raw.buffer) == 0) break;
       parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
@@ -113,12 +113,12 @@ make.typedbytes.input.format = function(recycle = TRUE) {
       read.size <<- ceiling(1.1^sign(keyval.length - obj.buffer.rmr.length) * read.size)
       if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
     straddler = list()
-    retval = 
+    retval = {
       if(length(obj.buffer) == 0) NULL 
       else { 
         if(length(obj.buffer)%%2 ==1) {
-           straddler = obj.buffer[length(obj.buffer)]
-           obj.buffer <<- obj.buffer[-length(obj.buffer)]}
+          straddler = obj.buffer[length(obj.buffer)]
+          obj.buffer <<- obj.buffer[-length(obj.buffer)]}
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
         if(recycle) {
@@ -126,11 +126,11 @@ make.typedbytes.input.format = function(recycle = TRUE) {
             c.or.rbind.rep(kk, sapply.rmr.length(vv)), 
             c.or.rbind(vv))}
         else {
-          keyval(kk, vv)}}
+          keyval(kk, vv)}}}
     obj.buffer <<- straddler
     obj.buffer.rmr.length <<- 0
     retval}}
-  
+
 make.native.input.format = make.typedbytes.input.format
 
 make.native.or.typedbytes.output.format = 
@@ -314,8 +314,8 @@ make.input.format =
           streaming.format = 
             "com.dappervision.hbase.mapred.TypedBytesTableInputFormat"
           family.columns = optlist$family.columns
-	  start.row = optlist$start.row
-	  stop.row = optlist$stop.row
+          start.row = optlist$start.row
+          stop.row = optlist$stop.row
           backend.parameters = 
             list(
               hadoop = 
