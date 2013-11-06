@@ -409,8 +409,8 @@ void serialize(const SEXP & object, raw & serialized, bool native) {
             serialize_many(data[i], 7, serialized);}}
         break; 
         case INTSXP: {
-            Rcpp::IntegerVector data(object);  
-            serialize_vector(data, 3, serialized, TRUE);}
+          Rcpp::IntegerVector data(object);  
+          serialize_vector(data, 3, serialized, TRUE);}
         break;
         default:
           serialize_native(object, serialized);}}}
