@@ -319,40 +319,46 @@ make.input.format =
           backend.parameters = 
             list(
               hadoop = 
-                list(
-                  D = 
-                    paste(
-                      "hbase.mapred.tablecolumnsb64=",
+                c(
+                  list(
+                    D = 
                       paste(
-                        sapply(
-                          names(family.columns), 
-                          function(fam) 
-                            paste(
-                              sapply(
-                                1:length(family.columns[[fam]]),
-                                function(i) 
-                                  base64encode(
+                        "hbase.mapred.tablecolumnsb64=",
+                        paste(
+                          sapply(
+                            names(family.columns), 
+                            function(fam) 
+                              paste(
+                                sapply(
+                                  1:length(family.columns[[fam]]),
+                                  function(i) 
+                                    base64encode(
                                       paste(
                                         fam,
                                         ":",
                                         family.columns[[fam]][i],
                                         sep = "",
                                         collapse = ""))),
-                              sep = "",
-                              collapse = " ")),
-                        collapse = " "),
-                      sep = ""),
-                  D = 
-                    paste(
-                      "hbase.mapred.startrowb64=",
-                      base64encode(start.row),
-                      sep = ""),
-                  D = 
-                    paste(
-                      "hbase.mapred.stoprowb64=",
-                      base64encode(stop.row),
-                      sep = ""),
-                  libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))})}
+                                sep = "",
+                                collapse = " ")),
+                          collapse = " "),
+                        sep = "")),
+                  if(!is.null(start.row))
+                    list(
+                      D = 
+                        paste(
+                          "hbase.mapred.startrowb64=",
+                          base64encode(start.row),
+                          sep = "")),
+                  if(!is.null(stop.row))
+                    list(
+                      D = 
+                        paste(
+                          "hbase.mapred.stoprowb64=",
+                          base64encode(stop.row),
+                          sep = "")),
+                  list(
+                    libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))})}
     if(is.null(streaming.format) && mode == "binary") 
       streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
     list(mode = mode, 
@@ -439,6 +445,6 @@ make.output.format =
                     ":", 
                     list(...)$column, 
                     sep = ""),
-                libjars = system.file(package = "rmr2", "java/hadoopy_hbase.jar")))})}
+                  libjars = system.file(package = "rmr2", "java/hadoopy_hbase.jar")))})}
     mode = match.arg(mode)
     list(mode = mode, format = format, streaming.format = streaming.format, backend.parameters = backend.parameters)}
