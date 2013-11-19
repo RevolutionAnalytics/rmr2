@@ -41,7 +41,7 @@ length.keyval =
 keyval = 
   function(key, val = NULL) {
     if(missing(val)) list(key = NULL, val = key)
-    else list(key = key, val = val)}
+    else recycle.keyval(list(key = key, val = val))}
 
 keys = function(kv) kv$key
 values = function(kv) kv$val
@@ -95,7 +95,6 @@ recycle.keyval =
 
 slice.keyval = 
   function(kv, r) {
-    kv = recycle.keyval(kv)
     keyval(rmr.slice(keys(kv), r),
            rmr.slice(values(kv), r))}
 
@@ -177,7 +176,6 @@ c.keyval =
     if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) {
       rmr.str(kvs)
       stop("can't mix NULL and not NULL key keyval pairs")}
-    kvs = lapply(kvs, recycle.keyval)
     vv = lapply.values(kvs)
     kk = lapply.keys(kvs)
     keyval(c.or.rbind(kk), c.or.rbind(vv))})
@@ -234,11 +232,9 @@ split.keyval = function(kv, size) {
   else {
     if(is.null(k)) {
       k =  ceiling(1:rmr.length(v)/size)
-      recycle.keyval(
         keyval(list(NULL),
-               unname(rmr.split(v, k))))}
+               unname(rmr.split(v, k)))}
     else {
-      kv = recycle.keyval(kv)
       k = keys(kv)
       v = values(kv)
       ind = {

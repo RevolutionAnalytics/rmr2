@@ -72,7 +72,6 @@ make.csv.input.format = function(...) function(con, keyval.length) {
   else keyval(NULL, df)}
 
 make.csv.output.format = function(...) function(kv, con) {
-  kv = recycle.keyval(kv)
   k = keys(kv)
   v = values(kv)
   write.table(file = con, 
@@ -91,7 +90,7 @@ typedbytes.writer = function(objects, con, native) {
     .Call("typedbytes_writer", objects, native, PACKAGE = "rmr2"),
     con)}
 
-make.typedbytes.input.format = function(recycle = TRUE) {
+make.typedbytes.input.format = function() {
   obj.buffer = list()
   obj.buffer.rmr.length = 0
   raw.buffer = raw()
@@ -121,12 +120,7 @@ make.typedbytes.input.format = function(recycle = TRUE) {
           obj.buffer <<- obj.buffer[-length(obj.buffer)]}
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
-        if(recycle) {
-          keyval(
-            c.or.rbind.rep(kk, sapply.rmr.length(vv)), 
-            c.or.rbind(vv))}
-        else {
-          keyval(kk, vv)}}}
+        keyval(kk, vv)}}
     obj.buffer <<- straddler
     obj.buffer.rmr.length <<- 0
     retval}}
