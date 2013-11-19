@@ -72,7 +72,7 @@ named.slice = function(x, n) x[which(names(x) == n)]
 
 mapply.list = function(...) mapply(FUN = list, SIMPLIFY=FALSE, ...)
 
-tlist = function(l) if(!is.null(l))splat(mapply.list)(l)
+t.list = function(l) if(!is.null(l))splat(mapply.list)(l)
 
 #data frame manip
 
