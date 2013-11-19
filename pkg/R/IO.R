@@ -133,14 +133,36 @@ make.typedbytes.input.format = function(recycle = TRUE) {
 
 make.native.input.format = make.typedbytes.input.format
 
-make.native.or.typedbytes.output.format = 
-  function(keyval.length, native)
-    function(kv, con){
-      kvs = split.keyval(kv, keyval.length)
-      typedbytes.writer(interleave(keys(kvs), values(kvs)), con, native)}
+row.first = 
+  function(x) {
+    if (is.matrix(x)) x = as.data.frame(x)
+    if (is.data.frame(x)) x = t.list(x)
+    x}
 
-make.native.output.format = Curry(make.native.or.typedbytes.output.format, native = TRUE)
-make.typedbytes.output.format = Curry(make.native.or.typedbytes.output.format, native = FALSE)
+make.native.or.typedbytes.output.format = 
+  function(keyval.length, native) {
+    meta = NULL;
+    function(kv, con){
+      k = keys(kv)
+      v = values(kv)
+      if(
+        is.null(meta) && 
+          (!is.null(attributes(k)) || !is.null(attributes(v)))) {
+        meta <<- keyval(list(attributes(k)), list(attributes(v)))
+        fname = summary(con)$description  
+        if(fname != "stdout")
+          to.dfs(meta, output=file.path(dirname(fname), "_rmr2.meta"))}
+      typedbytes.writer(
+        interleave(
+          row.first(k), 
+          row.first(v)), 
+        con, 
+        native)}}
+
+make.native.output.format = 
+  Curry(make.native.or.typedbytes.output.format, native = TRUE)
+make.typedbytes.output.format = 
+  Curry(make.native.or.typedbytes.output.format, native = FALSE)
 
 pRawToChar = 
   function(rl)
