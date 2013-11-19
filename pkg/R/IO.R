@@ -135,7 +135,7 @@ row.first =
 
 make.native.or.typedbytes.output.format = 
   function(keyval.length, native) {
-    meta = NULL;
+    meta = NULL
     function(kv, con){
       k = keys(kv)
       v = values(kv)
