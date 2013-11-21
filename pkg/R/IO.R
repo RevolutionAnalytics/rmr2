@@ -127,11 +127,14 @@ make.typedbytes.input.format = function() {
 
 make.native.input.format = make.typedbytes.input.format
 
-row.first = 
+to.list = 
   function(x) {
-    if (is.matrix(x)) x = as.data.frame(x)
-    if (is.data.frame(x)) x = t.list(x)
-    x}
+    if (is.null(x))
+      list(x)
+    else {
+      if (is.matrix(x)) x = as.data.frame(x)
+      if (is.data.frame(x)) x = t.list(unname(x))
+      as.list(x)}}
 
 make.native.or.typedbytes.output.format = 
   function(keyval.length, native) {
