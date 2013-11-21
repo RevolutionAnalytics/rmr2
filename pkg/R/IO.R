@@ -145,15 +145,14 @@ make.native.or.typedbytes.output.format =
       if(
         is.null(meta) && 
           (!is.null(attributes(k)) || !is.null(attributes(v)))) {
-        meta <<- keyval(list(attributes(k)), list(attributes(v)))
-        fname = summary(con)$description  
-        if(fname != "stdout")
-          to.dfs(meta, output=file.path(dirname(fname), "_rmr2.meta"))}
+        meta <<- list(key = rmr.slice(k,0), val = rmr.slice(k,0))
+        save(meta, file = con[[2]])
+        close(con[[2]])}
       typedbytes.writer(
         interleave(
-          row.first(k), 
-          row.first(v)), 
-        con, 
+          to.list(k), 
+          to.list(v)), 
+        con[[1]], 
         native)}}
 
 make.native.output.format = 
