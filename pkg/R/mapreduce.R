@@ -222,6 +222,8 @@ to.dfs =
         close(con)}
     
     write.file(kv, tmp)      
+    rm(keyval.writer)
+    gc() # enough to close dead connections
     if(rmr.options('backend') == 'hadoop') {
       if(format$mode == "binary")
         system(paste(hadoop.streaming(),  "loadtb", dfsOutput, "<", tmp))
