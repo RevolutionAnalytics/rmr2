@@ -66,27 +66,29 @@ rmr.slice =
       x[r]}
 
 rmr.recycle = 
-  function(x,y) {
-    lx = rmr.length(x)
-    ly = rmr.length(y)
-    if(lx == ly) x
+  function(this, upto) {
+    if(is.null(this))
+      this = list(NULL)
+    l.this = rmr.length(this)
+    l.upto = if(is.null(upto)) 1 else rmr.length(upto)
+    if(l.this == l.upto) this
     else {
-      if(min(lx,ly) == 0){
-        rmr.str(lx)
-        rmr.str(ly)
+      if(min(l.this,l.upto) == 0){
+        rmr.str(l.this)
+        rmr.str(l.upto)
         stop("Can't recycle 0-length argument")}
       else
         rmr.slice(
           rmr.slice(
-            x,
-            rep(1:rmr.length(x), ceiling(ly/lx))),
-          1:max(ly, lx))}}
+            this,
+            rep(1:rmr.length(this), ceiling(l.upto/l.this))),
+          1:max(l.upto, l.this))}}
 
 recycle.keyval =
   function(kv) {
     k = keys(kv)
     v = values(kv)
-    if(is.null(k) || (rmr.length(k) == rmr.length(v)))
+    if((rmr.length(k) == rmr.length(v)))
       kv
     else
       keyval(
