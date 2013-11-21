@@ -272,37 +272,42 @@ open.stdinout =
           "cat"}
       pipe(cat, ifelse(is.read, "rb", "wb"))}}
 
+#opens all required connections for a format. If in a task, replace first connection with stdin or out and
+#make all the other names unique before opening
 make.keyval.readwriter = 
-  function(mode, format, keyval.length, con = NULL, read) {
-    if(is.null(con)) 
-      con = {
-        if(mode == "text") { 
-          if(read)  file("stdin", "r") #not stdin() which is parsed by the interpreter
-          else stdout()}
-        else {
-          cat  = {
-            if(.Platform$OS.type == "windows")
+  function(fname, format, keyval.length, is.read) {
+    if(!is.null(format$sections)) {
+      if(!is.read) dfs.mkdir(fname)
+      fname = file.path(fname, format$sections) }
+    con = list()
+    if(in.a.task()){
+      con[[1]] = open.stdinout(format$mode, is.read)
+      fname = fname[-1]}
+    con = 
+      c(
+        con,
+        lapply(
+          if(in.a.task())
+            paste(fname, current_task(), sep = "_")
+          else
+            fname,
+          function(fn) 
+            file(
+              fn, 
               paste(
-                "\"", 
-                system.file(
-                  package="rmr2", 
-                  "bin", 
-                  .Platform$r_arch, 
-                  "catwin.exe"), 
-                "\"", 
-                sep="")
-            else
-              "cat"}
-          pipe(cat, ifelse(read, "rb", "wb"))}}
-    if (read) {
+                if(is.read) "r" else "w", 
+                if(format$mode=="text") "" else "b"))))
+    if (is.null(format$sections))
+      con = con[[1]]
+    if (is.read) {
       function() 
-        format(con, keyval.length)}
+        format$format(con, keyval.length)}
     else {
       function(kv)
-        format(kv, con)}}
+        format$format(kv, con)}}
 
-make.keyval.reader = Curry(make.keyval.readwriter, read = TRUE)
-make.keyval.writer = Curry(make.keyval.readwriter, keyval.length = NULL, read = FALSE)
+make.keyval.reader = Curry(make.keyval.readwriter, is.read = TRUE)
+make.keyval.writer = Curry(make.keyval.readwriter, keyval.length = NULL, is.read = FALSE)
 
 IO.formats = c("text", "json", "csv", "native",
                "sequence.typedbytes", "hbase", 
