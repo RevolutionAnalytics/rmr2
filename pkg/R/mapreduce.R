@@ -194,6 +194,11 @@ to.dfs.path =
       if(is.function(input)) {
         input()}}}
 
+loadtb = 
+  function(inf, outf)
+    system(paste(hadoop.streaming(),  "loadtb", outf, "<", inf))
+
+
 to.dfs = 
   function(
     kv, 
