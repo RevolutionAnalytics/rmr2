@@ -231,7 +231,7 @@ make.hbase.input.format =
         deser}
     key.deserialize = deserialize.opt(key.deserialize)
     cell.deserialize = deserialize.opt(cell.deserialize)
-    tif = make.typedbytes.input.format(recycle = FALSE)
+    tif = make.typedbytes.input.format()
     if(is.null(dense)) dense = FALSE
     function(con, keyval.length) {
       rec = tif(con, keyval.length)
