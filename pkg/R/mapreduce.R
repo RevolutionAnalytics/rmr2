@@ -208,36 +208,36 @@ to.dfs =
       warning("Converting to.dfs argument to keyval with a NULL key")
     kv = as.keyval(kv)
     tmp = tempfile()
-    dfsOutput = to.dfs.path(output)
-    if(is.character(format)) format = make.output.format(format)
-    
-    write.file = 
-      function(kv, fname) {
-        con = file(fname, if(format$mode == "text") "w" else "wb")
-        keyval.writer = make.keyval.writer(format$mode, 
-                                           format$format, 
-                                           con)
-        keyval.writer(kv)
-        
-        close(con)}
-    
-    write.file(kv, tmp)      
+    dfs.output = to.dfs.path(output)
+    if(is.character(format)) 
+      format = make.output.format(format)
+    keyval.writer = make.keyval.writer(tmp, format)
+    keyval.writer(kv)
     rm(keyval.writer)
     gc() # enough to close dead connections
+    move.results = 
+      function(action) {
+        if(is.null(format$sections))
+          action(tmp, dfs.output)
+        else 
+          lapply(
+            format$sections, 
+            function(s) 
+              action(file.path(tmp, s), file.path(dfs.output, s)))}
     if(rmr.options('backend') == 'hadoop') {
-      if(format$mode == "binary")
-        system(paste(hadoop.streaming(),  "loadtb", dfsOutput, "<", tmp))
-      else  hdfs.put(tmp, dfsOutput)}
-    else {
-      if(file.exists(dfsOutput))
-        stop("Can't overwrite ", dfsOutput)
-      else
-        file.copy(tmp, dfsOutput, overwrite = FALSE)}
+      if(format$mode == "binary") 
+        move.results(loadtb)
+      else   #text
+        move.results(hdfs.put) }
+    else { #local
+      if(file.exists(dfs.output))
+        stop("Can't overwrite ", dfs.output)
+      dfs.mkdir(dfs.output)
+      move.results(file.copy) }
     file.remove(tmp)
     output}
 
 from.dfs = function(input, format = "native") {
-  
   read.file = function(fname) {
     con = file(fname, if(format$mode == "text") "r" else "rb")
     keyval.reader = make.keyval.reader(format$mode, format$format, rmr.options('keyval.length'), con)
@@ -283,7 +283,13 @@ from.dfs = function(input, format = "native") {
 
 in.a.task = 
   function()
-    Sys.getenv("mapred_task_id") != ""
+    !is.null(current.task())
+
+current.task = 
+  function() {
+    id = Sys.getenv("mapred_task_id")
+    if (id == "") NULL else id }
+
 
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   if(is.null(tmpdir)) { 
