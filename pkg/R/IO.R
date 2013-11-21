@@ -318,9 +318,10 @@ make.input.format =
     format = make.native.input.format(), 
     mode = c("binary", "text"),
     streaming.format = NULL, 
+    backend.parameters = NULL,
+    sections = NULL,
     ...) {
     mode = match.arg(mode)
-    backend.parameters = NULL
     if(is.character(format)) {
       format = match.arg(format, IO.formats)
       switch(
@@ -336,7 +337,8 @@ make.input.format =
           mode = "text"}, 
         native = {
           format = make.native.input.format() 
-          mode = "binary"}, 
+          mode = "binary"
+          sections = c("data", "_meta")}, 
         sequence.typedbytes = {
           format = make.typedbytes.input.format() 
           mode = "binary"},
@@ -411,7 +413,8 @@ make.input.format =
     list(mode = mode, 
          format = format, 
          streaming.format = streaming.format, 
-         backend.parameters = backend.parameters)}
+         backend.parameters = backend.parameters,
+         sections = sections)}
 
 set.separator.options =
   function(sep) {
@@ -440,9 +443,10 @@ make.output.format =
     format = make.native.output.format(keyval.length = rmr.options('keyval.length')),
     mode = c("binary", "text"),
     streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat", 
+    backend.parameters = NULL,
+    sections = NULL,
     ...) {
     mode = match.arg(mode)
-    backend.parameters = NULL
     if(is.character(format)) {
       format = match.arg(format, IO.formats)
       switch(
@@ -472,14 +476,15 @@ make.output.format =
           format = make.native.output.format(
             keyval.length = rmr.options('keyval.length'))
           mode = "binary"
-          streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"}, 
+          streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"
+          sections = c("data", "_meta")}, 
         sequence.typedbytes = {
           format = make.typedbytes.output.format(keyval.length = rmr.options('keyval.length'))
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"},
         hbase = {
           stop("hbase output format not implemented yet")
-          format = make.typedbytes.output.format(recycle = FALSE)
+          format = make.typedbytes.output.format()
           mode = "binary"
           streaming.format = "com.dappervision.mapreduce.TypedBytesTableOutputFormat"
           backend.parameters = 
@@ -494,4 +499,9 @@ make.output.format =
                     sep = ""),
                   libjars = system.file(package = "rmr2", "java/hadoopy_hbase.jar")))})}
     mode = match.arg(mode)
-    list(mode = mode, format = format, streaming.format = streaming.format, backend.parameters = backend.parameters)}
+    list(
+      mode = mode, 
+      format = format, 
+      streaming.format = streaming.format, 
+      backend.parameters = backend.parameters, 
+      sections = sections)}
