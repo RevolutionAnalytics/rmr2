@@ -222,27 +222,26 @@ rmr.stream = function(
     input.reader = 
       function()
         rmr2:::make.keyval.reader(
-          input.format$mode, 
-          input.format$format, 
+          in.folder,
+          input.format, 
           keyval.length = keyval.length)
     output.writer = 
       function()
         rmr2:::make.keyval.writer(
-          output.format$mode, 
-          output.format$format)
+          out.folder,
+          output.format)
       
     default.reader = 
       function() 
         rmr2:::make.keyval.reader(
-          default.input.format$mode, 
-          default.input.format$format, 
+          some-tmp-file,
+          default.input.format, 
           keyval.length = keyval.length)
     default.writer = 
       function() 
         rmr2:::make.keyval.writer(
-          default.output.format$mode, 
-          default.output.format$format)
- 
+          some-tmp-file,
+          default.output.format)
   ')  
   map.line = '  
   rmr2:::map.loop(
