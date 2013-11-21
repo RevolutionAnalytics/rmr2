@@ -248,6 +248,30 @@ data.frame.to.nested.map = function(x,ind) {
 
 hbdf.to.m3 = Curry(data.frame.to.nested.map, ind = c("key", "family", "column"))
 # I/O 
+
+open.stdinout = 
+  function(mode, is.read) {
+    if(mode == "text") { 
+      if(is.read)  
+        file("stdin", "r") #not stdin() which is parsed by the interpreter
+      else 
+        stdout()}
+    else { # binary
+      cat  = {
+        if(.Platform$OS.type == "windows")
+          paste(
+            "\"", 
+            system.file(
+              package="rmr2", 
+              "bin", 
+              .Platform$r_arch, 
+              "catwin.exe"), 
+            "\"", 
+            sep="")
+        else
+          "cat"}
+      pipe(cat, ifelse(is.read, "rb", "wb"))}}
+
 make.keyval.readwriter = 
   function(mode, format, keyval.length, con = NULL, read) {
     if(is.null(con)) 
