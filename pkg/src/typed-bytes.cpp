@@ -325,7 +325,7 @@ SEXP typedbytes_reader(SEXP data, SEXP _nobjs){
     catch (ReadPastEnd rpe){
       break;}
 		catch (UnsupportedType ue) {
-      safe_stop("Unsupported type: " + to_string(ue.type_code));}
+      safe_stop("Unsupported type: " + to_string((int)ue.type_code));}
 		catch (NegativeLength nl) {
       safe_stop("Negative length exception");}}
   Rcpp::List list_tmp(objs.begin(), objs.begin() + objs_end);
@@ -513,6 +513,6 @@ SEXP typedbytes_writer(SEXP objs, SEXP native){
     try{
       serialize(Rcpp::wrap(*i), serialized, is_native[0]);}
     catch(UnsupportedType ut){
-      safe_stop("Unsupported type: " + (int)ut.type_code);}}
+      safe_stop("Unsupported type: " + to_string((int)ut.type_code));}}
 	return Rcpp::wrap(serialized);}	
 
