@@ -61,6 +61,7 @@ text.output.format = function(kv, con) {
   out = reduce.keyval(kv, ser, length.keyval(kv))
   writeLines(paste(out, "\n", collapse="", sep = ""), sep = "", con = con)}
 
+make.csv.input.format = function(...) function(con, read.size) {
   df = 
     tryCatch(
       read.table(file = con, nrows = read.size, header = FALSE, ...),
