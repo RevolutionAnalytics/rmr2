@@ -246,7 +246,6 @@ from.dfs = function(input, format = "native") {
     while(!is.null(kv)) {
       retval(list(kv))
       kv = keyval.reader()}
-    close(con)
     c.keyval(retval())}
   
   dumptb = function(src, dest){
@@ -271,8 +270,13 @@ from.dfs = function(input, format = "native") {
   if(is.character(format)) format = make.input.format(format)
   if(rmr.options("backend") == "hadoop") {
     tmp = tempfile()
-    if(format$mode == "binary") dumptb(part.list(fname), tmp)
-    else getmerge(part.list(fname), tmp)}
+    if(!is.null(format$sections))
+      dir.create(tmp)
+    if(format$mode == "binary") 
+      dumptb(part.list(fname), tmp)
+    else getmerge(part.list(fname), tmp)
+    if(!is.null(format$sections))
+      lapply(file.path(fname, format$sections), function(fn) rmr2:::hdfs.get(fn, tmp))}
   else
     tmp = fname
   retval = read.file(tmp)
