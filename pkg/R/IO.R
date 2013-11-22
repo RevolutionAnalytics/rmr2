@@ -42,7 +42,9 @@ make.json.input.format =
                  else 
                    keyval(process.field(x[1], key.class), process.field(x[2], value.class))))}}}
 
-json.output.format = function(kv, con) {
+
+json.output.format = 
+  function(kv, con) {
   ser = function(k, v) paste(gsub("\n", "", toJSON(k, .escapeEscapes=TRUE, collapse = "")),
                              gsub("\n", "", toJSON(v, .escapeEscapes=TRUE, collapse = "")),
                              sep = "\t")
