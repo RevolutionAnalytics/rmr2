@@ -26,7 +26,7 @@ mr.local = function(
   verbose) {
   
   profile.nodes = rmr.options("profile.nodes")
-  keyval.length = rmr.options("keyval.length")
+  read.size = rmr.options("read.size")
   get.data =
     function(fname) {
       kv = from.dfs(fname, format = input.format)
@@ -44,7 +44,7 @@ mr.local = function(
               unname(
                 tapply(
                   1:length.keyval(kv),
-                  floor(1:length.keyval(kv)/keyval.length),
+                  floor(1:length.keyval(kv)/1000),
                   function(r) {
                     kvr = slice.keyval(kv, r)
                     as.keyval(map(keys(kvr),values(kvr)))},

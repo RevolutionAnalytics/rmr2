@@ -29,8 +29,8 @@ make.json.input.format =
     process.field = 
       function(field, class)
         cast(class)(fromJSON(field, asText = TRUE))
-    function(con, keyval.length) {
-      lines = readLines(con, keyval.length)
+    function(con, read.size) {
+      lines = readLines(con, read.size)
       if (length(lines) == 0) NULL
       else {
         splits =  strsplit(lines, "\t")
@@ -46,11 +46,11 @@ json.output.format = function(kv, con) {
   ser = function(k, v) paste(gsub("\n", "", toJSON(k, .escapeEscapes=TRUE, collapse = "")),
                              gsub("\n", "", toJSON(v, .escapeEscapes=TRUE, collapse = "")),
                              sep = "\t")
-  out = reduce.keyval(kv, ser, rmr.options('keyval.length'))
+  out = reduce.keyval(kv, ser, 1000)
   writeLines(paste(out, collapse = "\n"), sep = "", con = con)}
 
-text.input.format = function(con, keyval.length) {
-  lines = readLines(con, keyval.length)
+text.input.format = function(con, read.size) {
+  lines = readLines(con, read.size)
   if (length(lines) == 0) NULL
   else keyval(NULL, lines)}
 
@@ -59,10 +59,9 @@ text.output.format = function(kv, con) {
   out = reduce.keyval(kv, ser, length.keyval(kv))
   writeLines(paste(out, "\n", collapse="", sep = ""), sep = "", con = con)}
 
-make.csv.input.format = function(...) function(con, keyval.length) {
   df = 
     tryCatch(
-      read.table(file = con, nrows = keyval.length, header = FALSE, ...),
+      read.table(file = con, nrows = read.size, header = FALSE, ...),
       error = 
         function(e) {
           if(e$message != "no lines available in input")
@@ -233,8 +232,8 @@ make.hbase.input.format =
     cell.deserialize = deserialize.opt(cell.deserialize)
     tif = make.typedbytes.input.format()
     if(is.null(dense)) dense = FALSE
-    function(con, keyval.length) {
-      rec = tif(con, keyval.length)
+    function(con, read.size) {
+      rec = tif(con, read.size)
       if(is.null(rec)) NULL
       else {
         df = hbase.rec.to.data.frame(rec, atomic, dense, key.deserialize, cell.deserialize)
@@ -275,7 +274,7 @@ open.stdinout =
 #opens all required connections for a format. If in a task, replace first connection with stdin or out and
 #make all the other names unique before opening
 make.keyval.readwriter = 
-  function(fname, format, keyval.length, is.read) {
+  function(fname, format, read.size, is.read) {
     if(!is.null(format$sections)) {
       if(!is.read) dfs.mkdir(fname)
       fname = file.path(fname, format$sections) }
@@ -301,13 +300,13 @@ make.keyval.readwriter =
       con = con[[1]]
     if (is.read) {
       function() 
-        format$format(con, keyval.length)}
+        format$format(con, read.size)}
     else {
       function(kv)
         format$format(kv, con)}}
 
 make.keyval.reader = Curry(make.keyval.readwriter, is.read = TRUE)
-make.keyval.writer = Curry(make.keyval.readwriter, keyval.length = NULL, is.read = FALSE)
+make.keyval.writer = Curry(make.keyval.readwriter, read.size = NULL, is.read = FALSE)
 
 IO.formats = c("text", "json", "csv", "native",
                "sequence.typedbytes", "hbase", 
@@ -440,7 +439,7 @@ set.separator.options =
 
 make.output.format = 
   function(
-    format = make.native.output.format(keyval.length = rmr.options('keyval.length')),
+    format = make.native.output.format(),
     mode = c("binary", "text"),
     streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat", 
     backend.parameters = NULL,
@@ -473,13 +472,12 @@ make.output.format =
           mode = "text"
           streaming.format = NULL}, 
         native = {
-          format = make.native.output.format(
-            keyval.length = rmr.options('keyval.length'))
+          format = make.native.output.format()
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"
           sections = c("data", "_meta")}, 
         sequence.typedbytes = {
-          format = make.typedbytes.output.format(keyval.length = rmr.options('keyval.length'))
+          format = make.typedbytes.output.format(read.size = rmr.options('read.size'))
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"},
         hbase = {

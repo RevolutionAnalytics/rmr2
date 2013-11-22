@@ -150,7 +150,6 @@ for (be in c("local", "hadoop")) {
   group = function(x) x%%10
   aggregate = function(x) sum(x)
 ## @knitr end  
-  rmr.options(keyval.length=10^4)
   report[[be]] =
     rbind(
       report[[be]],
