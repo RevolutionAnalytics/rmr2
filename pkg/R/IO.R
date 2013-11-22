@@ -93,22 +93,12 @@ make.typedbytes.input.format = function() {
   obj.buffer = list()
   obj.buffer.rmr.length = 0
   raw.buffer = raw()
-  read.size = 100
-  function(con, keyval.length) {
-    while(length(obj.buffer) < 2 || 
-            obj.buffer.rmr.length < keyval.length) {
-      raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
+  function(con, read.size) {
+    while(length(obj.buffer) < 2) {
+      raw.buffer <<- c(raw.buffer, readBin(con[[1]], raw(), read.size))
       if(length(raw.buffer) == 0) break;
-      parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
+      parsed = typedbytes.reader(raw.buffer, as.integer(read.size/20)) 
       obj.buffer <<- c(obj.buffer, parsed$objects)
-      approx.read.records = {
-        if(length(parsed$objects) == 0) 0 
-        else 
-          sum(
-            sapply(sample(parsed$objects, 10, replace = T), rmr.length)) * 
-          length(parsed$objects)/10.0 }
-      obj.buffer.rmr.length <<- obj.buffer.rmr.length + approx.read.records 
-      read.size <<- ceiling(1.1^sign(keyval.length - obj.buffer.rmr.length) * read.size)
       if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
     straddler = list()
     retval = {
