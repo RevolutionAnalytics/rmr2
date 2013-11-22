@@ -275,6 +275,14 @@ SEXP unserialize(const raw & data, int & start, int type_code){
     case R_NATIVE: 
       new_object = unserialize_native(data, start);
       break;
+    case R_WITH_ATTRIBUTES: {
+      get_length(data, start);
+      new_object = unserialize(data, start, 255);
+      Rcpp::CharacterVector names(unserialize(data, start, 255));
+      Rcpp::List attributes(unserialize(data, start, 255));
+      for(int i = 0; i < names.size(); i++) {
+        new_object.attr(Rcpp::as<std::string>(names[i])) = attributes[i];}}
+      break;
     case R_VECTOR: {
       int raw_length = get_length(data, start);
       int vec_type_code  = get_type(data, start);
@@ -486,9 +494,11 @@ void serialize_noattr(const SEXP & object, raw & serialized, bool native) {
 void serialize_attributes(const SEXP & object, raw & serialized) {
   Rcpp::RObject robj(object);
   std::vector<std::string> names = robj.attributeNames();
+  serialize(Rcpp::wrap(names), serialized, TRUE);
+  std::vector<SEXP> attributes;
   for(int i = 0; i < names.size(); i++) {
-    serialize(Rcpp::wrap(names[i]), serialized, TRUE);
-    serialize(Rcpp::wrap(robj.attr(names[i])), serialized, TRUE);}}
+    attributes.push_back(Rcpp::wrap(robj.attr(names[i])));}
+  serialize(Rcpp::wrap(attributes), serialized, TRUE);}
   
 void serialize(const SEXP & object, raw & serialized, bool native) {
   Rcpp::RObject robj(object);
