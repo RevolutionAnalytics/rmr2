@@ -268,6 +268,10 @@ SEXP unserialize(const raw & data, int & start, int type_code){
     case TB_MAP: 
       new_object = unserialize_map(data, start);
       break;
+    case R_NULL:{
+      new_object = R_NilValue;
+      get_length(data, start);} 
+      break;
     case R_NATIVE: 
       new_object = unserialize_native(data, start);
       break;
