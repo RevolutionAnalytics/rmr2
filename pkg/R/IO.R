@@ -92,6 +92,26 @@ typedbytes.writer = function(objects, con, native) {
     .Call("typedbytes_writer", objects, native, PACKAGE = "rmr2"),
     con)}
 
+to.data.frame = 
+  function(x, template){
+    x = t.list(x)
+    y = 
+      lapply(
+        seq_along(x), 
+        function(i)
+          if(is.atomic(template[[i]])) unlist(x[[i]]) else x[[i]])
+    names(y) = names(template)
+    data.frame(y)}
+
+from.list = 
+  function (x, template) {
+    switch(
+      class(template),
+      list = x,
+      matrix = as.matrix(to.data.frame(x, as.data.frame(template))), 
+      data.frame = to.data.frame(x, template),
+      unlist(x))}
+
 make.typedbytes.input.format = function() {
   obj.buffer = list()
   obj.buffer.rmr.length = 0
@@ -112,9 +132,11 @@ make.typedbytes.input.format = function() {
           obj.buffer <<- obj.buffer[-length(obj.buffer)]}
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
-        keyval(kk, vv)}}
+        load(con[[2]])
+        keyval(
+          from.list(kk, template[[1]]),
+          from.list(vv, template[[2]]))}}
     obj.buffer <<- straddler
-    obj.buffer.rmr.length <<- 0
     retval}}
 
 make.native.input.format = make.typedbytes.input.format
@@ -129,16 +151,14 @@ to.list =
       as.list(x)}}
 
 make.native.or.typedbytes.output.format = 
-  function(keyval.length, native) {
-    meta = NULL
+  function(native) {
+    template = NULL
     function(kv, con){
       k = keys(kv)
       v = values(kv)
-      if(
-        is.null(meta) && 
-          (!is.null(attributes(k)) || !is.null(attributes(v)))) {
-        meta <<- list(key = rmr.slice(k,0), val = rmr.slice(k,0))
-        save(meta, file = con[[2]])
+      if(is.null(template))  {
+        template <<- list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
+        save(template, file = con[[2]])
         close(con[[2]])}
       typedbytes.writer(
         interleave(
@@ -288,7 +308,8 @@ make.keyval.readwriter =
               fn, 
               paste(
                 if(is.read) "r" else "w", 
-                if(format$mode=="text") "" else "b"))))
+                if(format$mode=="text") "" else "b",
+                sep = ""))))
     if (is.null(format$sections))
       con = con[[1]]
     if (is.read) {
@@ -330,7 +351,7 @@ make.input.format =
         native = {
           format = make.native.input.format() 
           mode = "binary"
-          sections = c("data", "_meta")}, 
+          sections = c("data", "_rmr2_template")}, 
         sequence.typedbytes = {
           format = make.typedbytes.input.format() 
           mode = "binary"},
@@ -468,7 +489,7 @@ make.output.format =
           format = make.native.output.format()
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"
-          sections = c("data", "_meta")}, 
+          sections = c("data", "_rmr2_template")}, 
         sequence.typedbytes = {
           format = make.typedbytes.output.format(read.size = rmr.options('read.size'))
           mode = "binary"
