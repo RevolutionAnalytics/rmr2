@@ -216,17 +216,20 @@ to.dfs =
     rm(keyval.writer)
     gc() # enough to close dead connections
     move.results = 
-      function(action) {
+      function(action, action2 = action) {
         if(is.null(format$sections))
           action(tmp, dfs.output)
-        else 
+        else {
+          s = format$sections[[1]]
+          action(file.path(tmp, s), file.path(dfs.output, s))
+          a2 = as.character(substitute(action2))
           lapply(
-            format$sections, 
+            format$sections[-1], 
             function(s) 
-              action(file.path(tmp, s), file.path(dfs.output, s)))}
+              eval(call(a2, file.path(tmp, s), file.path(dfs.output, s))))}}
     if(rmr.options('backend') == 'hadoop') {
       if(format$mode == "binary") 
-        move.results(loadtb)
+        move.results(loadtb, hdfs.put)
       else   #text
         move.results(hdfs.put) }
     else { #local
@@ -258,25 +261,26 @@ from.dfs = function(input, format = "native") {
       hdfs.get(as.character(x), tmp)
       if(.Platform$OS.type == "windows") {
         cmd = paste('type', tmp, '>>' , dest)
-        system(paste(Sys.getenv("COMSPEC"),"/c",cmd))
-      }
+        system(paste(Sys.getenv("COMSPEC"),"/c",cmd))}
       else {
-        system(paste('cat', tmp, '>>' , dest))
-      }
+        system(paste('cat', tmp, '>>' , dest))}
       unlink(tmp)})
     dest}
   
   fname = to.dfs.path(input)
   if(is.character(format)) format = make.input.format(format)
   if(rmr.options("backend") == "hadoop") {
-    tmp = tempfile()
-    if(!is.null(format$sections))
+    tmp = tmp.data = tempfile()
+    if(!is.null(format$sections)){
       dir.create(tmp)
+      tmp.data = file.path(tmp, "data")}
     if(format$mode == "binary") 
-      dumptb(part.list(fname), tmp)
-    else getmerge(part.list(fname), tmp)
+      dumptb(part.list(fname), tmp.data)
+    else getmerge(part.list(fname), tmp.data)
     if(!is.null(format$sections))
-      lapply(file.path(fname, format$sections), function(fn) rmr2:::hdfs.get(fn, tmp))}
+      lapply(
+        file.path(fname, format$sections[-1]), 
+        function(fn) rmr2:::hdfs.get(fn, tmp))}
   else
     tmp = fname
   retval = read.file(tmp)
