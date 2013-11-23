@@ -147,8 +147,10 @@ to.list =
       list(x)
     else {
       if (is.matrix(x)) x = as.data.frame(x)
-      if (is.data.frame(x)) x = t.list(unname(x))
-      as.list(x)}}
+      if (is.data.frame(x)) 
+        structure(t.list(unname(x)), names = row.names(x))
+      else
+        as.list(x)}}
 
 make.native.or.typedbytes.output.format = 
   function(native) {
