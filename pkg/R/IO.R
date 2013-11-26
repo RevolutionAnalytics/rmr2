@@ -148,7 +148,16 @@ to.list =
     else {
       if (is.matrix(x)) x = as.data.frame(x)
       if (is.data.frame(x)) 
-        structure(t.list(unname(x)), names = row.names(x))
+        structure(
+          unname(
+            do.call(
+              c,
+              lapply(
+                split(
+                  x,
+                  ceiling((1:nrow(x)/10^4))),
+                t.list))),
+          names = row.names(x))
       else
         as.list(x)}}
 
