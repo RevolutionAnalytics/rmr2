@@ -30,3 +30,5 @@ Rprof.out
 *.swp
 *.gz
 !build/*.gz
+
+rmr2-template-*
