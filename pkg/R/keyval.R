@@ -40,7 +40,7 @@ length.keyval =
   
 keyval = 
   function(key, val = NULL) {
-    if(missing(val)) list(key = NULL, val = key)
+    if(missing(val)) keyval(key = list(NULL), val = key)
     else recycle.keyval(list(key = key, val = val))}
 
 keys = function(kv) kv$key
