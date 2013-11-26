@@ -237,16 +237,25 @@ rmr.stream =
           out.folder,
           output.format)
       
+    template.file = paste("./rmr2-template", rmr2:::current.task(), sep = "-")
     default.reader = 
       function() 
         rmr2:::make.keyval.reader(
-          some-tmp-file,
+          rownames(
+            subset(
+              as.data.frame(
+                t(
+                  sapply(
+                    list.files(path=".", pattern="rmr2-template"), 
+                    file.info))), 
+            size > 0))[1],
           default.input.format, 
           read.size = read.size)
+
     default.writer = 
       function() 
         rmr2:::make.keyval.writer(
-          some-tmp-file,
+          template.file,
           default.output.format)
   ')  
     map.line = '  
