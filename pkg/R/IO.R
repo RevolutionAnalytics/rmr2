@@ -310,10 +310,7 @@ make.keyval.readwriter =
       c(
         con,
         lapply(
-          if(in.a.task())
-            paste(fname, current_task(), sep = "_")
-          else
-            fname,
+          fname,
           function(fn) 
             file(
               fn, 
