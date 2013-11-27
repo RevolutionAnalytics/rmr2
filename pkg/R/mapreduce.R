@@ -275,7 +275,7 @@ from.dfs = function(input, format = "native") {
     tmp = tmp.data = tempfile()
     if(!is.null(format$sections)){
       dir.create(tmp)
-      tmp.data = file.path(tmp, "data")}
+      tmp.data = file.path(tmp, format$sections[[1]])}
     if(format$mode == "binary") 
       dumptb(part.list(fname), tmp.data)
     else getmerge(part.list(fname), tmp.data)
