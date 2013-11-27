@@ -231,12 +231,12 @@ rmr.stream =
           in.folder,
           input.format, 
           read.size = read.size)
+
     output.writer = 
       function()
         rmr2:::make.keyval.writer(
           out.folder,
           output.format)
-      
     template.file = paste("./rmr2-template", rmr2:::current.task(), sep = "-")
     default.reader = 
       function() 
@@ -251,7 +251,6 @@ rmr.stream =
             size > 0))[1],
           default.input.format, 
           read.size = read.size)
-
     default.writer = 
       function() 
         rmr2:::make.keyval.writer(
