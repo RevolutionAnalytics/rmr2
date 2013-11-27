@@ -68,12 +68,16 @@ make.fast.list = function(l = list()) {
 
 named.slice = function(x, n) x[which(names(x) == n)]
 
+mapply.list = 
+  function(...) mapply(FUN = list, ..., SIMPLIFY = FALSE)
+
 t.list = 
   function(l) {
     if(length(l) == 0) l
     else
       .Call("t_list", l, PACKAGE="rmr2")}
 
+#      splat(mapply.list)(l)}
 
 #data frame manip
 
