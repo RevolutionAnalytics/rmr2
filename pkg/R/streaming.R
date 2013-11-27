@@ -385,10 +385,10 @@ rmr.stream =
          !is.element("mapred.reduce.tasks",
                      sapply(strsplit(as.character(named.slice(backend.parameters, 'D')), '='), 
                             function(x)x[[1]])))
-      backend.parameters = c(list(D='mapred.reduce.tasks=0'), backend.parameters)
+      backend.parameters = c(list(D = 'mapred.reduce.tasks=0'), backend.parameters)
     #debug.opts = "-mapdebug kdfkdfld -reducexdebug jfkdlfkja"
     
-    final.command =
+    final.command = 
       paste(
         hadoop.command, 
         stream.mapred.io,  
@@ -411,7 +411,7 @@ rmr.stream =
       retval = system(final.command)
       if (retval != 0) stop("hadoop streaming failed with error code ", retval, "\n")}
     else {
-      console.output = tryCatch(system(final.command, intern=TRUE), 
+      console.output = tryCatch(system(final.command, intern = TRUE), 
                                 warning = function(e) stop(e)) 
       0}}
 
