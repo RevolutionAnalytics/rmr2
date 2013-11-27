@@ -172,15 +172,15 @@ lapply.keys =
 
 c.keyval = 
   Make.single.or.multi.arg(
-  function(kvs) {
-    zero.length = as.logical(sapply.length.keyval(kvs) == 0)
-    null.keys = as.logical(sapply.null.keys(kvs))
-    if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) {
-      rmr.str(kvs)
-      stop("can't mix NULL and not NULL key keyval pairs")}
-    vv = lapply.values(kvs)
-    kk = lapply.keys(kvs)
-    keyval(c.or.rbind(kk), c.or.rbind(vv))})
+    function(kvs) {
+      zero.length = as.logical(sapply.length.keyval(kvs) == 0)
+      null.keys = as.logical(sapply.null.keys(kvs))
+      if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) {
+        rmr.str(kvs)
+        stop("can't mix NULL and not NULL key keyval pairs")}
+      vv = lapply.values(kvs)
+      kk = lapply.keys(kvs)
+      keyval(c.or.rbind(kk), c.or.rbind(vv))})
 
 split.data.frame.fast = 
   function(x, ind, drop) {
