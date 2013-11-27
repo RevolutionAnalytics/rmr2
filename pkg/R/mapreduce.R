@@ -235,7 +235,8 @@ to.dfs =
     else { #local
       if(file.exists(dfs.output))
         stop("Can't overwrite ", dfs.output)
-      dfs.mkdir(dfs.output)
+      if(!is.null(format$sections))
+        dfs.mkdir(dfs.output)
       move.results(file.copy) }
     file.remove(tmp)
     output}
