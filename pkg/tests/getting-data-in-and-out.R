@@ -57,7 +57,8 @@ tsv.format =
 tsv.data = 
   to.dfs(
     data.frame(
-      x = 1:100, y = rnorm(100), 
+      x = 1:100, 
+      y = rnorm(100), 
       z = runif(100), 
       w = 1:100), 
     format = 
