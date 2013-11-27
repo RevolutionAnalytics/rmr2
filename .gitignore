@@ -31,4 +31,5 @@ Rprof.out
 *.gz
 !build/*.gz
 
-rmr2-template-*
+rmr2-*-template-*
+_rmr2_template
