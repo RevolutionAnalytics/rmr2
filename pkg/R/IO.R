@@ -153,13 +153,7 @@ to.list =
       if (is.data.frame(x)) 
         structure(
           unname(
-            do.call(
-              c,
-              lapply(
-                split(
-                  x,
-                  ceiling((1:nrow(x)/10^4))),
-                function(y) t.list(lapply(y, as.list))))),
+            t.list(lapply(x, as.list))),
           names = row.names(x))
       else
         as.list(x)}}
