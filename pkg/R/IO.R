@@ -359,7 +359,7 @@ make.input.format =
         native = {
           format = make.native.input.format() 
           mode = "binary"
-          sections = c("data", "_rmr2_template")}, 
+          sections = c("part-00000", "_rmr2_template")}, 
         sequence.typedbytes = {
           format = make.typedbytes.input.format() 
           mode = "binary"},
@@ -497,7 +497,7 @@ make.output.format =
           format = make.native.output.format()
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"
-          sections = c("data", "_rmr2_template")}, 
+          sections = c("part-00000", "_rmr2_template")}, 
         sequence.typedbytes = {
           format = make.typedbytes.output.format(read.size = rmr.options('read.size'))
           mode = "binary"
