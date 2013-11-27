@@ -116,6 +116,7 @@ make.typedbytes.input.format = function() {
   obj.buffer = list()
   obj.buffer.rmr.length = 0
   raw.buffer = raw()
+  template.pe = NULL
   function(con, read.size) {
     while(length(obj.buffer) < 2) {
       raw.buffer <<- c(raw.buffer, readBin(con[[1]], raw(), read.size))
@@ -132,10 +133,12 @@ make.typedbytes.input.format = function() {
           obj.buffer <<- obj.buffer[-length(obj.buffer)]}
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
-        load(con[[2]])
+        if(is.null(template.pe)) {
+          load(con[[2]])
+          template.pe <<- template}
         keyval(
-          from.list(kk, template[[1]]),
-          from.list(vv, template[[2]]))}}
+          from.list(kk, template.pe[[1]]),
+          from.list(vv, template.pe[[2]]))}}
     obj.buffer <<- straddler
     retval}}
 
