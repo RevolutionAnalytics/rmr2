@@ -40,7 +40,7 @@ length.keyval =
 
 keyval = 
   function(key, val = NULL) {
-    if(missing(val)) keyval(key = list(NULL), val = key)
+    if(missing(val)) keyval(key = NULL, val = key)
     else recycle.keyval(list(key = key, val = val))}
 
 keys = function(kv) kv$key
@@ -68,27 +68,32 @@ rmr.slice =
 rmr.recycle = 
   function(this, upto) {
     if(is.null(this))
-      this = list(NULL)
-    l.this = rmr.length(this)
-    l.upto = if(is.null(upto)) 1 else rmr.length(upto)
-    if(l.this == l.upto) this
+      NULL
     else {
-      if(min(l.this,l.upto) == 0){
-        rmr.str(l.this)
-        rmr.str(l.upto)
-        stop("Can't recycle 0-length argument")}
-      else
-        rmr.slice(
-          rmr.slice(
-            this,
-            rep(1:rmr.length(this), ceiling(l.upto/l.this))),
-          1:max(l.upto, l.this))}}
+      if(is.null(upto))
+        this
+      else {
+        l.this = rmr.length(this)
+        l.upto = if(is.null(upto)) 1 else rmr.length(upto)
+        if(l.this == l.upto) this
+        else {
+          if(min(l.this,l.upto) == 0){
+            rmr.str(l.this)
+            rmr.str(l.upto)
+            stop("Can't recycle 0-length argument")}
+          else
+            rmr.slice(
+              rmr.slice(
+                this,
+                rep(1:rmr.length(this), ceiling(l.upto/l.this))),
+              1:max(l.upto, l.this))}}}}
 
 recycle.keyval =
   function(kv) {
     k = keys(kv)
     v = values(kv)
-    if((rmr.length(k) == rmr.length(v)))
+    if((rmr.length(k) == rmr.length(v)) ||
+         is.null(k))
       kv
     else
       keyval(
@@ -234,8 +239,9 @@ split.keyval = function(kv, size) {
   else {
     if(is.null(k)) {
       k =  ceiling(1:rmr.length(v)/size)
-        keyval(list(NULL),
-               unname(rmr.split(v, k)))}
+      keyval(
+        NULL,
+        unname(rmr.split(v, k)))}
     else {
       k = keys(kv)
       v = values(kv)

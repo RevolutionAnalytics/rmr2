@@ -107,6 +107,7 @@ from.list =
   function (x, template) {
     switch(
       class(template),
+      NULL = NULL,
       list = x,
       matrix = as.matrix(to.data.frame(x, as.data.frame(template))), 
       data.frame = to.data.frame(x, template),
@@ -147,7 +148,7 @@ make.native.input.format = make.typedbytes.input.format
 to.list = 
   function(x) {
     if (is.null(x))
-      list(x)
+      list(NULL)
     else {
       if (is.matrix(x)) x = as.data.frame(x)
       if (is.data.frame(x)) 
@@ -168,6 +169,8 @@ make.native.or.typedbytes.output.format =
         template <<- list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
         save(template, file = con[[2]])
         close(con[[2]])}
+      if(is.null(k))
+        k = replicate(rmr.length(v), NULL)
       typedbytes.writer(
         interleave(
           to.list(k), 
