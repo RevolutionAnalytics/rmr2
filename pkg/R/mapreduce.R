@@ -300,6 +300,10 @@ current.task =
     id = Sys.getenv("mapred_task_id")
     if (id == "") NULL else id }
 
+current.job = 
+  function() {
+    id = Sys.getenv("mapred_job_id")
+    if (id == "") NULL else id }
 
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   if(is.null(tmpdir)) { 
