@@ -77,10 +77,8 @@ rmr.recycle =
         l.upto = if(is.null(upto)) 1 else rmr.length(upto)
         if(l.this == l.upto) this
         else {
-          if(min(l.this,l.upto) == 0){
-            rmr.str(l.this)
-            rmr.str(l.upto)
-            stop("Can't recycle 0-length argument")}
+          if(min(l.this,l.upto) == 0)
+            stop("Can't recycle 0-length argument")
           else
             rmr.slice(
               rmr.slice(
@@ -181,7 +179,6 @@ c.keyval =
       zero.length = as.logical(sapply.length.keyval(kvs) == 0)
       null.keys = as.logical(sapply.null.keys(kvs))
       if(!(all(null.keys | zero.length) || !any(null.keys & !zero.length))) {
-        rmr.str(kvs)
         stop("can't mix NULL and not NULL key keyval pairs")}
       vv = lapply.values(kvs)
       kk = lapply.keys(kvs)
