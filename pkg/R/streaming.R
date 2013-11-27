@@ -16,7 +16,7 @@
 
 paste.options = 
   function(...) {
-    quote.char =
+    quote.char = 
       if(.Platform$OS.type == "windows") "\""
     else "'"
     
@@ -50,7 +50,7 @@ make.input.files =
     paste(sapply(infiles, 
                  function(r) {
                    paste.options(input = r)}), 
-          collapse=" ")}
+          collapse = " ")}
 
 ## loops section, or what runs on the nodes
 
@@ -78,7 +78,7 @@ reduce.as.keyval =
   function(k, vv, reduce) 
     as.keyval(reduce(k, vv))
 
-apply.reduce =
+apply.reduce = 
   function(kv, reduce)
     c.keyval(
       reduce.keyval(
@@ -94,7 +94,7 @@ map.loop =
     combine, 
     vectorized) {
     if(profile != "off") activate.profiling(profile)
-    combine.as.kv =
+    combine.as.kv = 
       Curry(
         reduce.as.keyval,
         reduce = combine)
@@ -170,7 +170,7 @@ hadoop.streaming =
     if(hadoop_streaming == ""){
       hadoop_home = Sys.getenv("HADOOP_HOME")
       if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_STREAMING is set")
-      stream.jar = list.files(path =  file.path(hadoop_home, "contrib", "streaming"), pattern = "jar$", full.names = TRUE)
+      stream.jar = list.files(path = file.path(hadoop_home, "contrib", "streaming"), pattern = "jar$", full.names = TRUE)
       paste(hadoop.cmd(), "jar", stream.jar)}
     else paste(hadoop.cmd(), "jar", hadoop_streaming)}
 
@@ -207,7 +207,7 @@ rmr.stream =
     
     preamble = paste(sep = "", '
   sink(file = stderr())
-  options(warn=1) 
+  options(warn = 1) 
   library(functional)
   invisible(
     if(is.null(formals(load)$verbose)) #recent R change
@@ -270,7 +270,7 @@ rmr.stream =
     profile = profile.nodes,
     combine = in.memory.combine,
     vectorized = vectorized.reduce)})()'
-    reduce.line  =  '  
+    reduce.line = '  
   rmr2:::reduce.loop(
     reduce = reduce, 
     vectorized = vectorized.reduce,
@@ -306,7 +306,7 @@ rmr.stream =
         envir = {
           if (is.function(fun)) environment(fun)
           else fun}
-        all.names =  ls(all.names = TRUE, envir = envir)
+        all.names = ls(all.names = TRUE, envir = envir)
         obj.names = {
           if(is.null(exclude))
             all.names
@@ -334,11 +334,11 @@ rmr.stream =
         collapse = " ")
     ## prepare hadoop streaming command
     hadoop.command = hadoop.streaming()
-    input =  make.input.files(in.folder)
+    input = make.input.files(in.folder)
     output = paste.options(output = out.folder)
     input.format.opt = paste.options(inputformat = input.format$streaming.format)
     output.format.opt = paste.options(outputformat = output.format$streaming.format)
-    stream.map.input =
+    stream.map.input = 
       if(input.format$mode == "binary") {
         paste.options(D = "stream.map.input=typedbytes")}
     else {''}
@@ -362,7 +362,7 @@ rmr.stream =
     if(!is.null(reduce) ) {
       reducer = 
         paste.options(
-          reducer  = 
+          reducer = 
             paste(
               'Rscript', 
               file.path(work.dir, basename(reduce.file))))
@@ -377,7 +377,7 @@ rmr.stream =
             paste(
               'Rscript', 
               file.path(work.dir, basename(combine.file))))  
-      c.fl =  paste.options(file = combine.file)}
+      c.fl = paste.options(file = combine.file)}
     else {
       combiner = ""
       c.fl = "" }
