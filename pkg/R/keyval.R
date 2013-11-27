@@ -19,8 +19,8 @@ rmr.length =
   function(x) if(has.rows(x)) nrow(x) else length(x)
 
 sapply.rmr.length = 
- function(xx)
-   .Call("sapply_rmr_length", xx, PACKAGE = "rmr2")
+  function(xx)
+    .Call("sapply_rmr_length", xx, PACKAGE = "rmr2")
 
 rmr.equal = 
   function(xx, y) {
