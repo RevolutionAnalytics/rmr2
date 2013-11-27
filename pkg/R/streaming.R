@@ -232,31 +232,33 @@ rmr.stream =
           in.folder,
           input.format, 
           read.size = read.size)
-
     output.writer = 
       function()
         rmr2:::make.keyval.writer(
           out.folder,
           output.format)
-    template.file = paste("./rmr2-template", rmr2:::current.task(), sep = "-")
     default.reader = 
-      function() 
+      function(template.pattern) 
         rmr2:::make.keyval.reader(
           rownames(
             subset(
               as.data.frame(
                 t(
                   sapply(
-                    list.files(path=".", pattern="rmr2-template"), 
+                    list.files(path = ".", pattern = template.pattern), 
                     file.info))), 
             size > 0))[1],
           default.input.format, 
           read.size = read.size)
     default.writer = 
-      function() 
+      function(template.file) 
         rmr2:::make.keyval.writer(
           template.file,
           default.output.format)
+    map.pattern = paste("rmr2-map-template", rmr2:::current.job(), sep = "-")
+    map.template = paste("./", map.pattern, "-", rmr2:::current.task(), sep = "")
+    combine.pattern = paste("rmr2-combine-template", rmr2:::current.job(), sep = "-")
+    combine.template = paste("./", combine.pattern, "-", rmr2:::current.task(), sep = "")
   ')  
     map.line = '  
   rmr2:::map.loop(
@@ -266,7 +268,7 @@ rmr.stream =
       if(is.null(reduce)) {
         output.writer()}
       else {
-        default.writer()},
+        default.writer(map.template)},
     profile = profile.nodes,
     combine = in.memory.combine,
     vectorized = vectorized.reduce)})()'
@@ -274,15 +276,20 @@ rmr.stream =
   rmr2:::reduce.loop(
     reduce = reduce, 
     vectorized = vectorized.reduce,
-    keyval.reader = default.reader(), 
+    keyval.reader = 
+      default.reader(
+        if(is.null(combine))
+          map.pattern
+        else
+          combine.pattern), 
     keyval.writer = output.writer(),
     profile = profile.nodes)})()'
     combine.line = '  
   rmr2:::reduce.loop(
     reduce = combine, 
     vectorized = vectorized.reduce,
-    keyval.reader = default.reader(),
-    keyval.writer = default.writer(), 
+    keyval.reader = default.reader(map.pattern),
+    keyval.writer = default.writer(combine.template), 
   profile = profile.nodes)})()'
     
     map.file = tempfile(pattern = "rmr-streaming-map")
