@@ -265,10 +265,10 @@ rmr.stream =
     map = map, 
     keyval.reader = input.reader(), 
     keyval.writer = 
-      if(is.null(reduce)) {
-        output.writer()}
-      else {
-        default.writer(map.template)},
+      if(is.null(reduce)) 
+        output.writer()
+      else 
+        default.writer(map.template),
     profile = profile.nodes,
     combine = in.memory.combine,
     vectorized = vectorized.reduce)})()'
