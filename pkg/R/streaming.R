@@ -205,8 +205,9 @@ rmr.stream =
     rmr.local.env = tempfile(pattern = "rmr-local-env")
     rmr.global.env = tempfile(pattern = "rmr-global-env")
     
-    preamble = paste(sep = "", 'options(warn=1) 
+    preamble = paste(sep = "", '
   sink(file = stderr())
+  options(warn=1) 
   library(functional)
   invisible(
     if(is.null(formals(load)$verbose)) #recent R change
