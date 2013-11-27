@@ -32,12 +32,12 @@ rmr.equal =
           rowSums(xx == do.call(rbind, replicate(rmr.length(xx), y, simplify = FALSE))) == ncol(y)
         else
           sapply(xx, function(x) isTRUE(all.equal(list(x), y, check.attributes = FALSE)))}}}
-    
+
 length.keyval = 
   function(kv) 
     max(rmr.length(keys(kv)), 
         rmr.length(values(kv)))
-  
+
 keyval = 
   function(key, val = NULL) {
     if(missing(val)) keyval(key = list(NULL), val = key)
@@ -47,11 +47,11 @@ keys = function(kv) kv$key
 values = function(kv) kv$val
 
 is.keyval = 
-  function(x) 
+  function(x) {
     is.list(x) && 
       length(x) == 2 && 
       !is.null(names(x)) && 
-      all(names(x) == qw(key, val))
+      all(names(x) == qw(key, val))}
 
 as.keyval = 
   function(x) {
@@ -197,7 +197,7 @@ split.data.frame.fast =
     rn = split(rownames(x), f = ind, drop = drop)
     mapply(function(a, na) {rownames(a) = na; a}, y, rn, SIMPLIFY = FALSE)}
 
-  
+
 rmr.split = 
   function(x, ind) {
     if(rmr.length(ind) == 1)
