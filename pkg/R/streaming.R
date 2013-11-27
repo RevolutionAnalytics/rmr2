@@ -278,7 +278,7 @@ rmr.stream =
     vectorized = vectorized.reduce,
     keyval.reader = 
       default.reader(
-        if(is.null(combine))
+        if(is.null(combine) || identical(combine, FALSE))
           map.pattern
         else
           combine.pattern), 
