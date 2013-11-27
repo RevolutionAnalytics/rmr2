@@ -217,11 +217,12 @@ to.dfs =
     gc() # enough to close dead connections
     move.results = 
       function(action, action2 = action) {
+        a = as.character(substitute(action))
         if(is.null(format$sections))
-          action(tmp, dfs.output)
+          eval(call(a, tmp, dfs.output))
         else {
           s = format$sections[[1]]
-          action(file.path(tmp, s), file.path(dfs.output, s))
+          eval(call(a, file.path(tmp, s), file.path(dfs.output, s)))
           a2 = as.character(substitute(action2))
           lapply(
             format$sections[-1], 
