@@ -159,7 +159,7 @@ to.list =
                 split(
                   x,
                   ceiling((1:nrow(x)/10^4))),
-                t.list))),
+                function(y) t.list(lapply(y, as.list))))),
           names = row.names(x))
       else
         as.list(x)}}

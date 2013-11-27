@@ -14,15 +14,14 @@
 
 #include "t-list.h"
 
-SEXP t_list(SEXP _ll) {
-  Rcpp::List ll(_ll);
-  Rcpp::List first_col(Rcpp::wrap(ll[0]));  
-  std::vector<std::vector<SEXP> > tll(first_col.size());
+using namespace Rcpp;
+
+SEXP t_list(SEXP _ll, SEXP _tll) {
+  List ll(_ll);
+  List tll(_tll);
   for(int i = 0; i < ll.size(); i++) {
-    Rcpp::List l(Rcpp::wrap(ll[i]));
-    for(int j = 0; j < l.size(); j++)
-      tll[j].push_back(l[j]);}
-  std::vector<SEXP> results ;
-  for(int i = 0; i < tll.size(); i++) {
-     results.push_back(Rcpp::wrap(tll[i]));}    
-  return(Rcpp::wrap(results));}
+    List l_i(as<List>(ll[i]));
+    for(int j = 0; j < l_i.size(); j++) {
+      List tl_j(as<List>(tll[j]));
+      tl_j[i] = l_i[j];};}
+  return wrap(tll);}

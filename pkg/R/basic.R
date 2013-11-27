@@ -74,10 +74,13 @@ mapply.list =
 t.list = 
   function(l) {
     if(length(l) == 0) l
-    else
-      .Call("t_list", l, PACKAGE="rmr2")}
-
+    else {
+      nc = length(l)
+      nr = length(l[[1]])
+      empty.l = replicate(nc, NA, simplify = FALSE)
+      tl = replicate(nr, empty.l, simplify = FALSE)
 #      splat(mapply.list)(l)}
+      .Call("t_list", l, tl, PACKAGE = "rmr2")}}
 
 #data frame manip
 
