@@ -314,6 +314,12 @@ make.input.format =
           streaming.format = 
             "com.dappervision.hbase.mapred.TypedBytesTableInputFormat"
           family.columns = optlist$family.columns
+	  start.row = optlist$start.row
+	  stop.row = optlist$stop.row
+	  regxrow.filter = optlist$regxrow.filter
+          if (length(start.row)==0) {start.row=""} 
+          if (length(stop.row)==0) {stop.row=""}
+          if (length(regxrow.filter)==0) {regxrow.filter=""}
           backend.parameters = 
             list(
               hadoop = 
@@ -330,16 +336,30 @@ make.input.format =
                                 1:length(family.columns[[fam]]),
                                 function(i) 
                                   base64encode(
-                                    charToRaw(
                                       paste(
                                         fam,
                                         ":",
                                         family.columns[[fam]][i],
                                         sep = "",
-                                        collapse = "")))),
+                                        collapse = ""))),
                               sep = "",
                               collapse = " ")),
                         collapse = " "),
+                      sep = ""),
+		  D = 
+                    paste(
+                      "hbase.mapred.startrowb64=",
+                      base64encode(start.row),
+                      sep = ""),
+		  D = 
+                    paste(
+                      "hbase.mapred.stoprowb64=",
+                      base64encode(stop.row),
+                      sep = ""),
+		  D = 
+                    paste(
+                      "hbase.mapred.rowfilter=",
+                      regxrow.filter,
                       sep = ""),
                   libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))})}
     if(is.null(streaming.format) && mode == "binary") 
