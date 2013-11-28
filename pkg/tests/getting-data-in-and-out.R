@@ -73,7 +73,7 @@ freq.counts =
 ## @knitr getting-data.named.columns
 tsv.reader = 
   function(con, nrecs){
-    lines = readLines(con, 1)
+    lines = readLines(con, 20)
     if(length(lines) == 0)
       NULL
     else {
