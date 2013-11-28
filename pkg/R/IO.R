@@ -166,7 +166,8 @@ make.native.or.typedbytes.output.format =
       k = keys(kv)
       v = values(kv)
       if(is.null(template))  {
-        template <<- list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
+        template <<- 
+          list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
         save(template, file = con[[2]])
         close(con[[2]])}
       if(is.null(k))
@@ -316,7 +317,7 @@ make.keyval.readwriter =
               fn, 
               paste(
                 if(is.read) "r" else "w", 
-                if(format$mode=="text") "" else "b",
+                if(format$mode == "text") "" else "b",
                 sep = ""))))
     if (is.null(format$sections))
       con = con[[1]]
