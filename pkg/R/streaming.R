@@ -99,6 +99,7 @@ map.loop =
         reduce.as.keyval,
         reduce = combine)
     kv = keyval.reader()
+    force(keyval.writer)
     while(!is.null(kv)) { 
       increment.counter("rmr", "map calls", 1)    
       out = as.keyval(map(keys(kv), values(kv)))
@@ -119,6 +120,7 @@ reduce.loop =
   function(reduce, vectorized, keyval.reader, keyval.writer, profile) {
     if(profile != "off") activate.profiling(profile)
     kv = keyval.reader()
+    force(keyval.writer)
     straddler = NULL
     red.as.kv = 
       Curry(
