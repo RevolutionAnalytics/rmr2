@@ -119,6 +119,7 @@ make.typedbytes.input.format = function() {
   raw.buffer = raw()
   template.pe = NULL
   function(con, read.size) {
+    is.native = length(con) > 1
     while(length(obj.buffer) < 2) {
       raw.buffer <<- c(raw.buffer, readBin(con[[1]], raw(), read.size))
       if(length(raw.buffer) == 0) break;
@@ -134,12 +135,15 @@ make.typedbytes.input.format = function() {
           obj.buffer <<- obj.buffer[-length(obj.buffer)]}
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
-        if(is.null(template.pe)) {
+        if(is.null(template.pe) && is.native) {
           load(con[[2]])
           template.pe <<- template}
-        keyval(
-          from.list(kk, template.pe[[1]]),
-          from.list(vv, template.pe[[2]]))}}
+        if(is.native) {
+          keyval(
+            from.list(kk, template.pe[[1]]),
+            from.list(vv, template.pe[[2]]))}
+        else {
+          keyval(kk,vv)}}}
     obj.buffer <<- straddler
     retval}}
 
@@ -165,7 +169,7 @@ make.native.or.typedbytes.output.format =
     function(kv, con){
       k = keys(kv)
       v = values(kv)
-      if(is.null(template))  {
+      if(is.null(template) && native)  {
         template <<- 
           list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
         save(template, file = con[[2]])
