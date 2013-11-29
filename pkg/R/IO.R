@@ -504,7 +504,7 @@ make.output.format =
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"
           sections = c("part-00000", "_rmr2_template")}, 
         sequence.typedbytes = {
-          format = make.typedbytes.output.format(read.size = rmr.options('read.size'))
+          format = make.typedbytes.output.format()
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"},
         hbase = {
