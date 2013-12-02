@@ -213,8 +213,12 @@ to.dfs =
       format = make.output.format(format)
     keyval.writer = make.keyval.writer(tmp, format)
     keyval.writer(kv)
-    rm(keyval.writer)
-    gc() # enough to close dead connections
+    eval(
+      quote(
+        if(length(con) == 1)
+          close(con) 
+        else lapply(con, close)), 
+      envir=environment(keyval.writer))
     move.results = 
       function(action, action2 = action) {
         a = as.character(substitute(action))
@@ -251,6 +255,12 @@ from.dfs = function(input, format = "native") {
     while(!is.null(kv)) {
       retval(list(kv))
       kv = keyval.reader()}
+    eval(
+      quote(
+        if(length(con) == 1)
+          close(con) 
+        else lapply(con, close)), 
+      envir=environment(keyval.reader))
     c.keyval(retval())}
   
   dumptb = function(src, dest){

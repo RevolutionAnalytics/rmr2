@@ -113,6 +113,16 @@ map.loop =
             out = combine.as.kv(keys(out), values(out))}}
         keyval.writer(as.keyval(out))}
       kv = keyval.reader()}
+    eval(
+      quote(
+        if(length(con) > 1)
+          lapply(con[-1], close)), 
+      envir=environment(keyval.reader))
+    eval(
+      quote(
+        if(length(con) > 1)
+          lapply(con[-1], close)), 
+      envir=environment(keyval.writer))
     if(profile != "off") close.profiling(profile)
     invisible()}
 
@@ -152,6 +162,16 @@ reduce.loop =
         out = as.keyval(reduce(keys(straddler), values(straddler)))}
       if(length.keyval(out) > 0)
         keyval.writer(out)}    
+    eval(
+      quote(
+        if(length(con) > 1)
+          lapply(con[-1], close)), 
+      envir=environment(keyval.reader))
+    eval(
+      quote(
+        if(length(con) > 1)
+          lapply(con[-1], close)), 
+      envir=environment(keyval.writer))
     if(profile != "off") close.profiling(profile)
     invisible()}
 
