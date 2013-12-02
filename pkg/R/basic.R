@@ -77,9 +77,8 @@ t.list =
     else {
       nc = length(l)
       nr = length(l[[1]])
-      empty.l = replicate(nc, NA, simplify = FALSE)
-      tl = replicate(nr, empty.l, simplify = FALSE)
-#      splat(mapply.list)(l)}
+      empty.l = as.list(raw(nc))
+      tl = rep_len(list(empty.l), nr)
       .Call("t_list", l, tl, PACKAGE = "rmr2")}}
 
 #data frame manip
