@@ -15,6 +15,9 @@
 #include "t-list.h"
 
 using namespace Rcpp;
+using std::vector;
+using std::cerr;
+using std::endl;
 
 SEXP t_list(SEXP _ll, SEXP _tll) {
   List ll(_ll);
