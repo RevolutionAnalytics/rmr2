@@ -21,12 +21,15 @@ for (be in c("local", "hadoop")) {
   
   ## keyval compare
   kv.cmp = function(kv1, kv2) {
+    reorder = 
+      function(y)
+        lapply(y, function(x)x[order(cksum(x))])
     kv1 = rmr2:::split.keyval(kv1)
     kv2 = rmr2:::split.keyval(kv2)
     o1 = order(unlist(keys(kv1)))  
     o2 = order(unlist(keys(kv2)))
     isTRUE(all.equal(keys(kv1)[o1], keys(kv2)[o2], tolerance=1e-4, check.attributes=FALSE)) &&
-      isTRUE(all.equal(values(kv1)[o1], values(kv2)[o2], tolerance=1e-4, check.attributes=FALSE)) }
+      isTRUE(all.equal(reorder(values(kv1))[o1], reorder(values(kv2))[o2], tolerance=1e-4, check.attributes=FALSE)) }
   
   ##from.dfs to.dfs
   ##native
