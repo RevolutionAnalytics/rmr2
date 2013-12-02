@@ -170,8 +170,7 @@ make.native.or.typedbytes.output.format =
       if(is.null(template) && native)  {
         template <<- 
           list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
-        save(template, file = con[[2]])
-        close(con[[2]])}
+        save(template, file = con[[2]])}
       if(is.null(k))
         k = replicate(rmr.length(v), NULL)
       typedbytes.writer(
