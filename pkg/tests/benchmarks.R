@@ -167,31 +167,19 @@ for (be in c("local", "hadoop")) {
       combine = TRUE)
 ## @knitr end        
       }))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df1 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df10 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:10), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df100 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:100), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df1000 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:1000), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df10E4 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:10000), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df10E5 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:100000), data.frame(x =1:10^5))))))
+  n = log10(input.size)
+  z = splat(rbind)(
+    c(
+      lapply(0:log.input.size, function(i) system.time(to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))))),
+      lapply(0:log.input.size, function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); system.time(from.dfs(z))}),
+      lapply(0:log.input.size, function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); system.time(mapreduce(z))}),
+      lapply(0:log.input.size, function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); 
+                               system.time(mapreduce(z, reduce = function(k,v) as.data.frame(t(colSums(v)))))})))
+  row.names(z) = make.names(t(outer(c("to.dfs","from.dfs", "map only", "map reduce"), c(0:log.input.size), paste)))
+  report[[be]] = rbind(report[[be]], z)
 }
+
+
 print(report)
 
 # $local
