@@ -29,7 +29,7 @@ rmr.equal =
       if(is.atomic(xx) && !is.matrix(xx)) xx == y
       else {
         if(is.matrix(xx) || is.data.frame(xx))
-          rowSums(xx == do.call(rbind, replicate(rmr.length(xx), y, simplify = FALSE))) == ncol(y)
+          rowSums(xx == y[rep.int(1, rmr.length(xx)),]) == ncol(y)
         else
           sapply(xx, function(x) isTRUE(all.equal(list(x), y, check.attributes = FALSE)))}}}
     
