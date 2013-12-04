@@ -167,7 +167,7 @@ for (be in c("local", "hadoop")) {
       combine = TRUE)
 ## @knitr end        
       }))
-  n = log10(input.size)
+  log.input.size = log10(input.size)
   z = splat(rbind)(
     c(
       lapply(0:log.input.size, function(i) system.time(to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))))),
