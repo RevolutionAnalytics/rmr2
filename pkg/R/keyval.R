@@ -212,13 +212,12 @@ rmr.split =
           data.frame = split.data.frame.fast,
           split)
       spl(x,ind, drop = TRUE)[
-        order(
           if(!has.rows(ind))
             as.character(unique(ind))
           else {
             if (is.matrix(ind))
               ind = apply(ind, 2, list)
-            unique(do.call(paste,c(ind, sep = ".")))})]}}
+            unique(do.call(paste,c(ind, sep = ".")))}]}}
 
 key.normalize= function(k) {
   k = rmr.slice(k, 1)
