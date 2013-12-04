@@ -172,7 +172,7 @@ make.native.or.typedbytes.output.format =
           list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
         save(template, file = con[[2]])}
       if(is.null(k))
-        k = replicate(rmr.length(v), NULL)
+        k =  rep_len(list(NULL), rmr.length(v))
       typedbytes.writer(
         interleave(
           to.list(k), 
