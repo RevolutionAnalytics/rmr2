@@ -108,8 +108,8 @@ from.list =
     switch(
       class(template),
       NULL = NULL,
-      list = x,
-      matrix = as.matrix(to.data.frame(x, as.data.frame(template))), 
+      list = splat(c)(x),
+      matrix = splat(rbind)(x), 
       data.frame = to.data.frame(x, template),
       unlist(x))}
 
