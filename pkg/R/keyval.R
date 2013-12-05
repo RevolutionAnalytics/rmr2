@@ -199,6 +199,12 @@ split.data.frame.fast =
     rn = split(rownames(x), f = ind, drop = drop)
     mapply(function(a, na) {rownames(a) = na; a}, y, rn, SIMPLIFY = FALSE)}
 
+split.data.frame.fastest = 
+  function(x, ind, drop) 
+    t.list(
+      lapply(
+        x, 
+        Curry(split, f = ind, drop = drop)))
 
 rmr.split = 
   function(x, ind) {
