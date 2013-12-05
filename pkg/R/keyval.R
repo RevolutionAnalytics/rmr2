@@ -207,7 +207,7 @@ split.data.frame.fastest =
         Curry(split, f = ind, drop = drop)))
 
 rmr.split = 
-  function(x, ind) {
+  function(x, ind, lossy) {
     if(rmr.length(ind) == 1)
       list(x)
     else {
@@ -215,7 +215,9 @@ rmr.split =
         switch(
           class(x),
           matrix = split.data.frame,
-          data.frame = split.data.frame.fast,
+          data.frame = {
+            if(lossy) split.data.frame.fastest
+            else split.data.frame.fast},
           split)
       spl(x,ind, drop = TRUE)[
           if(!has.rows(ind))
