@@ -171,12 +171,14 @@ make.native.or.typedbytes.output.format =
         template <<- 
           list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
         save(template, file = con[[2]])}
+      kvs = split.keyval(kv, 10^4, TRUE)
       if(is.null(k))
-        k =  rep_len(list(NULL), rmr.length(v))
+        k =  rep_len(list(NULL), length.keyval(kvs))
+      else 
+        k = keys(kvs)
+      v = values(kvs)
       typedbytes.writer(
-        interleave(
-          to.list(k), 
-          to.list(v)), 
+        interleave(k, v), 
         con[[1]], 
         native)}}
 
