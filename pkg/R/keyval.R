@@ -219,13 +219,12 @@ rmr.split =
             if(lossy) split.data.frame.fastest
             else split.data.frame.fast},
           split)
-      spl(x,ind, drop = TRUE)[
-          if(!has.rows(ind))
-            as.character(unique(ind))
-          else {
-            if (is.matrix(ind))
-              ind = apply(ind, 2, list)
-            unique(do.call(paste,c(ind, sep = ".")))}]}}
+      y = spl(x,ind, drop = TRUE)
+      if (is.matrix(ind))
+        ind = as.data.frame(ind)
+      perm = c()
+      perm[unlist(split(1:rmr.length(y), unique(ind)))] = 1:rmr.length(y)
+      rmr.slice(y, perm)}}
 
 key.normalize= function(k) {
   k = rmr.slice(k, 1)
