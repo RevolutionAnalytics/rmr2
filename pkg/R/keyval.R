@@ -235,7 +235,7 @@ key.normalize= function(k) {
     attributes(k) = attributes(k)[sort(names(attributes(k)))]
   k}
 
-split.keyval = function(kv, size) {
+split.keyval = function(kv, size, lossy = FALSE) {
   k = keys(kv)
   v = values(kv)
   if(is.null(v))
@@ -245,7 +245,7 @@ split.keyval = function(kv, size) {
       k =  ceiling(1:rmr.length(v)/size)
       keyval(
         NULL,
-        unname(rmr.split(v, k)))}
+        unname(rmr.split(v, k, lossy = lossy)))}
     else {
       k = keys(kv)
       v = values(kv)
@@ -265,11 +265,11 @@ split.keyval = function(kv, size) {
         rownames(x) = NULL
       else
         names(x) = NULL
-      x = unname(rmr.split(x, ind))
+      x = unname(rmr.split(x, ind, lossy = lossy))
       if ((rmr.length(x) != rmr.length(k)) || 
             is.data.frame(k))
         x = lapply(x, key.normalize)
-      keyval(x, unname(rmr.split(v, ind)))}}}
+      keyval(x, unname(rmr.split(v, ind, lossy = lossy)))}}}
 
 unsplit.keyval = function(kv) {
   c.keyval(mapply(keyval, keys(kv), values(kv), SIMPLIFY = FALSE))}
