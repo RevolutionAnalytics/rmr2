@@ -238,37 +238,40 @@ split.keyval = function(kv, size, lossy = FALSE) {
   k = keys(kv)
   v = values(kv)
   if(is.null(v))
-    keyval(NULL, NULL)
+    keyval(NULL, NULL) 
   else {
-    if(is.null(k)) {
-      k =  ceiling(1:rmr.length(v)/size)
-      keyval(
-        NULL,
-        unname(rmr.split(v, k, lossy = lossy)))}
+    if(length.keyval(kv) == 0)
+      keyval(list(), list())
     else {
-      k = keys(kv)
-      v = values(kv)
-      ind = {
-        if(is.list(k) && !is.data.frame(k)) 
-          cksum(k)
-        else {
-          if(is.matrix(k))
-            as.data.frame(k)
+      if(is.null(k)) {
+        k =  ceiling(1:(length(unlist(v))/size))
+        keyval(
+          NULL,
+          unname(rmr.split(v, k, lossy = lossy)))}
+      else {
+        k = keys(kv)
+        v = values(kv)
+        ind = {
+          if(is.list(k) && !is.data.frame(k)) 
+            cksum(k)
           else {
-            if(is.raw(k))
-              as.integer(k)
-            else
-              k}}}
-      x = k 
-      if(has.rows(x)) 
-        rownames(x) = NULL
-      else
-        names(x) = NULL
-      x = unname(rmr.split(x, ind, lossy = lossy))
-      if ((rmr.length(x) != rmr.length(k)) || 
-            is.data.frame(k))
-        x = lapply(x, key.normalize)
-      keyval(x, unname(rmr.split(v, ind, lossy = lossy)))}}}
+            if(is.matrix(k))
+              as.data.frame(k)
+            else {
+              if(is.raw(k))
+                as.integer(k)
+              else
+                k}}}
+        x = k 
+        if(has.rows(x)) 
+          rownames(x) = NULL
+        else
+          names(x) = NULL
+        x = unname(rmr.split(x, ind, lossy = lossy))
+        if ((rmr.length(x) != rmr.length(k)) || 
+              is.data.frame(k))
+          x = lapply(x, key.normalize)
+        keyval(x, unname(rmr.split(v, ind, lossy = lossy)))}}}}
 
 unsplit.keyval = function(kv) {
   c.keyval(mapply(keyval, keys(kv), values(kv), SIMPLIFY = FALSE))}
