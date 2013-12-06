@@ -56,14 +56,14 @@ make.input.files =
 
 activate.profiling = 
   function(profile) {
-    dir = file.path("/tmp/Rprof", Sys.getenv('mapred_job_id'), Sys.getenv('mapred_tip_id'))
+    dir = file.path("/tmp/Rprof", current.job(), Sys.getenv('mapred_tip_id'))
     dir.create(dir, recursive = T)
     if(is.element(profile, c("calls", "both"))) {
-      prof.file = file.path(dir, paste(Sys.getenv('mapred_task_id'), Sys.time(), sep = "-")) 
+      prof.file = file.path(dir, paste(current.task(), Sys.time(), sep = "-")) 
       warning("Profiling data in ", prof.file)
       Rprof(prof.file)}
     if(is.element(profile, c("memory", "both"))) {
-      mem.prof.file = file.path(dir, paste(Sys.getenv('mapred_task_id'), Sys.time(), "mem", sep = "-")) 
+      mem.prof.file = file.path(dir, paste(current.task(), Sys.time(), "mem", sep = "-")) 
       warning("Memory profiling data in ", mem.prof.file)
       Rprofmem(mem.prof.file)}}
 
