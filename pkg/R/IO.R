@@ -173,9 +173,11 @@ make.native.or.typedbytes.output.format =
         template <<- 
           list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
         save(template, file = con[[2]])}
-      kvs = split.keyval(kv, 10^4, TRUE)
-      if(is.null(k))
-        k =  rep_len(list(NULL), length.keyval(kvs))
+      kvs = {
+        if(native)
+          split.keyval(kv, 10^6, TRUE)
+        else 
+          keyval(to.list(k), to.list(v))}
       if(is.null(k)) {
         if(!native) stop("Can't handle NULL in typedbytes")
         k =  rep_len(list(NULL), length.keyval(kvs)) }
