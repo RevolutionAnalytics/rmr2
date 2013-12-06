@@ -135,6 +135,8 @@ make.typedbytes.input.format = function() {
           obj.buffer <<- obj.buffer[-length(obj.buffer)]}
         kk = odd(obj.buffer)
         vv = even(obj.buffer)
+        if(is.native)
+          kk = rep(kk,sapply.rmr.length(vv))
         if(is.null(template.pe) && is.native) {
           load(con[[2]])
           template.pe <<- template}
