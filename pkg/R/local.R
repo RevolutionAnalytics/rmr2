@@ -41,14 +41,15 @@ mr.local = function(
           function(fname) {
             kv = get.data(fname)
             Sys.setenv(map_input_file = fname)
-              unname(
-                tapply(
-                  1:length.keyval(kv),
-                  floor(1:length.keyval(kv)/1000),
-                  function(r) {
-                    kvr = slice.keyval(kv, r)
-                    as.keyval(map(keys(kvr),values(kvr)))},
-                  simplify = FALSE))})))
+            lkv = length.keyval(kv)
+            unname(
+              tapply(
+                1:lkv, 
+                ceiling((1:lkv)/(lkv/(object.size(kv)/10^6))), 
+                function(r) {
+                  kvr = slice.keyval(kv, r)
+                  as.keyval(map(keys(kvr), values(kvr)))}, 
+                simplify = FALSE))})))
   map.out = from.dfs(to.dfs(map.out))
   reduce.helper = 
     function(kk, vv) as.keyval(reduce(rmr.slice(kk,1), vv))
