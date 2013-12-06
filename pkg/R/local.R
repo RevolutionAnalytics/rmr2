@@ -17,9 +17,9 @@ mr.local = function(
   out.folder, 
   map, 
   reduce, 
-  vectorized.reduce,
+  vectorized.reduce, 
   combine, 
-  in.memory.combine,
+  in.memory.combine, 
   input.format, 
   output.format, 
   backend.parameters, 
@@ -35,9 +35,9 @@ mr.local = function(
   map.out = 
     c.keyval(
       do.call(
-        c,    
+        c, 
         lapply(
-          in.folder,
+          in.folder, 
           function(fname) {
             kv = get.data(fname)
             Sys.setenv(map_input_file = fname)
@@ -52,7 +52,7 @@ mr.local = function(
                 simplify = FALSE))})))
   map.out = from.dfs(to.dfs(map.out))
   reduce.helper = 
-    function(kk, vv) as.keyval(reduce(rmr.slice(kk,1), vv))
+    function(kk, vv) as.keyval(reduce(rmr.slice(kk, 1), vv))
   reduce.out = { 
     if(!is.null(reduce)){
       if(!vectorized.reduce){
