@@ -173,9 +173,9 @@ for (be in c("local", "hadoop")) {
       lapply(0:log.input.size, function(i) system.time(to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))))),
       lapply(0:log.input.size, function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); system.time(from.dfs(z))}),
       lapply(0:log.input.size, function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); system.time(mapreduce(z))}),
-      lapply(0:log.input.size, function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); 
+      lapply(0:(log.input.size-2), function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); 
                                system.time(mapreduce(z, reduce = function(k,v) as.data.frame(t(colSums(v)))))})))
-  row.names(z) = make.names(t(outer(c("to.dfs","from.dfs", "map only", "map reduce"), c(0:log.input.size), paste)))
+  row.names(z) = make.names(t(outer(c("to.dfs","from.dfs", "map only", "map reduce"), c(0:log.input.size), paste)))[1:(4*(1 + log.input.size) - 2)]
   report[[be]] = rbind(report[[be]], z)
 }
 
