@@ -174,6 +174,9 @@ make.native.or.typedbytes.output.format =
       kvs = split.keyval(kv, 10^4, TRUE)
       if(is.null(k))
         k =  rep_len(list(NULL), length.keyval(kvs))
+      if(is.null(k)) {
+        if(!native) stop("Can't handle NULL in typedbytes")
+        k =  rep_len(list(NULL), length.keyval(kvs)) }
       else 
         k = keys(kvs)
       v = values(kvs)
