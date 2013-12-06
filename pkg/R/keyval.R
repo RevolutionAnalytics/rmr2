@@ -244,7 +244,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
       keyval(list(), list())
     else {
       if(is.null(k)) {
-        k =  ceiling(1:(length(unlist(v))/size))
+        k =  ceiling((1:rmr.length(v))/(rmr.length(v) /(object.size(v)/size)))
         keyval(
           NULL,
           unname(rmr.split(v, k, lossy = lossy)))}
