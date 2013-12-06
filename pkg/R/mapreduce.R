@@ -315,6 +315,11 @@ current.job =
     id = Sys.getenv("mapred_job_id")
     if (id == "") NULL else id }
 
+current.input = 
+  function() {
+    fname = Sys.getenv("map_input_file")
+    if (fname == "") NULL else fname }
+
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   if(is.null(tmpdir)) { 
     tmpdir = tempdir()
@@ -447,7 +452,7 @@ equijoin =
     is.left.side = 
       function(left.input) {
         rmr.normalize.path(to.dfs.path(left.input)) ==
-          rmr.normalize.path(Sys.getenv("map_input_file"))}
+          rmr.normalize.path(current.input())}
     reduce.split =
       function(vv) {
         tapply(
