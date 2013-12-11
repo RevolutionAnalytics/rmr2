@@ -17,16 +17,15 @@ mr.local = function(
   out.folder, 
   map, 
   reduce, 
-  vectorized.reduce,
+  vectorized.reduce, 
   combine, 
-  in.memory.combine,
+  in.memory.combine, 
   input.format, 
   output.format, 
   backend.parameters, 
   verbose) {
   
   profile.nodes = rmr.options("profile.nodes")
-  keyval.length = rmr.options("keyval.length")
   get.data =
     function(fname) {
       kv = from.dfs(fname, format = input.format)
@@ -35,23 +34,24 @@ mr.local = function(
   map.out = 
     c.keyval(
       do.call(
-        c,    
+        c, 
         lapply(
-          in.folder,
+          in.folder, 
           function(fname) {
             kv = get.data(fname)
             Sys.setenv(map_input_file = fname)
-              unname(
-                tapply(
-                  1:length.keyval(kv),
-                  floor(1:length.keyval(kv)/keyval.length),
-                  function(r) {
-                    kvr = slice.keyval(kv, r)
-                    as.keyval(map(keys(kvr),values(kvr)))},
-                  simplify = FALSE))})))
+            lkv = length.keyval(kv)
+            unname(
+              tapply(
+                1:lkv, 
+                ceiling((1:lkv)/(lkv/(object.size(kv)/10^6))), #make this constant configurable?
+                function(r) {
+                  kvr = slice.keyval(kv, r)
+                  as.keyval(map(keys(kvr), values(kvr)))}, 
+                simplify = FALSE))})))
   map.out = from.dfs(to.dfs(map.out))
   reduce.helper = 
-    function(kk, vv) as.keyval(reduce(rmr.slice(kk,1), vv))
+    function(kk, vv) as.keyval(reduce(rmr.slice(kk, 1), vv))
   reduce.out = { 
     if(!is.null(reduce)){
       if(!vectorized.reduce){

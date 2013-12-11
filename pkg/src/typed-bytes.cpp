@@ -21,6 +21,24 @@
 #include <string>
 #include <sstream>
 
+enum type_code {
+  TB_BYTES = 0,
+  TB_BYTE = 1,
+  TB_BOOLEAN = 2,
+  TB_INTEGER = 3,
+  TB_LONG = 4,
+  TB_FLOAT = 5,
+  TB_DOUBLE = 6, 
+  TB_STRING = 7,
+  TB_VECTOR = 8,
+  TB_LIST = 9,
+  TB_MAP = 10,
+  R_NATIVE = 144,
+  R_VECTOR = 145,
+  R_CHAR_VECTOR = 146,
+  R_WITH_ATTRIBUTES = 147,
+  R_NULL = 148};
+
 typedef std::deque<unsigned char> raw;
 
 template<typename T> 
@@ -136,7 +154,7 @@ float unserialize_scalar<float>(const raw & data, int & start){
 int get_length(const raw & data, int & start) {
   int len = unserialize_scalar<int>(data, start);
   if(len < 0) {
-  	throw NegativeLength();}
+    throw NegativeLength();}
   return len;}
   
 int get_type(const raw & data, int & start) {
@@ -214,72 +232,84 @@ SEXP unserialize(const raw & data, int & start, int type_code){
   if(type_code == 255) {
     type_code = get_type(data, start);}
   switch(type_code) {
-    case 0: { //byte vector
+    case TB_BYTES: { 
       int length = get_length(data, start);
       new_object = wrap_unserialize_vector<unsigned char>(data, start, length);}
       break;
-    case 1:  //byte
+    case TB_BYTE:
       new_object = wrap_unserialize_scalar<unsigned char>(data, start);
       break;
-    case 2: //boolean
+    case TB_BOOLEAN: //boolean
       new_object = wrap_unserialize_scalar<bool>(data, start);
       break;
-    case 3: //integer
+    case TB_INTEGER: 
       new_object = wrap_unserialize_scalar<int>(data, start);
       break;
-    case 4: //long
+    case TB_LONG:
       new_object = wrap_unserialize_scalar<long>(data, start);
       break;
-    case 5: //float
+    case TB_FLOAT:
       new_object = wrap_unserialize_scalar<float>(data, start);
       break;
-    case 6: //double
+    case TB_DOUBLE:
       new_object = wrap_unserialize_scalar<double>(data, start);
       break;
-    case 7: {//string
+    case TB_STRING: {
       int length = get_length(data, start);
       std::vector<char> vec_tmp = unserialize_vector<char>(data, start, length);
       new_object =  Rcpp::wrap(std::string(vec_tmp.begin(), vec_tmp.end()));}
       break;
-    case 8: //list
+    case TB_VECTOR:
       new_object = unserialize_list(data, start);
       break;
-    case 9: //other list
+    case TB_LIST: 
       new_object = unserialize_255_terminated_list(data, start);
       break;
-    case 10: //map
+    case TB_MAP: 
       new_object = unserialize_map(data, start);
       break;
-    case 144: //R serialization
+    case R_NULL:{
+      new_object = R_NilValue;
+      get_length(data, start);} 
+      break;
+    case R_NATIVE: 
       new_object = unserialize_native(data, start);
       break;
-    case 145: {
+    case R_WITH_ATTRIBUTES: {
+      get_length(data, start);
+      new_object = unserialize(data, start, 255);
+      Rcpp::CharacterVector names(unserialize(data, start, 255));
+      Rcpp::List attributes(unserialize(data, start, 255));
+      for(int i = 0; i < names.size(); i++) {
+        new_object.attr(Rcpp::as<std::string>(names[i])) = attributes[i];}}
+      break;
+    case R_VECTOR: {
       int raw_length = get_length(data, start);
       int vec_type_code  = get_type(data, start);
       raw_length = raw_length - 1;
       switch(vec_type_code) {
-        case 1:
+        case TB_BYTE:
           new_object = wrap_unserialize_vector<unsigned char>(data, start, raw_length);
         break;
-        case 2:
+        case TB_BOOLEAN:
           new_object = wrap_unserialize_vector<bool>(data, start, raw_length);
         break;
-        case 3:
+        case TB_INTEGER:
           new_object = wrap_unserialize_vector<int>(data, start, raw_length);
         break;
-        case 4:
+        case TB_LONG:
           new_object = wrap_unserialize_vector<long>(data, start, raw_length);
         break;
-        case 5:
+        case TB_FLOAT:
           new_object = wrap_unserialize_vector<float>(data, start, raw_length);
         break;
-        case 6:
+        case TB_DOUBLE:
           new_object = wrap_unserialize_vector<double>(data, start, raw_length);
         break;
         default: 
           throw UnsupportedType(vec_type_code);}}
       break;
-    case 146: {
+    case R_CHAR_VECTOR: {
        int raw_length = get_length(data, start);
        new_object = wrap_unserialize_vector<std::string>(data, start, raw_length);}
       break;
@@ -303,7 +333,7 @@ SEXP typedbytes_reader(SEXP data, SEXP _nobjs){
     catch (ReadPastEnd rpe){
       break;}
 		catch (UnsupportedType ue) {
-      safe_stop("Unsupported type: " + to_string(ue.type_code));}
+      safe_stop("Unsupported type: " + to_string((int)ue.type_code));}
 		catch (NegativeLength nl) {
       safe_stop("Negative length exception");}}
   Rcpp::List list_tmp(objs.begin(), objs.begin() + objs_end);
@@ -354,70 +384,74 @@ void serialize_vector(T & data, unsigned char type_code, raw & serialized, bool 
     serialize_scalar(data[0], type_code, serialized);}
   else {
     if(native) {
-      serialized.push_back(145);
+      serialized.push_back(R_VECTOR);
       length_header(data.size() * sizeof(data[0]) + 1, serialized); 
       serialized.push_back(type_code);
       for(typename T::iterator i = data.begin(); i < data.end(); i++) {
         serialize_scalar(*i, 255, serialized);}}
     else {
-      serialized.push_back(8);
+      serialized.push_back(TB_VECTOR);
       length_header(data.size(), serialized); 
       for(typename T::iterator i = data.begin(); i < data.end(); i++) {
         serialize_scalar(*i, type_code, serialized);}}}}
 
-template <typename T> void serialize_list(T & data, raw & serialized){
-  serialized.push_back(8);
+template <typename T> 
+void serialize_list(T & data, raw & serialized, bool native){
+  serialized.push_back(TB_VECTOR);
   length_header(data.size(), serialized);
   for(typename T::iterator i = data.begin(); i < data.end(); i++) {
-    serialize(Rcpp::wrap(*i), serialized, FALSE);}}
+    serialize(Rcpp::wrap(*i), serialized, native);}}
 
 void serialize_native(const SEXP & object, raw & serialized) {
-  serialized.push_back(144);
+  serialized.push_back(R_NATIVE);
   Rcpp::Function r_serialize("serialize");
   Rcpp::RawVector tmp(r_serialize(object, R_NilValue));
   length_header(tmp.size(), serialized);
   serialized.insert(serialized.end(), tmp.begin(), tmp.end());}
 
-void serialize(const SEXP & object, raw & serialized, bool native) {
+void serialize_null(raw & serialized) {
+  serialized.push_back(R_NULL);
+  length_header(0, serialized);}
+
+void serialize_noattr(const SEXP & object, raw & serialized, bool native) {
   Rcpp::RObject robj(object);
-  bool has_attr = robj.attributeNames().size() > 0;
   if(native) {
-    if(has_attr) {
-      serialize_native(object, serialized);}
-    else {
-      switch(robj.sexp_type()) {
-        case LGLSXP: {
-          Rcpp::LogicalVector data(object);  
-          std::vector<unsigned char> bool_data(data.size());
-          for(int i = 0; i < data.size(); i++) {
-            bool_data[i] = (unsigned char) data[i];} 
-          serialize_vector(bool_data, 2, serialized, TRUE);}
-        break;
-        case REALSXP: {
-          Rcpp::NumericVector data(object);  
-            serialize_vector(data, 6, serialized, TRUE);}
-        break;
-        case STRSXP: { //character
-          Rcpp::CharacterVector data(object);
-          serialized.push_back(146);
-          int raw_size = data.size() * 5 + 4;
-          for(int i = 0; i < data.size(); i++) {
-            raw_size += data[i].size();}
-          length_header(raw_size, serialized);
-          length_header(data.size(), serialized);
-          for(int i = 0; i < data.size(); i++) {
-            serialize_many(data[i], 7, serialized);}}
-        break; 
-        case INTSXP: {
-          Rcpp::IntegerVector data(object);  
-          serialize_vector(data, 3, serialized, TRUE);}
-        break;
-        case VECSXP: { //list
-          Rcpp::List data(object);
-          serialize_list(data, serialized);}
-        break;
-        default:
-          serialize_native(object, serialized);}}}
+    switch(robj.sexp_type()) {
+      case NILSXP: {
+        serialize_null(serialized);}
+      break;
+      case LGLSXP: {
+        Rcpp::LogicalVector data(object);  
+        std::vector<unsigned char> bool_data(data.size());
+        for(int i = 0; i < data.size(); i++) {
+          bool_data[i] = (unsigned char) data[i];} 
+        serialize_vector(bool_data, 2, serialized, TRUE);}
+      break;
+      case REALSXP: {
+        Rcpp::NumericVector data(object);  
+          serialize_vector(data, 6, serialized, TRUE);}
+      break;
+      case STRSXP: { //character
+        Rcpp::CharacterVector data(object);
+        serialized.push_back(R_CHAR_VECTOR);
+        int raw_size = data.size() * 5 + 4;
+        for(int i = 0; i < data.size(); i++) {
+          raw_size += data[i].size();}
+        length_header(raw_size, serialized);
+        length_header(data.size(), serialized);
+        for(int i = 0; i < data.size(); i++) {
+          serialize_many(data[i], 7, serialized);}}
+      break; 
+      case INTSXP: {
+        Rcpp::IntegerVector data(object);  
+        serialize_vector(data, 3, serialized, TRUE);}
+      break;
+      case VECSXP: { //list
+        Rcpp::List data(object);
+        serialize_list(data, serialized, TRUE);}
+      break;
+      default:
+        serialize_native(object, serialized);}}
     else {
       switch(robj.sexp_type()) {
       	case NILSXP: {
@@ -430,33 +464,57 @@ void serialize(const SEXP & object, raw & serialized, bool native) {
         case STRSXP: { //character
           Rcpp::CharacterVector data(object);
           if(data.size() > 1) {
-            serialized.push_back(8);
+            serialized.push_back(TB_VECTOR);
             length_header(data.size(), serialized);}
           for(int i = 0; i < data.size(); i++) {
-            serialize_many(data[i], 7, serialized);}}
+            serialize_many(data[i], TB_STRING, serialized);}}
           break; 
         case LGLSXP: { //logical
           Rcpp::LogicalVector data(object);
           std::vector<unsigned char> bool_data(data.size());
           for(int i = 0; i < data.size(); i++) {
             bool_data[i] = (unsigned char) data[i];}
-          serialize_vector(bool_data, 2, serialized, FALSE);}
+          serialize_vector(bool_data, TB_BOOLEAN, serialized, FALSE);}
           break;
         case REALSXP: { //numeric
           Rcpp::NumericVector data(object);
-          serialize_vector(data, 6, serialized, FALSE);}
+          serialize_vector(data, TB_DOUBLE, serialized, FALSE);}
           break;
         case INTSXP: { //factor, integer
           Rcpp::IntegerVector data(object);
-          serialize_vector(data, 3, serialized, FALSE);}
+          serialize_vector(data, TB_INTEGER, serialized, FALSE);}
           break;
-        case VECSXP: { //list
+        case VECSXP: { //list 
           Rcpp::List data(object);
-          serialize_list(data, serialized);}
+          serialize_list(data, serialized, FALSE);}
           break;
         default: {
           throw UnsupportedType(robj.sexp_type());}}}}
 
+void serialize_attributes(const SEXP & object, raw & serialized) {
+  Rcpp::RObject robj(object);
+  std::vector<std::string> names = robj.attributeNames();
+  serialize(Rcpp::wrap(names), serialized, TRUE);
+  std::vector<SEXP> attributes;
+  for(int i = 0; i < names.size(); i++) {
+    attributes.push_back(Rcpp::wrap(robj.attr(names[i])));}
+  serialize(Rcpp::wrap(attributes), serialized, TRUE);}
+  
+void serialize(const SEXP & object, raw & serialized, bool native) {
+  Rcpp::RObject robj(object);
+  bool has_attr = robj.attributeNames().size() > 0;
+  if(has_attr && native) {
+    serialized.push_back(R_WITH_ATTRIBUTES);
+    raw serialized_object(0);
+    serialize_noattr(object, serialized_object, TRUE);
+    raw serialized_attributes(0);
+    serialize_attributes(object, serialized_attributes);
+    length_header(serialized_object.size() + serialized_attributes.size(), serialized);
+    serialized.insert(serialized.end(), serialized_object.begin(), serialized_object.end());
+    serialized.insert(serialized.end(), serialized_attributes.begin(), serialized_attributes.end());}
+  else {
+    serialize_noattr(object, serialized, native);}}
+  
 SEXP typedbytes_writer(SEXP objs, SEXP native){
 	raw serialized(0);
 	Rcpp::List objects(objs);
@@ -465,7 +523,6 @@ SEXP typedbytes_writer(SEXP objs, SEXP native){
     try{
       serialize(Rcpp::wrap(*i), serialized, is_native[0]);}
     catch(UnsupportedType ut){
-      safe_stop("Unsupported type: " + (int)ut.type_code);}}
+      safe_stop("Unsupported type: " + to_string((int)ut.type_code));}}
 	return Rcpp::wrap(serialized);}	
-
 

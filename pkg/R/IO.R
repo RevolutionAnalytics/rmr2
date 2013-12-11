@@ -15,7 +15,8 @@
 
 make.json.input.format =
   function(key.class = rmr2:::qw(list, vector, data.frame, matrix),
-           value.class = rmr2:::qw(list, vector, data.frame, matrix)) { #leave the pkg qualifier in here
+           value.class = rmr2:::qw(list, vector, data.frame, matrix),#leave the pkg qualifier in here
+           read.size = 1000) { 
     key.class = match.arg(key.class)
     value.class = match.arg(value.class)
     cast =
@@ -29,8 +30,8 @@ make.json.input.format =
     process.field = 
       function(field, class)
         cast(class)(fromJSON(field, asText = TRUE))
-    function(con, keyval.length) {
-      lines = readLines(con, keyval.length)
+    function(con) {
+      lines = readLines(con, read.size)
       if (length(lines) == 0) NULL
       else {
         splits =  strsplit(lines, "\t")
@@ -42,105 +43,173 @@ make.json.input.format =
                  else 
                    keyval(process.field(x[1], key.class), process.field(x[2], value.class))))}}}
 
-json.output.format = function(kv, con) {
-  ser = function(k, v) paste(gsub("\n", "", toJSON(k, .escapeEscapes=TRUE, collapse = "")),
-                             gsub("\n", "", toJSON(v, .escapeEscapes=TRUE, collapse = "")),
-                             sep = "\t")
-  out = reduce.keyval(kv, ser, rmr.options('keyval.length'))
-  writeLines(paste(out, collapse = "\n"), sep = "", con = con)}
 
-text.input.format = function(con, keyval.length) {
-  lines = readLines(con, keyval.length)
-  if (length(lines) == 0) NULL
-  else keyval(NULL, lines)}
+make.json.output.format = 
+  function(write.size = 1000)
+    function(kv, con) {
+      ser =
+        function(k, v) 
+          paste(
+            gsub(
+              "\n",
+              "", 
+              toJSON(k, .escapeEscapes=TRUE, collapse = "")),
+            gsub("\n", "", toJSON(v, .escapeEscapes=TRUE, collapse = "")),
+            sep = "\t", 
+            write.size)
+      out = reduce.keyval(kv, ser, 1000)
+      writeLines(paste(out, collapse = "\n"), sep = "", con = con)}
 
-text.output.format = function(kv, con) {
-  ser = function(k, v) paste(k, v, collapse = "", sep = "\t")
-  out = reduce.keyval(kv, ser, length.keyval(kv))
-  writeLines(paste(out, "\n", collapse="", sep = ""), sep = "", con = con)}
+make.text.input.format = 
+  function(read.size = 1000)
+    function(con) {
+      lines = readLines(con, read.size)
+      if (length(lines) == 0) NULL
+      else keyval(NULL, lines)}
 
-make.csv.input.format = function(...) function(con, keyval.length) {
-  df = 
-    tryCatch(
-      read.table(file = con, nrows = keyval.length, header = FALSE, ...),
-      error = 
-        function(e) {
-          if(e$message != "no lines available in input")
-            stop(e$message)
-          NULL})  
-  if(is.null(df) || dim(df)[[1]] == 0) NULL
-  else keyval(NULL, df)}
+text.output.format = 
+  function(kv, con) {
+    ser = function(k, v) paste(k, v, collapse = "", sep = "\t")
+    out = reduce.keyval(kv, ser, length.keyval(kv))
+    writeLines(paste(out, "\n", collapse="", sep = ""), sep = "", con = con)}
 
-make.csv.output.format = function(...) function(kv, con) {
-  kv = recycle.keyval(kv)
-  k = keys(kv)
-  v = values(kv)
-  write.table(file = con, 
-              x = if(is.null(k)) v else cbind(k, v), 
-              ..., 
-              row.names = FALSE, 
-              col.names = FALSE)}
+make.csv.input.format =
+  function(...) function(con) {
+    df = 
+      tryCatch(
+        read.table(file = con, header = FALSE, ...),
+        error = 
+          function(e) {
+            if(e$message != "no lines available in input")
+              stop(e$message)
+            NULL})  
+    if(is.null(df) || dim(df)[[1]] == 0) NULL
+    else keyval(NULL, df)}
 
-typedbytes.reader = function(data, nobjs) {
-  if(is.null(data)) NULL
-  else
-    .Call("typedbytes_reader", data, nobjs, PACKAGE = "rmr2")}
+make.csv.output.format =
+  function(...) function(kv, con) {
+    k = keys(kv)
+    v = values(kv)
+    write.table(file = con, 
+                x = if(is.null(k)) v else cbind(k, v), 
+                ..., 
+                row.names = FALSE, 
+                col.names = FALSE)}
 
-typedbytes.writer = function(objects, con, native) {
-  writeBin(
-    .Call("typedbytes_writer", objects, native, PACKAGE = "rmr2"),
-    con)}
+typedbytes.reader =
+  function(data, nobjs) {
+    if(is.null(data)) NULL
+    else
+      .Call("typedbytes_reader", data, nobjs, PACKAGE = "rmr2")}
 
-make.typedbytes.input.format = function(recycle = TRUE) {
-  obj.buffer = list()
-  obj.buffer.rmr.length = 0
-  raw.buffer = raw()
-  read.size = 100
-  function(con, keyval.length) {
-    while(length(obj.buffer) < 2 || 
-            obj.buffer.rmr.length < keyval.length) {
-      raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
-      if(length(raw.buffer) == 0) break;
-      parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
-      obj.buffer <<- c(obj.buffer, parsed$objects)
-      approx.read.records = {
-        if(length(parsed$objects) == 0) 0 
-        else 
-          sum(
-            sapply(sample(parsed$objects, 10, replace = T), rmr.length)) * 
-          length(parsed$objects)/10.0 }
-      obj.buffer.rmr.length <<- obj.buffer.rmr.length + approx.read.records 
-      read.size <<- ceiling(1.1^sign(keyval.length - obj.buffer.rmr.length) * read.size)
-      if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
-    straddler = list()
-    retval = {
-      if(length(obj.buffer) == 0) NULL 
-      else { 
-        if(length(obj.buffer)%%2 ==1) {
-          straddler = obj.buffer[length(obj.buffer)]
-          obj.buffer <<- obj.buffer[-length(obj.buffer)]}
-        kk = odd(obj.buffer)
-        vv = even(obj.buffer)
-        if(recycle) {
-          keyval(
-            c.or.rbind.rep(kk, sapply.rmr.length(vv)), 
-            c.or.rbind(vv))}
-        else {
-          keyval(kk, vv)}}}
-    obj.buffer <<- straddler
-    obj.buffer.rmr.length <<- 0
-    retval}}
+typedbytes.writer =
+  function(objects, con, native) {
+    writeBin(
+      .Call("typedbytes_writer", objects, native, PACKAGE = "rmr2"),
+      con)}
+
+to.data.frame = 
+  function(x, template){
+    x = t.list(x)
+    y = 
+      lapply(
+        seq_along(x), 
+        function(i)
+          if(is.atomic(template[[i]])) unlist(x[[i]]) else x[[i]])
+    names(y) = names(template)
+    data.frame(y)}
+
+from.list = 
+  function (x, template) {
+    switch(
+      class(template),
+      NULL = NULL,
+      list = splat(c)(x),
+      matrix = splat(rbind)(x), 
+      data.frame = to.data.frame(x, template),
+      unlist(x))}
+
+make.typedbytes.input.format =
+  function(read.size = 10^7) {
+    obj.buffer = list()
+    obj.buffer.rmr.length = 0
+    raw.buffer = raw()
+    template.pe = NULL
+    function(con) {
+      is.native = length(con) > 1
+      while(length(obj.buffer) < 2) {
+        raw.buffer <<- c(raw.buffer, readBin(con[[1]], raw(), read.size))
+        if(length(raw.buffer) == 0) break;
+        parsed = typedbytes.reader(raw.buffer, as.integer(read.size/20)) #this is a ridiculous upper bound
+        obj.buffer <<- c(obj.buffer, parsed$objects)
+        if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
+      straddler = list()
+      retval = {
+        if(length(obj.buffer) == 0) NULL 
+        else { 
+          if(length(obj.buffer)%%2 ==1) {
+            straddler = obj.buffer[length(obj.buffer)]
+            obj.buffer <<- obj.buffer[-length(obj.buffer)]}
+          kk = odd(obj.buffer)
+          vv = even(obj.buffer)
+          if(is.native)
+            kk = rep(kk,sapply.rmr.length(vv))
+          if(is.null(template.pe) && is.native) {
+            load(con[[2]])
+            template.pe <<- template}
+          if(is.native) {
+            keyval(
+              from.list(kk, template.pe[[1]]),
+              from.list(vv, template.pe[[2]]))}
+          else {
+            keyval(kk,vv)}}}
+      obj.buffer <<- straddler
+      retval}}
 
 make.native.input.format = make.typedbytes.input.format
 
-make.native.or.typedbytes.output.format = 
-  function(keyval.length, native)
-    function(kv, con){
-      kvs = split.keyval(kv, keyval.length)
-      typedbytes.writer(interleave(keys(kvs), values(kvs)), con, native)}
+to.list = 
+  function(x) {
+    if (is.null(x))
+      list(NULL)
+    else {
+      if (is.matrix(x)) x = as.data.frame(x)
+      if (is.data.frame(x)) 
+        unname(
+          t.list(lapply(x, as.list)))
+      else
+        as.list(x)}}
 
-make.native.output.format = Curry(make.native.or.typedbytes.output.format, native = TRUE)
-make.typedbytes.output.format = Curry(make.native.or.typedbytes.output.format, native = FALSE)
+make.native.or.typedbytes.output.format = 
+  function(native, write.size = 1000) {
+    template = NULL
+    function(kv, con){
+      k = keys(kv)
+      v = values(kv)
+      if(is.null(template) && native)  {
+        template <<- 
+          list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
+        save(template, file = con[[2]])}
+      kvs = {
+        if(native)
+          split.keyval(kv, write.size, TRUE)
+        else 
+          keyval(to.list(k), to.list(v))}
+      if(is.null(k)) {
+        if(!native) stop("Can't handle NULL in typedbytes")
+        k =  rep_len(list(NULL), length.keyval(kvs)) }
+      else 
+        k = keys(kvs)
+      v = values(kvs)
+      typedbytes.writer(
+        interleave(k, v), 
+        con[[1]], 
+        native)}}
+
+make.native.output.format = 
+  Curry(make.native.or.typedbytes.output.format, native = TRUE)
+make.typedbytes.output.format = 
+  Curry(make.native.or.typedbytes.output.format, native = FALSE)
 
 pRawToChar = 
   function(rl)
@@ -194,7 +263,7 @@ hbase.rec.to.data.frame =
     retval}
 
 make.hbase.input.format = 
-  function(dense, atomic, key.deserialize, cell.deserialize) {
+  function(dense, atomic, key.deserialize, cell.deserialize, read.size) {
     deserialize.opt = 
       function(deser) {
         if(is.null(deser)) deser = "raw"
@@ -213,54 +282,96 @@ make.hbase.input.format =
         deser}
     key.deserialize = deserialize.opt(key.deserialize)
     cell.deserialize = deserialize.opt(cell.deserialize)
-    tif = make.typedbytes.input.format(recycle = FALSE)
+    tif = make.typedbytes.input.format(read.size)
     if(is.null(dense)) dense = FALSE
-    function(con, keyval.length) {
-      rec = tif(con, keyval.length)
+    function(con) {
+      rec = tif(con)
       if(is.null(rec)) NULL
       else {
         df = hbase.rec.to.data.frame(rec, atomic, dense, key.deserialize, cell.deserialize)
         keyval(NULL, df)}}}
 
-data.frame.to.nested.map = function(x,ind) {
-  if(length(ind)>0 && nrow(x) > 0) {
-    spl = split(x, x[,ind[1]])
-    lapply(x[,ind[1]], function(y) keyval(as.character(y), data.frame.to.nested.map(spl[[y]], ind[-1])))}
-  else x$value}
+data.frame.to.nested.map =
+  function(x,ind) {
+    if(length(ind)>0 && nrow(x) > 0) {
+      spl = split(x, x[,ind[1]])
+      lapply(x[,ind[1]], function(y) keyval(as.character(y), data.frame.to.nested.map(spl[[y]], ind[-1])))}
+    else x$value}
 
 hbdf.to.m3 = Curry(data.frame.to.nested.map, ind = c("key", "family", "column"))
 # I/O 
+
+open.stdinout = 
+  function(mode, is.read) {
+    if(mode == "text") { 
+      if(is.read)  
+        file("stdin", "r") #not stdin() which is parsed by the interpreter
+      else 
+        stdout()}
+    else { # binary
+      cat  = {
+        if(.Platform$OS.type == "windows")
+          paste(
+            "\"", 
+            system.file(
+              package="rmr2", 
+              "bin", 
+              .Platform$r_arch, 
+              "catwin.exe"), 
+            "\"", 
+            sep="")
+        else
+          "cat"}
+      pipe(cat, ifelse(is.read, "rb", "wb"))}}
+
+#opens all required connections for a format. If in a task, replace first connection with stdin or out and
+#make all the other names unique before opening
+
+get.section = 
+  function(fname)
+    arrange(dfs.du(dirname(fname), basename(fname)), -size)$path[1]
+
+make.section =
+  function(fname)        
+    paste(c(fname, if(in.a.task()) current.task()), collapse = "-")
+
 make.keyval.readwriter = 
-  function(mode, format, keyval.length, con = NULL, read) {
-    if(is.null(con)) 
-      con = {
-        if(mode == "text") { 
-          if(read)  file("stdin", "r") #not stdin() which is parsed by the interpreter
-          else stdout()}
-        else {
-          cat  = {
-            if(.Platform$OS.type == "windows")
+  function(fname, format, is.read) {
+    if(length(fname) > 1)
+      fname = current.input()
+    if(!is.null(format$sections)) {
+      if(!is.read) dfs.mkdir(fname) 
+      fname = file.path(fname, format$sections)}
+    con = list()
+    if(in.a.task()){
+      con[[1]] = open.stdinout(format$mode, is.read)
+      fname = fname[-1]}
+    con = 
+      c(
+        con,
+        lapply(
+          fname,
+          function(fn) 
+            file(
+              if(is.read)
+                get.section(fn)
+              else
+                make.section(fn), 
               paste(
-                "\"", 
-                system.file(
-                  package="rmr2", 
-                  "bin", 
-                  .Platform$r_arch, 
-                  "catwin.exe"), 
-                "\"", 
-                sep="")
-            else
-              "cat"}
-          pipe(cat, ifelse(read, "rb", "wb"))}}
-    if (read) {
+                if(is.read) "r" else "w", 
+                if(format$mode == "text") "" else "b",
+                sep = ""))))
+    if (is.null(format$sections))
+      con = con[[1]]
+    if (is.read) {
       function() 
-        format(con, keyval.length)}
+        format$format(con)}
     else {
       function(kv)
-        format(kv, con)}}
+        format$format(kv, con)}}
 
-make.keyval.reader = Curry(make.keyval.readwriter, read = TRUE)
-make.keyval.writer = Curry(make.keyval.readwriter, keyval.length = NULL, read = FALSE)
+make.keyval.reader = Curry(make.keyval.readwriter, is.read = TRUE)
+make.keyval.writer = Curry(make.keyval.readwriter, is.read = FALSE)
 
 IO.formats = c("text", "json", "csv", "native",
                "sequence.typedbytes", "hbase", 
@@ -271,15 +382,17 @@ make.input.format =
     format = make.native.input.format(), 
     mode = c("binary", "text"),
     streaming.format = NULL, 
+    backend.parameters = NULL,
+    sections = NULL,
     ...) {
     mode = match.arg(mode)
-    backend.parameters = NULL
+    args = list(...)
     if(is.character(format)) {
       format = match.arg(format, IO.formats)
       switch(
         format, 
         text = {
-          format = text.input.format 
+          format = make.text.input.format(...)
           mode = "text"}, 
         json = {
           format = make.json.input.format(...) 
@@ -288,10 +401,11 @@ make.input.format =
           format = make.csv.input.format(...) 
           mode = "text"}, 
         native = {
-          format = make.native.input.format() 
-          mode = "binary"}, 
+          format = make.native.input.format(...) 
+          mode = "binary"
+          sections = c("part-00000", "_rmr2_template")}, 
         sequence.typedbytes = {
-          format = make.typedbytes.input.format() 
+          format = make.typedbytes.input.format(...) 
           mode = "binary"},
         pig.hive = {
           format = 
@@ -303,19 +417,18 @@ make.input.format =
               quote = "")
           mode = "text"},
         hbase = {
-          optlist = list(...)
           format = 
             make.hbase.input.format(
-              default(optlist$dense, F),
-              default(optlist$atomic, F),
-              default(optlist$key.deserialize, "raw"),
-              default(optlist$cell.deserialize, "raw"))
+              default(args$dense, F),
+              default(args$atomic, F),
+              default(args$key.deserialize, "raw"),
+              default(args$cell.deserialize, "raw"))
           mode = "binary"
           streaming.format = 
             "com.dappervision.hbase.mapred.TypedBytesTableInputFormat"
-          family.columns = optlist$family.columns
-          start.row = optlist$start.row
-          stop.row = optlist$stop.row
+          family.columns = args$family.columns
+          start.row = args$start.row
+          stop.row = args$stop.row
           backend.parameters = 
             list(
               hadoop = 
@@ -364,7 +477,8 @@ make.input.format =
     list(mode = mode, 
          format = format, 
          streaming.format = streaming.format, 
-         backend.parameters = backend.parameters)}
+         backend.parameters = backend.parameters,
+         sections = sections)}
 
 set.separator.options =
   function(sep) {
@@ -390,12 +504,14 @@ set.separator.options =
 
 make.output.format = 
   function(
-    format = make.native.output.format(keyval.length = rmr.options('keyval.length')),
+    format = make.native.output.format(),
     mode = c("binary", "text"),
     streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat", 
+    backend.parameters = NULL,
+    sections = NULL,
     ...) {
     mode = match.arg(mode)
-    backend.parameters = NULL
+    args = list(...)
     if(is.character(format)) {
       format = match.arg(format, IO.formats)
       switch(
@@ -405,15 +521,14 @@ make.output.format =
           mode = "text"
           streaming.format = NULL},
         json = {
-          format = json.output.format
+          format = make.json.output.format(...)
           mode = "text"
           streaming.format = NULL}, 
         csv = {
           format = make.csv.output.format(...)
           mode = "text"
           streaming.format = NULL
-          sep = list(...)$sep
-          backend.parameters = set.separator.options(sep)}, 
+          backend.parameters = set.separator.options(args$sep)}, 
         pig.hive = {
           format = 
             make.csv.output.format(  
@@ -422,17 +537,17 @@ make.output.format =
           mode = "text"
           streaming.format = NULL}, 
         native = {
-          format = make.native.output.format(
-            keyval.length = rmr.options('keyval.length'))
+          format = make.native.output.format(...)
           mode = "binary"
-          streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"}, 
+          streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"
+          sections = c("part-00000", "_rmr2_template")}, 
         sequence.typedbytes = {
-          format = make.typedbytes.output.format(keyval.length = rmr.options('keyval.length'))
+          format = make.typedbytes.output.format(...)
           mode = "binary"
           streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"},
         hbase = {
           stop("hbase output format not implemented yet")
-          format = make.typedbytes.output.format(recycle = FALSE)
+          format = make.typedbytes.output.format(...)
           mode = "binary"
           streaming.format = "com.dappervision.mapreduce.TypedBytesTableOutputFormat"
           backend.parameters = 
@@ -441,10 +556,15 @@ make.output.format =
                 list(
                   D = paste(
                     "hbase.mapred.tablecolumnsb64=", 
-                    list(...)$family, 
+                    args$family, 
                     ":", 
-                    list(...)$column, 
+                    args$column, 
                     sep = ""),
                   libjars = system.file(package = "rmr2", "java/hadoopy_hbase.jar")))})}
     mode = match.arg(mode)
-    list(mode = mode, format = format, streaming.format = streaming.format, backend.parameters = backend.parameters)}
+    list(
+      mode = mode, 
+      format = format, 
+      streaming.format = streaming.format, 
+      backend.parameters = backend.parameters, 
+      sections = sections)}

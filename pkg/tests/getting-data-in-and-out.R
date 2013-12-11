@@ -35,8 +35,8 @@ result = mapreduce(
 from.dfs(result)
 ## @knitr end
 ## @knitr getting-data.tsv.reader
-tsv.reader = function(con, nrecs){
-  lines = readLines(con, 1)
+tsv.reader = function(con){
+  lines = readLines(con, 1000)
   if(length(lines) == 0)
     NULL
   else {
@@ -57,7 +57,8 @@ tsv.format =
 tsv.data = 
   to.dfs(
     data.frame(
-      x = 1:100, y = rnorm(100), 
+      x = 1:100, 
+      y = rnorm(100), 
       z = runif(100), 
       w = 1:100), 
     format = 
@@ -71,8 +72,8 @@ freq.counts =
     reduce = function(k, vv) keyval(k, sum(vv)))
 ## @knitr getting-data.named.columns
 tsv.reader = 
-  function(con, nrecs){
-    lines = readLines(con, 1)
+  function(con){
+    lines = readLines(con, 1000)
     if(length(lines) == 0)
       NULL
     else {
@@ -125,8 +126,8 @@ mapreduce(
 fields <- rmr2:::qw(mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb) 
 field.size = 8
 ## @knitr getting-data.fwf.reader
-fwf.reader <- function(con, nrecs) {  
-  lines <- readLines(con, nrecs)  
+fwf.reader <- function(con) {  
+  lines <- readLines(con, 1000)  
   if (length(lines) == 0) {
     NULL}
   else {
@@ -144,7 +145,7 @@ fwf.reader <- function(con, nrecs) {
     keyval(NULL, df)}} 
 fwf.input.format = make.input.format(mode = "text", format = fwf.reader)
 ## @knitr getting-data.fwf.writer
-fwf.writer <- function(kv, con, keyval.size) {
+fwf.writer <- function(kv, con) {
   ser = 
     function(df) 
       paste(

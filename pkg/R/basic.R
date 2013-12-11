@@ -46,11 +46,9 @@ Make.single.or.multi.arg = function(f, from = c("single", "multi")) {
       f.multi(...)}}
   
 
-`%:%` = function(f,g) function(...) do.call(f, g(...))
+`%|%` = function(f,g) function(...) do.call(g, f(...))
 
 all.predicate = function(x, P) all(sapply(x, P))
-
-mapply.data.frame = function(data, FUN) do.call(function(...) mapply(FUN = FUN, ...), data)
 
 #data structures
 
@@ -69,6 +67,19 @@ make.fast.list = function(l = list()) {
       i <<- i + length(els)}}}
 
 named.slice = function(x, n) x[which(names(x) == n)]
+
+mapply.list = 
+  function(...) mapply(FUN = list, ..., SIMPLIFY = FALSE)
+
+t.list = 
+  function(l) {
+    if(length(l) == 0) l
+    else {
+      nc = length(l)
+      nr = length(l[[1]])
+      empty.l = as.list(raw(nc))
+      tl = rep_len(list(empty.l), nr)
+      .Call("t_list", l, tl, PACKAGE = "rmr2")}}
 
 #data frame manip
 

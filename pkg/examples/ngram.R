@@ -69,7 +69,6 @@ filter.map = function(., lines) {
 ## @knitr filtered.data
 source = "/user/antonio/1gram/data"
 library(rmr2)
-rmr.options(keyval.length = 10^5)
 filtered.data = 
   mapreduce(input = source,
             map = filter.map)
