@@ -37,3 +37,4 @@ _rmr2_template
 out/*
 
 job_local*
+*.Rout
