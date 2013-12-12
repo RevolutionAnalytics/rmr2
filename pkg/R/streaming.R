@@ -268,16 +268,10 @@ rmr.stream =
           pattern,
           default.output.format)
     
-    rmkdir = 
-      function(path) {
-        if(!rmr2:::hdfs.test("-e", path)) {
-          rmkdir(dirname(path))
-          rmr2:::hdfs.mkdir(path)}}
-
     map.outdir = file.path(".", rmr2:::current.job(), "map")
-    rmkdir(map.outdir)
+    dir.create(map.outdir, recursive = TRUE)
     combine.outdir = file.path(".", rmr2:::current.job(), "combine")
-    rmkdir(combine.outdir)
+    dir.create(combine.outdir, recursive = TRUE)
   ')  
     map.line = '  
   rmr2:::map.loop(
