@@ -78,7 +78,7 @@ t.list =
       nc = length(l)
       nr = length(l[[1]])
       empty.l = as.list(raw(nc))
-      tl = rep_len(list(empty.l), nr)
+      tl = rep.int(list(empty.l), nr)
       .Call("t_list", l, tl, PACKAGE = "rmr2")}}
 
 #data frame manip
@@ -138,3 +138,5 @@ interleave =
     l[2*(1:length(l1)) - 1] = l1
     l[2*(1:length(l1))] = l2
     l}
+
+#con
