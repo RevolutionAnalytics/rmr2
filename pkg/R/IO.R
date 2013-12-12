@@ -197,7 +197,7 @@ make.native.or.typedbytes.output.format =
           keyval(to.list(k), to.list(v))}
       if(is.null(k)) {
         if(!native) stop("Can't handle NULL in typedbytes")
-        k =  rep.int(list(NULL), length.keyval(kvs)) }
+        k =  rep(list(NULL), length.keyval(kvs)) }
       else 
         k = keys(kvs)
       v = values(kvs)

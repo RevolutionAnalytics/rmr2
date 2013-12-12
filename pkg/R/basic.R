@@ -78,7 +78,7 @@ t.list =
       nc = length(l)
       nr = length(l[[1]])
       empty.l = as.list(raw(nc))
-      tl = rep.int(list(empty.l), nr)
+      tl = rep(list(empty.l), nr)
       .Call("t_list", l, tl, PACKAGE = "rmr2")}}
 
 #data frame manip
