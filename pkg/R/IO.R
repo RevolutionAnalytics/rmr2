@@ -340,7 +340,7 @@ make.keyval.readwriter =
     if(length(fname) > 1)
       fname = current.input()
     if(!is.null(format$sections)) {
-      if(!is.read) dfs.mkdir(fname) 
+      if(!is.read) dir.create(fname) 
       fname = file.path(fname, format$sections)}
     con = list()
     if(in.a.task()){
