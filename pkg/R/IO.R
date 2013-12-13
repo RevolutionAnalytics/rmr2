@@ -328,8 +328,16 @@ open.stdinout =
 #make all the other names unique before opening
 
 get.section = 
-  function(fname)
-    arrange(dfs.du(dirname(fname), basename(fname)), -size)$path[1]
+  function(fname) {
+    fi = 
+      file.info(
+        list.files(
+          dirname(fname), 
+          pattern = basename(fname), 
+          full.names = TRUE))
+    arrange(
+      data.frame(path = rownames(fi), size = fi$size, stringsAsFactors = FALSE),
+      -size)$path[1]}
 
 make.section =
   function(fname)        
