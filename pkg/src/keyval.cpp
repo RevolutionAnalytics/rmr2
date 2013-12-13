@@ -56,6 +56,15 @@ SEXP sapply_rmr_length(SEXP xx) {
   for(int i = 0; i < _xx.size(); i++) {
     results[i] = rmr_length(_xx[i]);}
   return(Rcpp::wrap(results));}
+  return(wrap(results));}
+  
+SEXP sapply_rmr_length_lossy_data_frame(SEXP xx){
+  List _xx(xx);
+  std::vector<int> results(_xx.size());
+  for(int i = 0; i < _xx.size(); i++) {
+    List cols(as<List>(_xx[i]));
+    results[i] = rmr_length(cols[0]);}
+  return wrap(results);}
 
 int length_keyval(SEXP kv) {
   Rcpp::List kv_(kv);

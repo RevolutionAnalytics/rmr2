@@ -22,6 +22,10 @@ sapply.rmr.length =
   function(xx)
     .Call("sapply_rmr_length", xx, PACKAGE = "rmr2")
 
+sapply.rmr.length.lossy.data.frame = 
+  function(xx)
+    .Call("sapply_rmr_length_lossy_data_frame", xx, PACKAGE = "rmr2")
+
 rmr.equal = 
   function(xx, y) {
     if(rmr.length(xx) == 0) logical()

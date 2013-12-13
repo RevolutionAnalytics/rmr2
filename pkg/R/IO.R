@@ -152,17 +152,21 @@ make.typedbytes.input.format =
             obj.buffer <<- obj.buffer[-length(obj.buffer)]}
           kk = odd(obj.buffer)
           vv = even(obj.buffer)
-          if(is.native)
-            kk = rep(kk,sapply.rmr.length(vv))
-          if(is.null(template.pe) && is.native) {
-            load(con[[2]])
-            template.pe <<- template}
           if(is.native) {
+            if(is.null(template.pe)) {
+              load(con[[2]])
+              template.pe <<- template}
+            kk = rep(
+              kk,
+              if(is.data.frame(template.pe[[2]]))
+                sapply.rmr.length.lossy.data.frame(vv)
+              else
+                sapply.rmr.length(vv))
             keyval(
               from.list(kk, template.pe[[1]]),
               from.list(vv, template.pe[[2]]))}
-          else {
-            keyval(kk,vv)}}}
+          else 
+            keyval(kk,vv)}}
       obj.buffer <<- straddler
       retval}}
 
