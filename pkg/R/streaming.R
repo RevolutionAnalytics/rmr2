@@ -226,7 +226,6 @@ rmr.stream =
       if(.Platform$OS.type == "windows") "../../jars"
     else "."
     dfs.work.dir = dfs.tempfile()
-    hdfs.mkdir(dfs.work.dir)
     rmr.local.env = tempfile(pattern = "rmr-local-env")
     rmr.global.env = tempfile(pattern = "rmr-global-env")
     
@@ -275,6 +274,7 @@ rmr.stream =
    map.outdir = file.path(".", rmr2:::current.job(), "map")
    combine.outdir = file.path(".", rmr2:::current.job(), "combine")
    dfs.work.dir = rmr2:::to.dfs.path(dfs.work.dir)
+   rmr2:::hdfs.mkdir(dfs.work.dir)
   ')  
     map.line = '  
   map.indir = file.path(".", rmr2:::current.job(), "mapin")
