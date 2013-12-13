@@ -196,6 +196,7 @@ hadoop.streaming =
       paste(hadoop.cmd(), "jar", stream.jar)}
     else paste(hadoop.cmd(), "jar", hadoop_streaming)}
 
+
 rmr.stream = 
   function(
     in.folder, 
@@ -210,6 +211,7 @@ rmr.stream =
     backend.parameters, 
     verbose, 
     debug) {
+    dfs.tempfile() #initialize dfs.tempdir if empty
     pkg.opts = as.list(rmr.options.env)
     profile.nodes = pkg.opts$profile.nodes
     
@@ -223,6 +225,8 @@ rmr.stream =
     work.dir = 
       if(.Platform$OS.type == "windows") "../../jars"
     else "."
+    dfs.work.dir = dfs.tempfile()
+    hdfs.mkdir(dfs.work.dir)
     rmr.local.env = tempfile(pattern = "rmr-local-env")
     rmr.global.env = tempfile(pattern = "rmr-global-env")
     
@@ -247,70 +251,108 @@ rmr.stream =
           if (!require(l, character.only = T)) 
             warning(paste("can\'t load", l)))
     sink(NULL)
-    input.reader = 
-      function()
-        rmr2:::make.keyval.reader(
-          in.folder,
-          input.format)
+  input.reader = 
+    function(input)
+      rmr2:::make.keyval.reader(
+        input,
+        input.format)
     output.writer = 
-      function()
+      function(output)
         rmr2:::make.keyval.writer(
-          out.folder,
+          output,
           output.format)
     default.reader = 
-      function(pattern) 
+      function(input) 
         rmr2:::make.keyval.reader(
-          pattern,
+          input,
           default.input.format)
     default.writer = 
-      function(pattern) 
+      function(output) 
         rmr2:::make.keyval.writer(
-          pattern,
+          output,
           default.output.format)
-    
-    map.outdir = file.path(".", rmr2:::current.job(), "map")
-    dir.create(map.outdir, recursive = TRUE)
-    combine.outdir = file.path(".", rmr2:::current.job(), "combine")
-    dir.create(combine.outdir, recursive = TRUE)
+
+   map.outdir = file.path(".", rmr2:::current.job(), "map")
+   combine.outdir = file.path(".", rmr2:::current.job(), "combine")
+   dfs.work.dir = rmr2:::to.dfs.path(dfs.work.dir)
   ')  
     map.line = '  
+  map.indir = file.path(".", rmr2:::current.job(), "mapin")
+  dir.create(map.indir, recursive = TRUE)
+  dir.create(map.outdir, recursive = TRUE)
+  lapply(
+    input.format$sections[-1],
+    function(sec)
+      stopifnot(rmr2:::hdfs.get(file.path(in.folder, sec), map.indir)))
   rmr2:::map.loop(
     map = map, 
-    keyval.reader = input.reader(), 
+    keyval.reader = input.reader(map.indir), 
     keyval.writer = 
       if(is.null(reduce)) 
-        output.writer()
+        output.writer(map.outdir)
       else 
         default.writer(map.outdir),
     profile = profile.nodes,
     combine = in.memory.combine,
-    vectorized = vectorized.reduce)})()'
-    reduce.line = '  
+    vectorized = vectorized.reduce)
+  sink(file=stderr())
+  if(!is.null(reduce)) rmr2:::hdfs.mkdir(file.path(dfs.work.dir, "map"))
+  stopifnot(
+    rmr2:::hdfs.put(
+      file.path(map.outdir, "*"), 
+      if(is.null(reduce)) out.folder else file.path(dfs.work.dir, "map")))
+  sink(NULL)
+'
+  reduce.line = '  
+  reduce.indir =  
+    if(is.null(combine) || identical(combine, FALSE))
+      map.outdir
+    else
+      combine.outdir
+  reduce.outdir = file.path(".", rmr2:::current.job(), "reduce")
+  sink(file=stderr())
+  rmr2:::hdfs.get(
+    file.path(
+      dfs.work.dir, 
+     basename(reduce.indir)), rmr2:::current.job())
+  sink(NULL)
   rmr2:::reduce.loop(
     reduce = reduce, 
     vectorized = vectorized.reduce,
     keyval.reader = 
-      default.reader(
-        if(is.null(combine) || identical(combine, FALSE))
-          map.outdir
-        else
-          combine.outdir), 
-    keyval.writer = output.writer(),
-    profile = profile.nodes)})()'
-    combine.line = '  
+      default.reader(reduce.indir), 
+    keyval.writer = output.writer(reduce.outdir),
+    profile = profile.nodes)
+  sink(file=stderr())
+  rmr2:::hdfs.put(file.path(reduce.outdir, "*"), out.folder)
+  sink(NULL)
+'
+    
+  combine.line = '  
+ dir.create(combine.outdir, recursive = TRUE)
+ sink(file=stderr())
+  rmr2:::hdfs.get(file.path(dfs.work.dir, "map"), rmr2:::current.job())
+  sink(NULL)
   rmr2:::reduce.loop(
     reduce = combine, 
     vectorized = vectorized.reduce,
     keyval.reader = default.reader(map.outdir),
     keyval.writer = default.writer(combine.outdir), 
-  profile = profile.nodes)})()'
+    profile = profile.nodes)    
+  sink(file=stderr())
+  stopifnot(rmr2:::hdfs.put(file.path(combine.outdir, "*"), file.path(dfs.work.dir, "combine")))
+  sink(NULL)
+'
+    
+    postamble = '
+    })()'
     
     map.file = tempfile(pattern = "rmr-streaming-map")
-    writeLines(c(preamble, map.line), con = map.file)
+    writeLines(c(preamble, map.line, postamble), con = map.file)
     reduce.file = tempfile(pattern = "rmr-streaming-reduce")
-    writeLines(c(preamble, reduce.line), con = reduce.file)
+    writeLines(c(preamble, reduce.line, postamble), con = reduce.file)
     combine.file = tempfile(pattern = "rmr-streaming-combine")
-    writeLines(c(preamble, combine.line), con = combine.file)
+    writeLines(c(preamble, combine.line, postamble), con = combine.file)
     
     ## set up the execution environment for map and reduce
     if (is.logical(combine) && combine) {
