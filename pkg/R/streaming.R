@@ -225,7 +225,7 @@ rmr.stream =
     work.dir = 
       if(.Platform$OS.type == "windows") "../../jars"
     else "."
-    dfs.work.dir = dfs.tempfile()
+    dfs.work.dir = file.path("/tmp", strsplit(as.character(runif(1)), "\\.")[[1]][2])
     rmr.local.env = tempfile(pattern = "rmr-local-env")
     rmr.global.env = tempfile(pattern = "rmr-global-env")
     
@@ -273,8 +273,12 @@ rmr.stream =
 
    map.outdir = file.path(".", rmr2:::current.job(), "map")
    combine.outdir = file.path(".", rmr2:::current.job(), "combine")
-   dfs.work.dir = rmr2:::to.dfs.path(dfs.work.dir)
+   put.all = 
+     function(src, dst)
+        rmr2:::hdfs.put(paste(list.files(src, full.names=T), collapse=" "), dst)
+   sink(file = stderr())
    rmr2:::hdfs.mkdir(dfs.work.dir)
+   sink(NULL)
   ')  
     map.line = '  
   map.indir = file.path(".", rmr2:::current.job(), "mapin")
@@ -295,12 +299,11 @@ rmr.stream =
     profile = profile.nodes,
     combine = in.memory.combine,
     vectorized = vectorized.reduce)
-  sink(file=stderr())
-  if(!is.null(reduce)) rmr2:::hdfs.mkdir(file.path(dfs.work.dir, "map"))
+  dfs.work.dir.map = file.path(dfs.work.dir, "map")
+  sink(file = stderr())
+  rmr2:::hdfs.mkdir(dfs.work.dir.map)
   stopifnot(
-    rmr2:::hdfs.put(
-      file.path(map.outdir, "*"), 
-      if(is.null(reduce)) out.folder else file.path(dfs.work.dir, "map")))
+    put.all(map.outdir, dfs.work.dir.map))
   sink(NULL)
 '
   reduce.line = '  
@@ -323,8 +326,11 @@ rmr.stream =
       default.reader(reduce.indir), 
     keyval.writer = output.writer(reduce.outdir),
     profile = profile.nodes)
-  sink(file=stderr())
-  rmr2:::hdfs.put(file.path(reduce.outdir, "*"), out.folder)
+  dfs.work.dir.reduce = file.path(dfs.work.dir, "reduce")
+  sink(file = stderr())
+  rmr2:::hdfs.mkdir(dfs.work.dir.reduce)
+  stopifnot(
+    put.all(reduce.outdir, dfs.work.dir.reduce))
   sink(NULL)
 '
     
@@ -339,8 +345,11 @@ rmr.stream =
     keyval.reader = default.reader(map.outdir),
     keyval.writer = default.writer(combine.outdir), 
     profile = profile.nodes)    
-  sink(file=stderr())
-  stopifnot(rmr2:::hdfs.put(file.path(combine.outdir, "*"), file.path(dfs.work.dir, "combine")))
+  dfs.work.dir.combine = file.path(dfs.work.dir, "combine")
+  sink(file = stderr())
+  rmr2:::hdfs.mkdir(dfs.work.dir.combine)
+  stopifnot(
+    put.all(combine.outdir, dfs.work.dir.combine))
   sink(NULL)
 '
     
@@ -475,7 +484,15 @@ rmr.stream =
     else {
       console.output = tryCatch(system(final.command, intern = TRUE), 
                                 warning = function(e) stop(e)) 
-      0}}
+      retval = 0}
+    if(!is.null(output.format$sections))
+      hdfs.get(
+        file.path(
+          dfs.work.dir, 
+          if(is.null(reduce)) "map" else "reduce",
+          "*"),
+        out.folder)
+    retval }
 
 
 #hdfs section
