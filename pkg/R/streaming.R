@@ -287,7 +287,15 @@ rmr.stream =
   lapply(
     input.format$sections[-1],
     function(sec)
-      stopifnot(rmr2:::hdfs.get(file.path(in.folder, sec), map.indir)))
+      stopifnot(
+        rmr2:::hdfs.get(
+          arrange(
+            rmr2:::dfs.du(
+              file.path(
+                in.folder, 
+                paste(sec, "*", sep = ""))), 
+            -size)[1,1], 
+          map.indir)))
   rmr2:::map.loop(
     map = map, 
     keyval.reader = input.reader(map.indir), 
