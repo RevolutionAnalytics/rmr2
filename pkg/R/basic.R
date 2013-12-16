@@ -77,8 +77,10 @@ t.list =
     else {
       nc = length(l)
       nr = length(l[[1]])
-      empty.l = as.list(raw(nc))
-      tl = rep(list(empty.l), nr)
+      tl = 
+        split(
+          as.list(runif(nc*nr)),
+          ceiling((1:(nc*nr))/nc))
       .Call("t_list", l, tl, PACKAGE = "rmr2")}}
 
 #data frame manip
