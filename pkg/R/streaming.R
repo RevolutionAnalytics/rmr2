@@ -286,8 +286,6 @@ rmr.stream =
   dir.create(map.outdir, recursive = TRUE)
   lapply(
     input.format$sections[-1],
-    function(sec)
-      stopifnot(
         rmr2:::hdfs.get(
           arrange(
             rmr2:::dfs.du(
@@ -310,8 +308,7 @@ rmr.stream =
   dfs.work.dir.map = file.path(dfs.work.dir, "map")
   sink(file = stderr())
   rmr2:::hdfs.mkdir(dfs.work.dir.map)
-  stopifnot(
-    put.all(map.outdir, dfs.work.dir.map))
+  put.all(map.outdir, dfs.work.dir.map)
   sink(NULL)
 '
   reduce.line = '  
@@ -337,8 +334,7 @@ rmr.stream =
   dfs.work.dir.reduce = file.path(dfs.work.dir, "reduce")
   sink(file = stderr())
   rmr2:::hdfs.mkdir(dfs.work.dir.reduce)
-  stopifnot(
-    put.all(reduce.outdir, dfs.work.dir.reduce))
+  put.all(reduce.outdir, dfs.work.dir.reduce)
   sink(NULL)
 '
     
@@ -356,8 +352,7 @@ rmr.stream =
   dfs.work.dir.combine = file.path(dfs.work.dir, "combine")
   sink(file = stderr())
   rmr2:::hdfs.mkdir(dfs.work.dir.combine)
-  stopifnot(
-    put.all(combine.outdir, dfs.work.dir.combine))
+  put.all(combine.outdir, dfs.work.dir.combine)
   sink(NULL)
 '
     

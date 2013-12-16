@@ -343,6 +343,13 @@ get.section =
       data.frame(path = rownames(fi), size = fi$size, stringsAsFactors = FALSE),
       -size)$path[1]}
 
+hdfs.get.section =
+  function(fname) {
+    arrange(
+      dfs.du(
+        paste(fname, "*", sep = "")), 
+      -size)[1,1]}
+
 make.section =
   function(fname)        
     paste(c(fname, if(in.a.task()) current.task()), collapse = "-")
