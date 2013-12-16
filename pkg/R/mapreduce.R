@@ -309,7 +309,7 @@ from.dfs = function(input, format = "native") {
     if(!is.null(format$sections))
       lapply(
         file.path(fname, format$sections[-1]), 
-        function(fn) rmr2:::hdfs.get(paste(fn, "*", sep = ""), tmp))}
+        function(fn) rmr2:::hdfs.get(hdfs.get.section(fn), tmp))}
   else
     tmp = fname
   retval = read.file(tmp)
