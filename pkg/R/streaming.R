@@ -286,14 +286,10 @@ rmr.stream =
   dir.create(map.outdir, recursive = TRUE)
   lapply(
     input.format$sections[-1],
+    function(sec) {
         rmr2:::hdfs.get(
-          arrange(
-            rmr2:::dfs.du(
-              file.path(
-                in.folder, 
-                paste(sec, "*", sep = ""))), 
-            -size)[1,1], 
-          map.indir)))
+          rmr2:::hdfs.get.section(file.path(in.folder, sec)), 
+          map.indir)})
   rmr2:::map.loop(
     map = map, 
     keyval.reader = input.reader(map.indir), 
@@ -488,13 +484,16 @@ rmr.stream =
       console.output = tryCatch(system(final.command, intern = TRUE), 
                                 warning = function(e) stop(e)) 
       retval = 0}
-    if(!is.null(output.format$sections))
-      hdfs.get(
-        file.path(
-          dfs.work.dir, 
-          if(is.null(reduce)) "map" else "reduce",
-          "*"),
-        out.folder)
+    lapply(
+      output.format$sections[-1],
+      function(sec)     
+        hdfs.get(
+          hdfs.get.section(
+            file.path(
+              dfs.work.dir, 
+              if(is.null(reduce)) "map" else "reduce",
+              sec)),
+          out.folder))
     retval }
 
 
