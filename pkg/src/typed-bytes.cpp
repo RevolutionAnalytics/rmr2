@@ -285,19 +285,13 @@ SEXP unserialize(const raw & data, int & start, int type_code){
       break;
     case R_WITH_ATTRIBUTES: {
       get_length(data, start);
-      for(int k = 0; k < 20; k++) {
-        cerr << (int)data[start + k] << " ";}
       new_object = unserialize(data, start, 255);
-      for(int k = 0; k < 20; k++) {
-        cerr << (int)data[start + k] << " ";}
       CharacterVector names(unserialize(data, start, 255));
-      for(int k = 0; k < 20; k++) {
-        cerr << (int)data[start + k] << " ";}
-      cerr << endl;
       List attributes(unserialize(data, start, 255));
       for(int i = 0; i < names.size(); i++) {
-        cerr << "names[i] " << i << " " << names[i] << endl;
-        new_object.attr(as<string>(names[i])) = attributes[i];}}
+        char * c = names[i]; //workaround Rcpp bug now fixed, remove if assuming 0.10.2 and higher
+        string s(c); 
+        new_object.attr(s)= attributes[i];}}
       break;
     case R_VECTOR: {
       int raw_length = get_length(data, start);
