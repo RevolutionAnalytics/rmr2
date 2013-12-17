@@ -314,7 +314,7 @@ rmr.stream =
     else
       combine.outdir
   reduce.outdir = file.path(".", rmr2:::current.job(), "reduce")
-  dir.create(reduce.outdir)
+  dir.create(reduce.outdir, recursive = TRUE)
   sink(file=stderr())
   rmr2:::hdfs.get(
     file.path(
