@@ -277,11 +277,19 @@ SEXP unserialize(const raw & data, int & start, int type_code){
       break;
     case R_WITH_ATTRIBUTES: {
       get_length(data, start);
+      for(int k = 0; k < 20; k++) {
+        cerr << (int)data[start + k] << " ";}
       new_object = unserialize(data, start, 255);
-      Rcpp::CharacterVector names(unserialize(data, start, 255));
-      Rcpp::List attributes(unserialize(data, start, 255));
+      for(int k = 0; k < 20; k++) {
+        cerr << (int)data[start + k] << " ";}
+      CharacterVector names(unserialize(data, start, 255));
+      for(int k = 0; k < 20; k++) {
+        cerr << (int)data[start + k] << " ";}
+      cerr << endl;
+      List attributes(unserialize(data, start, 255));
       for(int i = 0; i < names.size(); i++) {
-        new_object.attr(Rcpp::as<std::string>(names[i])) = attributes[i];}}
+        cerr << "names[i] " << i << " " << names[i] << endl;
+        new_object.attr(as<string>(names[i])) = attributes[i];}}
       break;
     case R_VECTOR: {
       int raw_length = get_length(data, start);
