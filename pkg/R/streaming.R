@@ -336,8 +336,8 @@ rmr.stream =
 '
     
   combine.line = '  
- dir.create(combine.outdir, recursive = TRUE)
- sink(file=stderr())
+  dir.create(combine.outdir, recursive = TRUE)
+  sink(file=stderr())
   rmr2:::hdfs.get(file.path(dfs.work.dir, "map"), rmr2:::current.job())
   sink(NULL)
   rmr2:::reduce.loop(
