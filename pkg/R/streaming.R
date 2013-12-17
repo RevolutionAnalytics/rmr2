@@ -487,7 +487,7 @@ rmr.stream =
     lapply(
       output.format$sections[-1],
       function(sec)     
-        hdfs.get(
+        hdfs.cp(
           hdfs.get.section(
             file.path(
               dfs.work.dir, 
