@@ -57,7 +57,7 @@ make.input.files =
 activate.profiling = 
   function(profile) {
     dir = file.path("/tmp/Rprof", current.job(), Sys.getenv('mapred_tip_id'))
-    dir.create(dir, recursive = T)
+    dir.create(dir, recursive = TRUE)
     if(is.element(profile, c("calls", "both"))) {
       prof.file = file.path(dir, paste(current.task(), Sys.time(), sep = "-")) 
       warning("Profiling data in ", prof.file)
