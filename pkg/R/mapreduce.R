@@ -140,7 +140,7 @@ dfs.rmr =
   function(fname) {
     fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop')
-      hdfs.rmr(fname)
+      hdfs.rm("-r", fname)
     else unlink(fname, recursive = TRUE)}
 
 dfs.is.dir = 
