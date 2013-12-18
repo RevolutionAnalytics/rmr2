@@ -260,7 +260,7 @@ to.dfs =
       if(!is.null(format$sections))
         dfs.mkdir(dfs.output)
       move.results(file.copy) }
-    file.remove(tmp)
+    unlink(tmp, recursive=TRUE)
     output}
 
 from.dfs = function(input, format = "native") {
