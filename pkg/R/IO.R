@@ -185,7 +185,7 @@ to.list =
         as.list(x)}}
 
 make.native.or.typedbytes.output.format = 
-  function(native, write.size = 1000) {
+  function(native, write.size = 10^6) {
     template = NULL
     function(kv, con){
       k = keys(kv)
