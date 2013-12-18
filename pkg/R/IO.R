@@ -398,7 +398,7 @@ IO.formats = c("text", "json", "csv", "native",
 
 make.input.format = 
   function(
-    format = make.native.input.format(), 
+    format = "native", 
     mode = c("binary", "text"),
     streaming.format = NULL, 
     backend.parameters = NULL,
@@ -523,9 +523,9 @@ set.separator.options =
 
 make.output.format = 
   function(
-    format = make.native.output.format(),
+    format = "native",
     mode = c("binary", "text"),
-    streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat", 
+    streaming.format = NULL, 
     backend.parameters = NULL,
     sections = NULL,
     ...) {
