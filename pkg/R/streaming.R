@@ -186,6 +186,10 @@ hadoop.cmd =
       file.path(hadoop_home, "bin", "hadoop")}
     else hadoop_cmd}
 
+hdfs.cmd = 
+  function() {
+    file.path(dirname(hadoop.cmd()), "hdfs")}
+
 hadoop.streaming = 
   function() {
     hadoop_streaming = Sys.getenv("HADOOP_STREAMING")
@@ -510,7 +514,7 @@ hdfs =
       argnames = sapply(1:length(list(...)), function(i) "")}
     else {
       argnames = names(list(...))}
-    system(paste(hadoop.cmd(), " dfs -", cmd, " ", 
+    system(paste(hdfs.cmd(), " dfs -", cmd, " ", 
                  paste(
                    apply(cbind(argnames, list(...)), 1, 
                          function(x) paste(
