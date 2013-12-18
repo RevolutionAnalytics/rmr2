@@ -277,7 +277,8 @@ rmr.stream =
      function(src, dst)
         rmr2:::hdfs.put(paste(list.files(src, full.names=T), collapse=" "), dst)
    sink(file = stderr())
-   rmr2:::hdfs.mkdir(dfs.work.dir)
+   if(!rmr2:::dfs.exists(dfs.work.dir)) 
+     rmr2:::hdfs.mkdir(dfs.work.dir)
    sink(NULL)
   ')  
     map.line = '  
@@ -303,7 +304,8 @@ rmr.stream =
     vectorized = vectorized.reduce)
   dfs.work.dir.map = file.path(dfs.work.dir, "map")
   sink(file = stderr())
-  rmr2:::hdfs.mkdir(dfs.work.dir.map)
+  if(!rmr2:::dfs.exists(dfs.work.dir.map)) 
+    rmr2:::hdfs.mkdir(dfs.work.dir.map)
   put.all(map.outdir, dfs.work.dir.map)
   sink(NULL)
 '
@@ -330,7 +332,8 @@ rmr.stream =
     profile = profile.nodes)
   dfs.work.dir.reduce = file.path(dfs.work.dir, "reduce")
   sink(file = stderr())
-  rmr2:::hdfs.mkdir(dfs.work.dir.reduce)
+  if(!rmr2:::dfs.exists(dfs.work.dir.reduce)) 
+    rmr2:::hdfs.mkdir(dfs.work.dir.reduce)
   put.all(reduce.outdir, dfs.work.dir.reduce)
   sink(NULL)
 '
@@ -348,7 +351,8 @@ rmr.stream =
     profile = profile.nodes)    
   dfs.work.dir.combine = file.path(dfs.work.dir, "combine")
   sink(file = stderr())
-  rmr2:::hdfs.mkdir(dfs.work.dir.combine)
+  if(!rmr2:::dfs.exists(dfs.work.dir.combine)) 
+    rmr2:::hdfs.mkdir(dfs.work.dir.combine)
   put.all(combine.outdir, dfs.work.dir.combine)
   sink(NULL)
 '
