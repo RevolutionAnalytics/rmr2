@@ -15,64 +15,74 @@
 library(quickcheck)
 library(rmr2)
 
+## generic sorting for normalized comparisons
+gorder = function(...) UseMethod("gorder")
+gorder.default = order
+gorder.factor = function(x) order(as.character(x))
+gorder.data.frame = 
+  function(x) splat(gorder)(lapply(x, function(x) if(is.factor(x)) as.character(x) else if(is.list(x) || is.raw(x)) cksum(x) else x))
+gorder.matrix = function(x) gorder(as.data.frame(x))
+gorder.raw = gorder.list = function(x) gorder(cksum(x))
+
+reorder = function(x, o) if(rmr2:::has.rows(x)) x[o, , drop = FALSE] else x[o]
+
+gsort = function(x) reorder(x, gorder(x))
+
+gsort.keyval = 
+  function(kv) {
+    k = keys(kv)
+    v = values(kv)
+    o = {
+      if(is.null(k)) gorder(v)
+      else 
+        gorder(
+          data.frame(
+            if(is.list(k) && !is.data.frame(k)) cksum(k) else k,
+            if(is.list(v) && !is.data.frame(v)) cksum(v) else v))}
+    keyval(reorder(k, o), reorder(v, o))}
+
+## keyval compare
+kv.cmp = function(kv1, kv2) 
+  isTRUE(all.equal(gsort.keyval(kv1), gsort.keyval(kv2), tolerance=1e-4, check.attributes=FALSE))
+
 for (be in c("local", "hadoop")) {
   rmr.options(backend = be)
   
-  
-  ## keyval compare
-  kv.cmp = function(kv1, kv2) {
-    reorder = 
-      function(y)
-        lapply(y, function(x)x[order(cksum(x))])
-    kv1 = rmr2:::split.keyval(kv1)
-    kv2 = rmr2:::split.keyval(kv2)
-    o1 = order(unlist(keys(kv1)))  
-    o2 = order(unlist(keys(kv2)))
-    isTRUE(all.equal(keys(kv1)[o1], keys(kv2)[o2], tolerance=1e-4, check.attributes=FALSE)) &&
-      isTRUE(all.equal(reorder(values(kv1))[o1], reorder(values(kv2))[o2], tolerance=1e-4, check.attributes=FALSE)) }
-  
   ##from.dfs to.dfs
+  
   ##native
   unit.test(
-    function(kv) {
-      kv.cmp(kv, 
-             from.dfs(to.dfs(kv)))},
-            generators = list(rmr2:::tdgg.keyval()),
-            sample.size = 10)
+    function(kv) 
+      kv.cmp(
+        kv, 
+        from.dfs(to.dfs(kv))),
+    generators = list(rmr2:::tdgg.keyval()),
+    sample.size = 10)
   
   ## csv
   unit.test(
-    function(df) {
-      isTRUE(
-        all.equal(
-          df, 
-          values(
-            from.dfs(
-              to.dfs(
-                df, 
-                format = "csv"), 
-              format = make.input.format(
-                format = "csv"))), 
-          tolerance = 1e-4, 
-          check.attributes = FALSE))},
+    function(df) 
+      kv.cmp(
+        keyval(NULL, df),
+        from.dfs(
+          to.dfs(
+            keyval(NULL, df), 
+            format = "csv"), 
+          format = "csv")),
     generators = list(tdgg.data.frame()),
     sample.size = 10)
   
   #json
   fmt = "json"
   unit.test(
-    function(df) {
-      isTRUE(
-        all.equal(
-          df, 
-          values(
-            from.dfs(
-              to.dfs(
-                df, 
-                format = fmt), 
-              format = make.input.format("json", key.class = "list", value.class = "data.frame"))), 
-          tolerance = 1e-4, 
-          check.attributes = FALSE))},
+    function(df) 
+      kv.cmp(
+        keyval(1, df), 
+        from.dfs(
+          to.dfs(
+            keyval(1, df), 
+            format = fmt), 
+          format = make.input.format("json", key.class = "list", value.class = "data.frame"))), 
     generators = list(tdgg.data.frame()),
     sample.size = 10)
   
@@ -81,91 +91,80 @@ for (be in c("local", "hadoop")) {
     function(l)
       rapply(
         l,
-        function(x) if(class(x) == "raw") x else as.list(x),
+        function(x) if(class(x) == "raw" || length(x) == 1) x else as.list(x),
         how = "replace")    
-    
+  
   fmt = "sequence.typedbytes"
   unit.test(
-    function(l) {
-      isTRUE(
-        all.equal(
-          seq.tb.data.loss(l),
-          values(
-            from.dfs(
-              to.dfs(
-                keyval(1,l), 
-                format = fmt), 
-              format = fmt)), 
-          tolerance = 1e-4, 
-          check.attributes = FALSE))},
+    function(l) 
+      kv.cmp(
+        keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
+        from.dfs(
+          to.dfs(
+            keyval(1, l), 
+            format = fmt), 
+          format = fmt)), 
     generators = list(tdgg.list()),
     precondition = function(l) length(l) > 0,
     sample.size = 10)
   
   ##mapreduce
- 
+  
   ##simplest mapreduce, all default
-  unit.test(function(kv) {
-      if(rmr2:::length.keyval(kv) == 0) TRUE
+  unit.test(
+    function(kv) {
+    if(rmr2:::length.keyval(kv) == 0) TRUE
     else {
       kv1 = from.dfs(mapreduce(input = to.dfs(kv)))
       kv.cmp(kv, kv1)}},
-            generators = list(rmr2:::tdgg.keyval()),
-            sample.size = 10)
+    generators = list(rmr2:::tdgg.keyval()),
+    sample.size = 10)
   
   ##put in a reduce for good measure
-  unit.test(function(kv) {
-    if(length(kv) == 0) TRUE
-    else {
-      kv1 = from.dfs(mapreduce(input = to.dfs(kv),
-                                reduce = to.reduce(identity)))
-      kv.cmp(kv, kv1)}},
-            generators = list(rmr2:::tdgg.keyval()),
-            sample.size = 10)
-  
-  ## csv
   unit.test(
-    function(df) {
-      df1 = 
-        values(
+    function(kv) {
+      if(length(kv) == 0) TRUE
+      else {
+        kv1 = 
           from.dfs(
             mapreduce(
-              to.dfs(
-                df, 
-                format = "csv"),
-              input.format = "csv",
-              output.format = "csv"),
-            format = "csv"))
-      isTRUE(
-        all.equal(
-          df[do.call(order,df),], 
-          df1[do.call(order,df1),], 
-          tolerance = 1e-4, 
-          check.attributes = FALSE))},
-    generators = list(tdgg.data.frame()),
+              input = to.dfs(kv),
+              reduce = to.reduce(identity)))
+        kv.cmp(kv, kv1)}},
+    generators = list(rmr2:::tdgg.keyval()),
     sample.size = 10)
+  
+  ## csv
+   z= unit.test(
+    function(df)
+      kv.cmp(
+        keyval(NULL, df),
+        from.dfs(
+          mapreduce(
+            to.dfs(
+              keyval(NULL, df), 
+              format = "csv"),
+            input.format = "csv",
+            output.format = "csv"),
+          format = "csv")),
+    generators = list(tdgg.data.frame()),
+    sample.size = 10, stop = FALSE)
   
   #json
   # a more general test would be better for json but the subtleties of mapping R to to JSON are many
   fmt = "json"
   unit.test(
-    function(df) {
-      df1 = 
-        values(
-          from.dfs(
-            mapreduce(
-              to.dfs(
-                df, 
-                format = fmt),
-              input.format = make.input.format("json", key.class = "list", value.class = "data.frame"),
-              output.format = fmt),
-            format = make.input.format("json", key.class = "list", value.class = "data.frame")))
-      isTRUE(
-        all.equal(
-          df, 
-          df1, 
-          tolerance = 1e-4, 
-          check.attributes = FALSE))},
+    function(df) 
+      kv.cmp(
+        keyval(1, df),
+        from.dfs(
+          mapreduce(
+            to.dfs(
+              keyval(1, df), 
+              format = fmt),
+            input.format = make.input.format("json", key.class = "list", value.class = "data.frame"),
+            output.format = fmt),
+          format = make.input.format("json", key.class = "list", value.class = "data.frame"))),
     generators = list(tdgg.data.frame()),
     sample.size = 10)
   
@@ -173,24 +172,19 @@ for (be in c("local", "hadoop")) {
   fmt = "sequence.typedbytes"
   unit.test(
     function(l) {
-      l = seq.tb.data.loss(l)
-      isTRUE(
-        all.equal(
-          l,     
-          values(
-            from.dfs(
-              mapreduce(
-                to.dfs(
-                  keyval(1,l), 
-                  format = fmt), 
-                input.format = fmt,
-                output.format = fmt),
-              format = fmt)), 
-          tolerance = 1e-4, 
-          check.attributes = FALSE))},
-    generators = list(tdgg.list()),
-    precondition = function(l) length(l) > 0,
-    sample.size = 10)
+      kv.cmp(
+        keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
+        from.dfs(
+          mapreduce(
+            to.dfs(
+              keyval(1, l), 
+              format = fmt), 
+            input.format = fmt,
+            output.format = fmt),
+          format = fmt))}, 
+      generators = list(tdgg.list()),
+      precondition = function(l) length(l) > 0,
+      sample.size = 10)
   
   #equijoin
   stopifnot(
