@@ -188,7 +188,8 @@ hadoop.cmd =
 
 hdfs.cmd = 
   function() {
-    file.path(dirname(hadoop.cmd()), "hdfs")}
+    #file.path(dirname(hadoop.cmd()), "hdfs")}
+    hadoop.cmd()}
 
 hadoop.streaming = 
   function() {
