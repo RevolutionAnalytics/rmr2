@@ -13,7 +13,6 @@
 # limitations under the License.
 
 library(rmr2)
-#timings from macbook pro i7 2011, standalone CDH4, one core, SDD
 
 report = list()
 for (be in c("local", "hadoop")) {
