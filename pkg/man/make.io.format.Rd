@@ -9,10 +9,8 @@
 Create combinations of IO settings either from named formats or from a combination of a Java class, a mode and an R function
 }
 \usage{
-make.input.format(format = make.native.input.format(), mode = c("binary", "text"), streaming.format = NULL, backend.parameters = NULL, sections = NULL, ...)
-make.output.format(format = make.native.output.format( keyval.length =   rmr.options("keyval.length")), 
-                   mode = c("binary", "text"), 
-                   streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat", ...)}
+make.input.format(format = "native", mode = c("binary", "text"), streaming.format = NULL, backend.parameters = NULL, sections = NULL, ...)
+make.output.format(format = "native", mode = c("binary", "text"), streaming.format = NULL, backend.parameters = NULL, sections = NULL,  ...)}
 
 \arguments{
   \item{format}{Either a string describing a predefined combination of IO settings (possibilities include: \code{"text"}, \code{"json"}, \code{"csv"}, \code{"native"},\code{"sequence.typedbytes"}, \code{"hbase"}, \code{"pig.hive"}) or a function. For an input format, this function accepts a connection and a number of records and returns a key-value pair (see \code{\link{keyval}}). For an output format, this function accepts a key-value pair and a connection and  writes the former to the latter.}
