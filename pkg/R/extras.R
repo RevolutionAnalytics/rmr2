@@ -46,7 +46,7 @@ rmr.sample = function(input, output = NULL, method = c("any", "Bernoulli"), ...)
     mapreduce(input, 
               output,
               map = some,
-              combine = T,
+              combine = TRUE,
               reduce = some)}
   else
     if(method == "Bernoulli"){
@@ -68,7 +68,7 @@ partitioned.map =
         data.frame(
           sample(
             1:n, size=length(k), 
-            replace=T), k),
+            replace = TRUE), k),
         v)}
 
 partitioned.combine = 
@@ -90,7 +90,7 @@ vsum =
 
 reload = 
   function() {
-    detach("package:rmr2", unload=T)
+    detach("package:rmr2", unload = TRUE)
     library.dynam.unload("rmr2",system.file(package="rmr2"))
     library(rmr2)}
 

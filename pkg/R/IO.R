@@ -438,8 +438,8 @@ make.input.format =
         hbase = {
           format = 
             make.hbase.input.format(
-              default(args$dense, F),
-              default(args$atomic, F),
+              default(args$dense, FALSE),
+              default(args$atomic, FALSE),
               default(args$key.deserialize, "raw"),
               default(args$cell.deserialize, "raw"))
           mode = "binary"

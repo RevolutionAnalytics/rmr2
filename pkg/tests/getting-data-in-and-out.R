@@ -140,7 +140,7 @@ fwf.reader <- function(con) {
               split.lines, 
               ceiling(1:length(split.lines)/field.size)), 
             paste, collapse = ""), 
-          ncol = length(fields), byrow = T))
+          ncol = length(fields), byrow = TRUE))
     names(df) = fields
     keyval(NULL, df)}} 
 fwf.input.format = make.input.format(mode = "text", format = fwf.reader)

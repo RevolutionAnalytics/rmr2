@@ -21,13 +21,13 @@ input.10e6 = mapreduce (input = input.1000,
                         reduce = to.reduce(identity))
 
 kmeans.input.10e6 = mapreduce(input.1000, 
-                              map = function(k, v) keyval(rnorm(1), cbind(sample(0:2, recsize, replace = T) + 
+                              map = function(k, v) keyval(rnorm(1), cbind(sample(0:2, recsize, replace = TRUE) + 
                                                                            rnorm(recsize, sd = .1), 
-                                                                         sample(0:3, recsize, replace = T) + 
+                                                                         sample(0:3, recsize, replace = TRUE) + 
                                                                            rnorm(recsize, sd = .1))))
 
 kmeans.input.10e9 = mapreduce(input.10e6, 
-                              map = function(k, v) keyval(rnorm(1), cbind(sample(0:2, recsize, replace = T) + 
+                              map = function(k, v) keyval(rnorm(1), cbind(sample(0:2, recsize, replace = TRUE) + 
                                                                            rnorm(recsize, sd = .1), 
-                                                                         sample(0:3, recsize, replace = T) + 
+                                                                         sample(0:3, recsize, replace = TRUE) + 
                                                                            rnorm(recsize, sd = .1))))

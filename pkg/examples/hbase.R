@@ -25,8 +25,8 @@ from.dfs(
             post = list("author", "body")), 
         key.deserialize = "raw", 
         cell.deserialize = "raw", 
-        dense = T, 
-        atomic = T)))
+        dense = TRUE, 
+        atomic = TRUE)))
 
 ## @knitr hbase-freebase.input.format
 freebase.input.format = 
@@ -38,8 +38,8 @@ freebase.input.format =
         freebase = "types"), 
     key.deserialize = "raw", 
     cell.deserialize = "raw", 
-    dense = F, 
-    atomic = F)
+    dense = FALSE, 
+    atomic = FALSE)
 
 ## @knitr hbase-freebase-mapreduce
 from.dfs(

@@ -252,7 +252,7 @@ rmr.stream =
     lapply(
       libs, 
         function(l)
-          if (!require(l, character.only = T)) 
+          if (!require(l, character.only = TRUE)) 
             warning(paste("can\'t load", l)))
     sink(NULL)
   input.reader = 
@@ -398,7 +398,7 @@ rmr.stream =
     default.input.format = make.input.format("native")
     default.output.format = make.output.format("native")
     
-    libs = sub("package:", "", grep("package", search(), value = T))
+    libs = sub("package:", "", grep("package", search(), value = TRUE))
     image.cmd.line = 
       paste(
         "-file",
@@ -524,7 +524,7 @@ hdfs =
                            " ", 
                            to.dfs.path(x[[2]]), 
                            sep = ""))[
-                             order(argnames, decreasing = T)], 
+                             order(argnames, decreasing = TRUE)], 
                    collapse = " "), 
                  sep = ""), 
            intern = intern)}

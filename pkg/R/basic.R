@@ -118,7 +118,7 @@ rbind.fill.fast =
           function(x) 
             if (is.atomic(x)) x
                 else I(x)), 
-        stringsAsFactors = F))}
+        stringsAsFactors = FALSE))}
 
 
 
@@ -131,8 +131,8 @@ every.second =
       options(warn = opt)
       y}
 
-odd = every.second(c(T,F))
-even = every.second(c(F,T))
+odd = every.second(c(TRUE, FALSE))
+even = every.second(c(FALSE, TRUE))
 
 interleave = 
   function(l1, l2) {
