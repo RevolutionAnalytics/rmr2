@@ -13,8 +13,8 @@ mapply.fromJSON =
     mapply(paste.fromJSON, ..., SIMPLIFY = FALSE)
 
 avro.input.format = 
-  function(con, read.size) {
-    lines = readLines(con = con, n = read.size)
+  function(con) {
+    lines = readLines(con = con, n = 1000)
     if  (length(lines) == 0) NULL
     else
       do.call(
