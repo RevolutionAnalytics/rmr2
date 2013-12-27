@@ -30,7 +30,12 @@ avroIF =
   make.input.format(
     format = avro.input.format,
     mode = "text",
-    streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat")
+    streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat",
+    backend.parameters = 
+    	list(
+    		hadoop = 
+    			list(
+    				libjars = "/Users/antonio/Downloads/avro-mapred-1.7.4-hadoop1.jar")))
 
 
 avro.output.format =
@@ -50,25 +55,20 @@ avroOF =
   make.output.format(
     format = avro.output.format,
     mode = "text",
-    streaming.format = "org.apache.avro.mapred.AvroTextOutputFormat")
+    streaming.format = "org.apache.avro.mapred.AvroTextOutputFormat",
+    backend.parameters =
+    	list(
+    		hadoop =
+    			list(
+    				libjars = "/Users/antonio/Downloads/avro-mapred-1.7.4-hadoop1.jar")))
 
 
 avro.test = 
   mapreduce(
     to.dfs(keyval(1:2, 1:10)), 
-    output.format = avroOF, 
-    backend.parameters =
-      list(
-        hadoop =
-          list(
-            libjars = "/Users/antonio/Downloads/avro-mapred-1.7.4-hadoop1.jar")))
+    output.format = avroOF)
 
 from.dfs(
   mapreduce(
     avro.test,
-    input.format = avroIF,
-    backend.parameters = 
-      list(
-        hadoop = 
-          list(
-            libjars = "/Users/antonio/Downloads/avro-mapred-1.7.4-hadoop1.jar"))))
+    input.format = avroIF))
