@@ -286,7 +286,7 @@ reduce.keyval =
     kv, 
     FUN, 
     split.size = 
-      stop("Must specify key when using keyval in map and combine functions")) {
+      stop("Must specify key when using reduce or combine functions")) {
     k = keys(kv)
     kvs = split.keyval(kv, split.size)
     if(is.null(k)) 
