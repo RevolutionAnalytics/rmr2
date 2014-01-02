@@ -181,31 +181,6 @@ reduce.loop =
 
 # the main function for the hadoop backend
 
-hadoop.cmd = 
-  function() {
-    hadoop_cmd = Sys.getenv("HADOOP_CMD")
-    if( hadoop_cmd == "") {
-      hadoop_home = Sys.getenv("HADOOP_HOME")
-      if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_CMD is set")
-      file.path(hadoop_home, "bin", "hadoop")}
-    else hadoop_cmd}
-
-hdfs.cmd = 
-  function() {
-    #file.path(dirname(hadoop.cmd()), "hdfs")}
-    hadoop.cmd()}
-
-hadoop.streaming = 
-  function() {
-    hadoop_streaming = Sys.getenv("HADOOP_STREAMING")
-    if(hadoop_streaming == ""){
-      hadoop_home = Sys.getenv("HADOOP_HOME")
-      if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_STREAMING is set")
-      stream.jar = list.files(path = file.path(hadoop_home, "contrib", "streaming"), pattern = "jar$", full.names = TRUE)
-      paste(hadoop.cmd(), "jar", stream.jar)}
-    else paste(hadoop.cmd(), "jar", hadoop_streaming)}
-
-
 rmr.stream = 
   function(
     in.folder, 
@@ -574,6 +549,30 @@ for (hdfscmd in c("ls", "lsr", "df", "du", "dus", "count", "cat", "text", "stat"
 for (hdfscmd in c("mv", "cp", "rm", "rmr", "expunge", "put", "copyFromLocal", "moveFromLocal", "get", "getmerge", 
                   "copyToLocal", "moveToLocal", "mkdir", "setrep", "touchz", "test", "chmod", "chown", "chgrp"))
   mkhdfsfun(hdfscmd, FALSE)in.a.task = 
+#mapreduce env
+hadoop.cmd = 
+  function() {
+    hadoop_cmd = Sys.getenv("HADOOP_CMD")
+    if( hadoop_cmd == "") {
+      hadoop_home = Sys.getenv("HADOOP_HOME")
+      if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_CMD is set")
+      file.path(hadoop_home, "bin", "hadoop")}
+    else hadoop_cmd}
+
+hdfs.cmd = 
+  function() {
+    #file.path(dirname(hadoop.cmd()), "hdfs")}
+    hadoop.cmd()}
+
+hadoop.streaming = 
+  function() {
+    hadoop_streaming = Sys.getenv("HADOOP_STREAMING")
+    if(hadoop_streaming == ""){
+      hadoop_home = Sys.getenv("HADOOP_HOME")
+      if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_STREAMING is set")
+      stream.jar = list.files(path = file.path(hadoop_home, "contrib", "streaming"), pattern = "jar$", full.names = TRUE)
+      paste(hadoop.cmd(), "jar", stream.jar)}
+    else paste(hadoop.cmd(), "jar", hadoop_streaming)}
   function()
     !is.null(current.task())
 
