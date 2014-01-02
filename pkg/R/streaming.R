@@ -209,7 +209,6 @@ rmr.stream =
     work.dir = 
       if(.Platform$OS.type == "windows") "../../jars"
     else "."
-    dfs.work.dir = file.path("/tmp", strsplit(as.character(runif(1)), "\\.")[[1]][2])
     rmr.local.env = tempfile(pattern = "rmr-local-env")
     rmr.global.env = tempfile(pattern = "rmr-global-env")
     
@@ -261,8 +260,6 @@ rmr.stream =
      function(src, dst)
         rmr2:::hdfs.put(paste(list.files(src, full.names=T), collapse=" "), dst)
    sink(file = stderr())
-   if(!rmr2:::dfs.exists(dfs.work.dir)) 
-     rmr2:::hdfs.mkdir(dfs.work.dir)
    sink(NULL)
   ')  
     map.line = '  
@@ -288,7 +285,7 @@ rmr.stream =
     combine = in.memory.combine,
     vectorized = vectorized.reduce, 
     map.only = map.only)
-  dfs.work.dir.map = file.path(dfs.work.dir, "map")
+  dfs.work.dir.map = file.path(rmr2:::job.work.output.dir(), "map")
   sink(file = stderr())
   if(!rmr2:::dfs.exists(dfs.work.dir.map)) 
     rmr2:::hdfs.mkdir(dfs.work.dir.map)
@@ -306,7 +303,7 @@ rmr.stream =
   sink(file=stderr())
   rmr2:::hdfs.get(
     file.path(
-      dfs.work.dir, 
+      rmr2:::job.work.output.dir(), 
      basename(reduce.indir)), rmr2:::current.job())
   sink(NULL)
   rmr2:::reduce.loop(
@@ -316,7 +313,7 @@ rmr.stream =
       default.reader(reduce.indir), 
     keyval.writer = output.writer(reduce.outdir),
     profile = profile.nodes)
-  dfs.work.dir.reduce = file.path(dfs.work.dir, "reduce")
+  dfs.work.dir.reduce = file.path(rmr2:::job.work.output.dir(), "reduce")
   sink(file = stderr())
   if(!rmr2:::dfs.exists(dfs.work.dir.reduce)) 
     rmr2:::hdfs.mkdir(dfs.work.dir.reduce)
@@ -327,7 +324,7 @@ rmr.stream =
   combine.line = '  
   dir.create(combine.outdir, recursive = TRUE)
   sink(file=stderr())
-  rmr2:::hdfs.get(file.path(dfs.work.dir, "map"), rmr2:::current.job())
+  rmr2:::hdfs.get(file.path(rmr2:::job.work.output.dir(), "map"), rmr2:::current.job())
   sink(NULL)
   rmr2:::reduce.loop(
     reduce = combine, 
@@ -335,7 +332,7 @@ rmr.stream =
     keyval.reader = default.reader(map.outdir),
     keyval.writer = default.writer(combine.outdir), 
     profile = profile.nodes)    
-  dfs.work.dir.combine = file.path(dfs.work.dir, "combine")
+  dfs.work.dir.combine = file.path(rmr2:::job.work.output.dir(), "combine")
   sink(file = stderr())
   if(!rmr2:::dfs.exists(dfs.work.dir.combine)) 
     rmr2:::hdfs.mkdir(dfs.work.dir.combine)
@@ -481,11 +478,14 @@ rmr.stream =
         hdfs.cp(
           hdfs.get.section(
             file.path(
-              dfs.work.dir, 
+              out.folder, 
               if(is.null(reduce)) "map" else "reduce",
               sec)),
           out.folder))
-    retval }
+    lapply(
+      c("map", "reduce", "combine"),
+      function(dir) hdfs.rm("-r", file.path(out.folder, dir)))    
+    retval}
 
 
 #hdfs section
@@ -548,7 +548,8 @@ for (hdfscmd in c("ls", "lsr", "df", "du", "dus", "count", "cat", "text", "stat"
 
 for (hdfscmd in c("mv", "cp", "rm", "rmr", "expunge", "put", "copyFromLocal", "moveFromLocal", "get", "getmerge", 
                   "copyToLocal", "moveToLocal", "mkdir", "setrep", "touchz", "test", "chmod", "chown", "chgrp"))
-  mkhdfsfun(hdfscmd, FALSE)in.a.task = 
+  mkhdfsfun(hdfscmd, FALSE)
+
 #mapreduce env
 hadoop.cmd = 
   function() {
@@ -573,6 +574,8 @@ hadoop.streaming =
       stream.jar = list.files(path = file.path(hadoop_home, "contrib", "streaming"), pattern = "jar$", full.names = TRUE)
       paste(hadoop.cmd(), "jar", stream.jar)}
     else paste(hadoop.cmd(), "jar", hadoop_streaming)}
+
+in.a.task = 
   function()
     !is.null(current.task())
 
@@ -585,3 +588,7 @@ nonempty.or.null =
 current.task = nonempty.or.null("mapred_task_id")
     
 current.job = nonempty.or.null("mapred_job_id")
+
+job.output.dir = nonempty.or.null("mapred_output_dir")
+
+job.work.output.dir = nonempty.or.null("mapred_work_output_dir")
