@@ -92,7 +92,8 @@ map.loop =
     keyval.writer, 
     profile, 
     combine, 
-    vectorized) {
+    vectorized,
+    map.only) {
     if(profile != "off") activate.profiling(profile)
     combine.as.kv = 
       Curry(
@@ -111,7 +112,10 @@ map.loop =
           else {
             increment.counter("rmr", "reduce calls", 1)
             out = combine.as.kv(keys(out), values(out))}}
-        keyval.writer(as.keyval(out))}
+        out = as.keyval(out)
+        if(!map.only && is.null(keys(out)) && !is.null(values(out)))
+          stop("Must specify key when using reduce or combine functions")
+        keyval.writer(out)}
       kv = keyval.reader()}
     eval(
       quote(
@@ -296,17 +300,19 @@ rmr.stream =
         rmr2:::hdfs.get(
           rmr2:::hdfs.get.section(file.path(in.folder, sec)), 
           map.indir)})
+  map.only = is.null(reduce)
   rmr2:::map.loop(
     map = map, 
     keyval.reader = input.reader(map.indir), 
     keyval.writer = 
-      if(is.null(reduce)) 
+      if(map.only) 
         output.writer(map.outdir)
       else 
         default.writer(map.outdir),
     profile = profile.nodes,
     combine = in.memory.combine,
-    vectorized = vectorized.reduce)
+    vectorized = vectorized.reduce, 
+    map.only = map.only)
   dfs.work.dir.map = file.path(dfs.work.dir, "map")
   sink(file = stderr())
   if(!rmr2:::dfs.exists(dfs.work.dir.map)) 
