@@ -573,4 +573,16 @@ for (hdfscmd in c("ls", "lsr", "df", "du", "dus", "count", "cat", "text", "stat"
 
 for (hdfscmd in c("mv", "cp", "rm", "rmr", "expunge", "put", "copyFromLocal", "moveFromLocal", "get", "getmerge", 
                   "copyToLocal", "moveToLocal", "mkdir", "setrep", "touchz", "test", "chmod", "chown", "chgrp"))
-  mkhdfsfun(hdfscmd, FALSE)
+  mkhdfsfun(hdfscmd, FALSE)in.a.task = 
+  function()
+    !is.null(current.task())
+
+nonempty.or.null =
+  function(var) 
+    function() {
+      x = Sys.getenv(var)
+      if(x == "") NULL else x} 
+  
+current.task = nonempty.or.null("mapred_task_id")
+    
+current.job = nonempty.or.null("mapred_job_id")

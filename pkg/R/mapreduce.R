@@ -318,19 +318,6 @@ from.dfs = function(input, format = "native") {
 
 # mapreduce
 
-in.a.task = 
-  function()
-    !is.null(current.task())
-
-current.task = 
-  function() {
-    id = Sys.getenv("mapred_task_id")
-    if (id == "") NULL else id }
-
-current.job = 
-  function() {
-    id = Sys.getenv("mapred_job_id")
-    if (id == "") NULL else id }
 
 rmr.normalize.path = 
   function(url.or.path) {
