@@ -215,6 +215,7 @@ rmr.stream =
     preamble = paste(sep = "", '
   sink(file = stderr())
   options(warn = 1) 
+  options(error = quote({sink(stderr()); traceback(); q()}))
   library(functional)
   invisible(
     if(is.null(formals(load)$verbose)) #recent R change
@@ -233,11 +234,11 @@ rmr.stream =
           if (!require(l, character.only = TRUE)) 
             warning(paste("can\'t load", l)))
     sink(NULL)
-  input.reader = 
-    function(input)
-      rmr2:::make.keyval.reader(
-        input,
-        input.format)
+    input.reader = 
+      function(input)
+        rmr2:::make.keyval.reader(
+          input,
+          input.format)
     output.writer = 
       function(output)
         rmr2:::make.keyval.writer(
@@ -254,8 +255,8 @@ rmr.stream =
           output,
           default.output.format)
 
-   map.outdir = file.path(".", rmr2:::current.job(), "map")
-   combine.outdir = file.path(".", rmr2:::current.job(), "combine")
+   map.outdir = file.path(".", rmr2:::current.job(), "_map")
+   combine.outdir = file.path(".", rmr2:::current.job(), "_combine")
    put.all = 
      function(src, dst)
         rmr2:::hdfs.put(paste(list.files(src, full.names=T), collapse=" "), dst)
@@ -263,14 +264,16 @@ rmr.stream =
    sink(NULL)
   ')  
     map.line = '  
-  map.indir = file.path(".", rmr2:::current.job(), "mapin")
+  map.indir = file.path(".", rmr2:::current.job(), "_mapin")
   dir.create(map.indir, recursive = TRUE)
   dir.create(map.outdir, recursive = TRUE)
   lapply(
     input.format$sections[-1],
     function(sec) {
         rmr2:::hdfs.get(
-          rmr2:::hdfs.get.section(file.path(in.folder, sec)), 
+          rmr2:::hdfs.get.section(
+            file.path(
+              dirname(rmr2:::current.input()), sec)), 
           map.indir)})
   map.only = is.null(reduce)
   rmr2:::map.loop(
@@ -285,11 +288,13 @@ rmr.stream =
     combine = in.memory.combine,
     vectorized = vectorized.reduce, 
     map.only = map.only)
-  dfs.work.dir.map = file.path(rmr2:::job.work.output.dir(), "map")
+  dfs.work.dir.map = file.path(rmr2:::job.work.output.dir(), "_map")
   sink(file = stderr())
   if(!rmr2:::dfs.exists(dfs.work.dir.map)) 
     rmr2:::hdfs.mkdir(dfs.work.dir.map)
   put.all(map.outdir, dfs.work.dir.map)
+  unlink(map.indir, recursive = TRUE)
+  unlink(map.outdir, recursive = TRUE)
   sink(NULL)
 '
   reduce.line = '  
@@ -298,7 +303,7 @@ rmr.stream =
       map.outdir
     else
       combine.outdir
-  reduce.outdir = file.path(".", rmr2:::current.job(), "reduce")
+  reduce.outdir = file.path(".", rmr2:::current.job(), "_reduce")
   dir.create(reduce.outdir, recursive = TRUE)
   sink(file=stderr())
   rmr2:::hdfs.get(
@@ -313,7 +318,7 @@ rmr.stream =
       default.reader(reduce.indir), 
     keyval.writer = output.writer(reduce.outdir),
     profile = profile.nodes)
-  dfs.work.dir.reduce = file.path(rmr2:::job.work.output.dir(), "reduce")
+  dfs.work.dir.reduce = file.path(rmr2:::job.work.output.dir(), "_reduce")
   sink(file = stderr())
   if(!rmr2:::dfs.exists(dfs.work.dir.reduce)) 
     rmr2:::hdfs.mkdir(dfs.work.dir.reduce)
@@ -324,7 +329,7 @@ rmr.stream =
   combine.line = '  
   dir.create(combine.outdir, recursive = TRUE)
   sink(file=stderr())
-  rmr2:::hdfs.get(file.path(rmr2:::job.work.output.dir(), "map"), rmr2:::current.job())
+  rmr2:::hdfs.get(file.path(rmr2:::job.work.output.dir(), "_map"), rmr2:::current.job())
   sink(NULL)
   rmr2:::reduce.loop(
     reduce = combine, 
@@ -332,7 +337,7 @@ rmr.stream =
     keyval.reader = default.reader(map.outdir),
     keyval.writer = default.writer(combine.outdir), 
     profile = profile.nodes)    
-  dfs.work.dir.combine = file.path(rmr2:::job.work.output.dir(), "combine")
+  dfs.work.dir.combine = file.path(rmr2:::job.work.output.dir(), "_combine")
   sink(file = stderr())
   if(!rmr2:::dfs.exists(dfs.work.dir.combine)) 
     rmr2:::hdfs.mkdir(dfs.work.dir.combine)
@@ -479,76 +484,31 @@ rmr.stream =
           hdfs.get.section(
             file.path(
               out.folder, 
-              if(is.null(reduce)) "map" else "reduce",
+              if(is.null(reduce)) "_map" else "_reduce",
               sec)),
           out.folder))
     lapply(
-      c("map", "reduce", "combine"),
-      function(dir) hdfs.rm("-r", file.path(out.folder, dir)))    
+      c("_map", "_reduce", "_combine"),
+      function(dir) hdfs.rm(file.path(out.folder, dir), recursive = TRUE))    
     retval}
 
 
 #hdfs section
 
-hdfs = 
-  function(cmd, intern, ...) {
-    if (is.null(names(list(...)))) {
-      argnames = sapply(1:length(list(...)), function(i) "")}
-    else {
-      argnames = names(list(...))}
-    system(paste(hdfs.cmd(), " dfs -", cmd, " ", 
-                 paste(
-                   apply(cbind(argnames, list(...)), 1, 
-                         function(x) paste(
-                           if(x[[1]] == "") {""} else {"-"}, 
-                           x[[1]], 
-                           " ", 
-                           to.dfs.path(x[[2]]), 
-                           sep = ""))[
-                             order(argnames, decreasing = TRUE)], 
-                   collapse = " "), 
-                 sep = ""), 
-           intern = intern)}
+hdfs.file.info.names = c("type", "name", "last.mod", "size", "replication","block.size", "owner", "group", "permissions", "last.access")
+hdfs.ls =
+  function(path) {
+    df = data.frame(lapply(rmr2:::t.list(hdfs_ls(path)), unlist))
+    names(df) = hdfs.file.info.names
+    df[["name"]] = sapply(as.character(df[['name']]), function(x) rmr2:::parse_url(x)[["path"]])
+    df}
 
-getcmd = 
-  function(matched.call)
-    strsplit(tail(as.character(as.list(matched.call)[[1]]), 1), "\\.")[[1]][[2]]
+hdfs.file.info =
+  function(path) {
+    fi = hdfs_file_info(path)
+    names(fi) = hdfs.file.info.names
+    fi}
 
-hdfs.match.sideeffect = 
-  function(...) {
-    hdfs(getcmd(match.call()), FALSE, ...) == 0}
-
-#this returns a character matrix, individual cmds may benefit from additional transformations
-hdfs.match.out = 
-  function(...) {
-    oldwarn = options("warn")[[1]]
-    options(warn = -1)
-    retval = 
-      do.call(
-        rbind, 
-        strsplit(
-          grep("Found [0-9]+ items",
-               hdfs(
-                 getcmd(match.call()), 
-                 TRUE, 
-                 ...),
-               value = TRUE, 
-               invert = TRUE),
-          " +")) 
-    options(warn = oldwarn)
-    retval}
-
-mkhdfsfun = 
-  function(hdfscmd, out)
-    eval(parse(text = paste ("hdfs.", hdfscmd, " = hdfs.match.", if(out) "out" else "sideeffect", sep = "")), 
-         envir = parent.env(environment()))
-
-for (hdfscmd in c("ls", "lsr", "df", "du", "dus", "count", "cat", "text", "stat", "tail", "help")) 
-  mkhdfsfun(hdfscmd, TRUE)
-
-for (hdfscmd in c("mv", "cp", "rm", "rmr", "expunge", "put", "copyFromLocal", "moveFromLocal", "get", "getmerge", 
-                  "copyToLocal", "moveToLocal", "mkdir", "setrep", "touchz", "test", "chmod", "chown", "chgrp"))
-  mkhdfsfun(hdfscmd, FALSE)
 
 #mapreduce env
 hadoop.cmd = 

@@ -1,8 +1,8 @@
 BINDIR	= inst/hbase-io
 .PHONY: all hbase-io
 
-PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"`
-PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"`
+PKG_CXXFLAGS=`${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()"` -I/Users/antonio/Downloads/hadoop-2.2.0/include
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` -lhdfs -L/Users/antonio/Downloads/hadoop-2.2.0-src/hadoop-hdfs-project/hadoop-hdfs/target/native/target/usr/local/lib 
 
 all: $(SHLIB) hbase-io
 

@@ -125,29 +125,29 @@ part.list =
     if(rmr.options('backend') == "local") fname
     else {
       if(dfs.is.dir(fname)) {
-        du = hdfs.du(fname)
-        du[!is.hidden.file(du[,2]),2]}
+        du = hdfs.ls(fname)
+        du[!is.hidden.file(du[,"name"]),"name"]}
       else fname}}
 
 dfs.exists = 
   function(fname) {
     fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.test(e = fname) 
+      hdfs.exists(fname) 
     else file.exists(fname)}
 
 dfs.rmr = 
   function(fname) {
     fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop')
-      hdfs.rm("-r", fname)
+      hdfs.rm(fname, recursive = TRUE)
     else unlink(fname, recursive = TRUE)}
 
 dfs.is.dir = 
   function(fname) { 
     fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.test(d = fname)
+      hdfs.file.info(fname)$type == "D"
     else file.info(fname)['isdir']}
 
 dfs.empty = 
@@ -158,10 +158,10 @@ dfs.size =
   function(fname) {
     fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop') {
-      du = hdfs.du(fname)
+      du = hdfs.ls(fname)
       if(is.null(du)) 0 
       else
-        sum(as.numeric(du[!is.hidden.file(du[,2]), 1]))}
+        sum(du[!is.hidden.file(du$name), "size"])}
     else file.info(fname)[1, 'size'] }
 
 dfs.mv = 
@@ -180,26 +180,6 @@ dfs.mkdir =
     else
       dir.create(fname)}
 
-dfs.du = 
-  function(fname, pattern = NULL) {
-    fname = to.dfs.path(fname)
-    lst = 
-      if (rmr.options('backend') == 'hadoop') {
-        fi = as.data.frame(hdfs.ls(fname))
-        data.frame(
-          path = as.character(fi[, 8]), 
-          size = as.numeric(levels(fi[, 5]))[as.integer(fi[, 5])], 
-          stringsAsFactors = FALSE)} 
-    else {
-      fi = file.info(list.files(fname, full.names=TRUE))
-      data.frame(
-        path = rownames(fi), 
-        size = fi$size,
-        stringsAsFactors = FALSE)}
-    if(is.null(pattern))
-      lst
-    else
-      lst[grep(lst$path, pattern = pattern),]}
 
 # dfs bridge
 
@@ -324,16 +304,15 @@ rmr.normalize.path =
     if(.Platform$OS.type == "windows")
       url.or.path = gsub("\\\\","/", url.or.path)
     gsub(
-      "/+", 
-      "/", 
-      paste(
+      "/$",
+      "",
+      gsub(
+        "/+", 
         "/", 
-        gsub(
-          "part-[0-9]+$", 
-          "", 
-          parse_url(url.or.path)$path), 
-        "/", 
-        sep = ""))}
+        paste(
+          "/", 
+          parse_url(url.or.path)$path, 
+          sep = "")))}
 
 current.input = 
   function() {
@@ -459,7 +438,7 @@ equijoin =
     is.left.side = 
       function(left.input) {
         rmr.normalize.path(to.dfs.path(left.input)) ==
-          current.input()}
+          dirname(current.input())}
     reduce.split =
       function(vv) {
         tapply(
