@@ -346,8 +346,8 @@ get.section =
 hdfs.get.section =
   function(fname) {
     lso = hdfs.ls(dirname(fname))
-    lso = lso[grep(paste("^", rmr.normalize.path(fname), sep = ""), lso$name),]
-    arrange(lso, -size)[1,"name"]}
+    lso = lso[grep(paste("^", rmr.normalize.path(fname), sep = ""), lso$file),]
+    arrange(lso, -size)[1,"file"]}
 
 make.section =
   function(fname)        

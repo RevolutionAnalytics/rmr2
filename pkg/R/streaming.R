@@ -102,7 +102,6 @@ map.loop =
     kv = keyval.reader()
     force(keyval.writer)
     while(!is.null(kv)) { 
-      increment.counter("rmr", "map calls", 1)    
       out = as.keyval(map(keys(kv), values(kv)))
       if(length.keyval(out) > 0) {
         if(is.function(combine)) {
@@ -121,12 +120,12 @@ map.loop =
       quote(
         if(length(con) > 1)
           lapply(con[-1], close)), 
-      envir=environment(keyval.reader))
+      envir = environment(keyval.reader))
     eval(
       quote(
         if(length(con) > 1)
           lapply(con[-1], close)), 
-      envir=environment(keyval.writer))
+      envir = environment(keyval.writer))
     if(profile != "off") close.profiling(profile)
     invisible()}
 
@@ -211,7 +210,9 @@ rmr.stream =
     else "."
     rmr.local.env = tempfile(pattern = "rmr-local-env")
     rmr.global.env = tempfile(pattern = "rmr-global-env")
-    
+    dfs.work.dir = file.path(pkg.opts$dfs.tempdir, cksum(runif(1)))
+    hdfs.mkdir(dfs.work.dir)
+       
     preamble = paste(sep = "", '
   sink(file = stderr())
   options(warn = 1) 
@@ -255,93 +256,107 @@ rmr.stream =
           output,
           default.output.format)
 
-   map.outdir = file.path(".", rmr2:::current.job(), "_map")
-   combine.outdir = file.path(".", rmr2:::current.job(), "_combine")
-   put.all = 
-     function(src, dst)
-        rmr2:::hdfs.put(paste(list.files(src, full.names=T), collapse=" "), dst)
-   sink(file = stderr())
-   sink(NULL)
+    put.all = 
+      function(src, dst) {
+        sink(stderr())
+        hdfs.put(paste(list.files(src, full.names=T), collapse=" "), dst)
+        sink(NULL)}
+
+    get.all =
+      function(src, dst) {
+        sink(stderr())
+        fnames = hdfs.ls(src)[["file"]]
+        hdfs.get(fnames, dst)
+        sink(NULL)}
+
+   map.in = "_mapin"
+   map.out = "_map"
+   combine.out = "_combine"
+   reduce.out = "_reduce"
+   local.work.dir = 
+     function(){
+       tf = tempfile(tmpdir = ".")
+       dir.create(tf, recursive = TRUE)
+       ne = new.env()
+       reg.finalizer(ne, function(x) unlink(x$x, recursive = TRUE))
+       ne$x = tf
+       ne}
+   get.sections =
+     function(src, dst, format) { 
+        sink(stderr())
+        lapply(
+          format$sections[-1],
+          function(sec) {
+            hdfs.get(
+              rmr2:::hdfs.get.section(
+                 file.path(src, sec)), 
+              dst)})
+          sink(NULL)}
+    has.combine = !(is.null(combine) || identical(combine, FALSE))
+    has.reduce = !(is.null(reduce))
+    indir = local.work.dir()  
+    outdir = local.work.dir()
+
   ')  
     map.line = '  
-  map.indir = file.path(".", rmr2:::current.job(), "_mapin")
-  dir.create(map.indir, recursive = TRUE)
-  dir.create(map.outdir, recursive = TRUE)
-  lapply(
-    input.format$sections[-1],
-    function(sec) {
-        rmr2:::hdfs.get(
-          rmr2:::hdfs.get.section(
-            file.path(
-              dirname(rmr2:::current.input()), sec)), 
-          map.indir)})
-  map.only = is.null(reduce)
+  get.sections(dirname(rmr2:::current.input()), indir$x, input.format)  
   rmr2:::map.loop(
     map = map, 
-    keyval.reader = input.reader(map.indir), 
+    keyval.reader = input.reader(indir$x), 
     keyval.writer = 
-      if(map.only) 
-        output.writer(map.outdir)
+      if(!has.reduce) 
+        output.writer(outdir$x)
       else 
-        default.writer(map.outdir),
+        default.writer(outdir$x),
     profile = profile.nodes,
     combine = in.memory.combine,
     vectorized = vectorized.reduce, 
-    map.only = map.only)
-  dfs.work.dir.map = file.path(rmr2:::job.work.output.dir(), "_map")
+    map.only = !has.reduce)
+  dfs.dst = 
+    if(has.reduce)
+      file.path(dfs.work.dir,  map.out)
+    else
+     out.folder
   sink(file = stderr())
-  if(!rmr2:::dfs.exists(dfs.work.dir.map)) 
-    rmr2:::hdfs.mkdir(dfs.work.dir.map)
-  put.all(map.outdir, dfs.work.dir.map)
-  unlink(map.indir, recursive = TRUE)
-  unlink(map.outdir, recursive = TRUE)
+  if(!rmr2:::dfs.exists(dfs.dst)) 
+    hdfs.mkdir(dfs.dst)
+  put.all(outdir$x, dfs.dst)
   sink(NULL)
 '
   reduce.line = '  
-  reduce.indir =  
-    if(is.null(combine) || identical(combine, FALSE))
-      map.outdir
-    else
-      combine.outdir
-  reduce.outdir = file.path(".", rmr2:::current.job(), "_reduce")
-  dir.create(reduce.outdir, recursive = TRUE)
-  sink(file=stderr())
-  rmr2:::hdfs.get(
+  rmr.str(list.files(dfs.work.dir, recursive=TRUE))
+  get.all(
     file.path(
-      rmr2:::job.work.output.dir(), 
-     basename(reduce.indir)), rmr2:::current.job())
-  sink(NULL)
+      dfs.work.dir, 
+      if(has.combine) combine.out else map.out), 
+   indir$x)  
   rmr2:::reduce.loop(
     reduce = reduce, 
     vectorized = vectorized.reduce,
     keyval.reader = 
-      default.reader(reduce.indir), 
-    keyval.writer = output.writer(reduce.outdir),
+      default.reader(indir$x), 
+    keyval.writer = output.writer(outdir$x),
     profile = profile.nodes)
-  dfs.work.dir.reduce = file.path(rmr2:::job.work.output.dir(), "_reduce")
-  sink(file = stderr())
-  if(!rmr2:::dfs.exists(dfs.work.dir.reduce)) 
-    rmr2:::hdfs.mkdir(dfs.work.dir.reduce)
-  put.all(reduce.outdir, dfs.work.dir.reduce)
-  sink(NULL)
+  put.all(outdir$x, out.folder)
 '
     
   combine.line = '  
-  dir.create(combine.outdir, recursive = TRUE)
-  sink(file=stderr())
-  rmr2:::hdfs.get(file.path(rmr2:::job.work.output.dir(), "_map"), rmr2:::current.job())
-  sink(NULL)
+  get.all(
+    file.path(
+      dfs.work.dir,
+      map.out),
+      indir$x)
   rmr2:::reduce.loop(
     reduce = combine, 
     vectorized = vectorized.reduce,
-    keyval.reader = default.reader(map.outdir),
-    keyval.writer = default.writer(combine.outdir), 
+    keyval.reader = default.reader(indir$x),
+    keyval.writer = default.writer(outdir$x), 
     profile = profile.nodes)    
-  dfs.work.dir.combine = file.path(rmr2:::job.work.output.dir(), "_combine")
   sink(file = stderr())
+  dfs.work.dir.combine = file.path(dfs.work.dir,  combine.out)
   if(!rmr2:::dfs.exists(dfs.work.dir.combine)) 
-    rmr2:::hdfs.mkdir(dfs.work.dir.combine)
-  put.all(combine.outdir, dfs.work.dir.combine)
+    hdfs.mkdir(dfs.work.dir.combine)
+  put.all(outdir$x, dfs.work.dir.combine)
   sink(NULL)
 '
     
@@ -477,37 +492,7 @@ rmr.stream =
       console.output = tryCatch(system(final.command, intern = TRUE), 
                                 warning = function(e) stop(e)) 
       retval = 0}
-    lapply(
-      output.format$sections[-1],
-      function(sec)     
-        hdfs.cp(
-          hdfs.get.section(
-            file.path(
-              out.folder, 
-              if(is.null(reduce)) "_map" else "_reduce",
-              sec)),
-          out.folder))
-    lapply(
-      c("_map", "_reduce", "_combine"),
-      function(dir) hdfs.rm(file.path(out.folder, dir), recursive = TRUE))    
     retval}
-
-
-#hdfs section
-
-hdfs.file.info.names = c("type", "name", "last.mod", "size", "replication","block.size", "owner", "group", "permissions", "last.access")
-hdfs.ls =
-  function(path) {
-    df = data.frame(lapply(rmr2:::t.list(hdfs_ls(path)), unlist))
-    names(df) = hdfs.file.info.names
-    df[["name"]] = sapply(as.character(df[['name']]), function(x) rmr2:::parse_url(x)[["path"]])
-    df}
-
-hdfs.file.info =
-  function(path) {
-    fi = hdfs_file_info(path)
-    names(fi) = hdfs.file.info.names
-    fi}
 
 
 #mapreduce env
@@ -549,6 +534,10 @@ current.task = nonempty.or.null("mapred_task_id")
     
 current.job = nonempty.or.null("mapred_job_id")
 
-job.output.dir = nonempty.or.null("mapred_output_dir")
+job.output.dir =   
+  function()
+    rmr.normalize.path(nonempty.or.null("mapred_output_dir")())
 
-job.work.output.dir = nonempty.or.null("mapred_work_output_dir")
+job.work.output.dir = 
+  function()
+    rmr.normalize.path(nonempty.or.null("mapred_work_output_dir")())

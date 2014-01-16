@@ -38,3 +38,5 @@ out/*
 
 job_local*
 *.Rout
+
+file*

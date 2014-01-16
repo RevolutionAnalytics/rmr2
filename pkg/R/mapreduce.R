@@ -126,7 +126,7 @@ part.list =
     else {
       if(dfs.is.dir(fname)) {
         du = hdfs.ls(fname)
-        du[!is.hidden.file(du[,"name"]),"name"]}
+        du[!is.hidden.file(du[,"file"]),"file"]}
       else fname}}
 
 dfs.exists = 
@@ -140,15 +140,15 @@ dfs.rmr =
   function(fname) {
     fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop')
-      hdfs.rm(fname, recursive = TRUE)
+      hdfs.rmr(fname)
     else unlink(fname, recursive = TRUE)}
 
 dfs.is.dir = 
   function(fname) { 
     fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.file.info(fname)$type == "D"
-    else file.info(fname)['isdir']}
+      hdfs.stat(fname)[["isDir"]]
+    else file.info(fname)[["isdir"]]}
 
 dfs.empty = 
   function(fname) 
@@ -161,7 +161,7 @@ dfs.size =
       du = hdfs.ls(fname)
       if(is.null(du)) 0 
       else
-        sum(du[!is.hidden.file(du$name), "size"])}
+        sum(du[!is.hidden.file(du[["file"]]), "size"])}
     else file.info(fname)[1, 'size'] }
 
 dfs.mv = 
@@ -218,17 +218,15 @@ to.dfs =
       envir=environment(keyval.writer))
     move.results = 
       function(action, action2 = action) {
-        a = as.character(substitute(action))
         if(is.null(format$sections))
-          eval(call(a, tmp, dfs.output))
+          action(tmp, dfs.output)
         else {
           s = format$sections[[1]]
-          eval(call(a, file.path(tmp, s), file.path(dfs.output, s)))
-          a2 = as.character(substitute(action2))
+          action(file.path(tmp, s), file.path(dfs.output, s))          
           lapply(
             format$sections[-1], 
             function(s) 
-              eval(call(a2, file.path(tmp, s), file.path(dfs.output, s))))}}
+              action2(file.path(tmp, s), file.path(dfs.output, s)))}}
     if(rmr.options('backend') == 'hadoop') {
       if(format$mode == "binary") 
         move.results(loadtb, hdfs.put)
@@ -289,7 +287,7 @@ from.dfs = function(input, format = "native") {
     if(!is.null(format$sections))
       lapply(
         file.path(fname, format$sections[-1]), 
-        function(fn) rmr2:::hdfs.get(hdfs.get.section(fn), tmp))}
+        function(fn) hdfs.get(hdfs.get.section(fn), tmp))}
   else
     tmp = fname
   retval = read.file(tmp)
@@ -320,21 +318,22 @@ current.input =
     if (fname == "") NULL 
     else rmr.normalize.path(fname)}
 
-dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
-  if(is.null(tmpdir)) { 
-    tmpdir = tempdir()
-    rmr.options(dfs.tempdir = tmpdir)}
-  fname  = tempfile(pattern, tmpdir)
-  subfname = strsplit(fname, ":")
-  if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
-  namefun = function() {fname}
-  reg.finalizer(environment(namefun), 
-                function(e) {
-                  fname = eval(expression(fname), envir = e)
-                  if(!in.a.task() && dfs.exists(fname)) dfs.rmr(fname)
-                },
-                onexit = TRUE)
-  namefun}
+dfs.tempfile = 
+  function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
+    if(is.null(tmpdir)) { 
+      tmpdir = tempdir()
+      rmr.options(dfs.tempdir = tmpdir)}
+    fname  = tempfile(pattern, tmpdir)
+    subfname = strsplit(fname, ":")
+    if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
+    namefun = function() {fname}
+    reg.finalizer(environment(namefun), 
+                  function(e) {
+                    fname = eval(expression(fname), envir = e)
+                    if(!in.a.task() && dfs.exists(fname)) dfs.rmr(fname)
+                  },
+                  onexit = TRUE)
+    namefun}
 
 dfs.managed.file = function(call, managed.dir = rmr.options('managed.dir')) {
   file.path(managed.dir, digest(lapply(call, eval)))}

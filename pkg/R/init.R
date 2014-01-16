@@ -1,0 +1,3 @@
+.onAttach = 
+   function(.,..)
+     hdfs.init()
