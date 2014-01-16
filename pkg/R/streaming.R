@@ -324,7 +324,6 @@ rmr.stream =
   sink(NULL)
 '
   reduce.line = '  
-  rmr.str(list.files(dfs.work.dir, recursive=TRUE))
   get.all(
     file.path(
       dfs.work.dir, 
