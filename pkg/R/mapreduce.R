@@ -434,10 +434,17 @@ equijoin =
                lapply(values(kv),
                       function(v) {
                         list(val = v, is.left = is.left)}))}
+    prefix.cmp = 
+      function(l,r)
+        suppressWarnings(
+          min(
+            which(!(strsplit(l,split="")[[1]] == strsplit(r, split = "")[[1]]))))
     is.left.side = 
-      function(left.input) {
-        rmr.normalize.path(to.dfs.path(left.input)) ==
-          dirname(current.input())}
+      function(left.input, right.input) {
+        li = rmr.normalize.path(to.dfs.path(left.input))
+        ri = rmr.normalize.path(to.dfs.path(right.input))
+        ci = rmr.normalize.path(current.input())
+        prefix.cmp(ci, li) > prefix.cmp(ci, ri)}
     reduce.split =
       function(vv) {
         tapply(
@@ -451,7 +458,7 @@ equijoin =
     map = 
       if (is.null(input)) {
         function(k, v) {
-          ils = is.left.side(left.input)
+          ils = is.left.side(left.input, right.input)
           mark.side(if(ils) map.left(k, v) else map.right(k, v), ils)}}
     else {
       function(k, v) {
