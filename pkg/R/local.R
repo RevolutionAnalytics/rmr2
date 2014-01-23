@@ -29,7 +29,6 @@ mr.local = function(
   get.data =
     function(fname) {
       kv = from.dfs(fname, format = input.format)
-      attr(kv$val, 'rmr.input') = fname
       kv}
   map.out = 
     c.keyval(

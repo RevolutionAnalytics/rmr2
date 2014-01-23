@@ -45,7 +45,8 @@ enum type_code {
   R_VECTOR = 145,
   R_CHAR_VECTOR = 146,
   R_WITH_ATTRIBUTES = 147,
-  R_NULL = 148};
+  R_NULL = 148,
+  RMR_TEMPLATE = 149};
 
 typedef deque<unsigned char> raw;
 
@@ -71,6 +72,12 @@ public:
     type_code = _type_code;
     start = _start;}};
 
+class RmrTemplate {
+public:
+  SEXP rmr_template;
+  RmrTemplate(SEXP _template) {
+    rmr_template = _template;}};
+    
 class UnsupportedType{
 public:
   unsigned char type_code;
@@ -323,6 +330,9 @@ SEXP unserialize(const raw & data, int & start, int type_code){
        int raw_length = get_length(data, start);
        new_object = wrap_unserialize_vector<string>(data, start, raw_length);}
       break;
+    case RMR_TEMPLATE: {
+      throw RmrTemplate(unserialize_native(data, start));}
+      break;
     default: {
       throw UnsupportedType(type_code);}}
       return new_object;}
@@ -335,6 +345,7 @@ SEXP typedbytes_reader(SEXP data, SEXP _nobjs){
 	int start = 0;
 	int parsed_start = 0;
 	int objs_end = 0;
+  SEXP rmr_template = R_NilValue;
 	while(rd.size() > start && objs_end < nobjs[0]) {
  		try{
       objs[objs_end] = unserialize(rd, start);
@@ -345,12 +356,18 @@ SEXP typedbytes_reader(SEXP data, SEXP _nobjs){
 		catch (UnsupportedType ue) {
       safe_stop("Unsupported type: " + to_string((int)ue.type_code));}
 		catch (NegativeLength nl) {
-      safe_stop("Negative length exception");}}
+      safe_stop("Negative length exception");}
+    catch (RmrTemplate rt) {
+      objs_end = objs_end - 1; //discard key
+      parsed_start = start;
+      rmr_template = rt.rmr_template;
+    }}
   List list_tmp(objs.begin(), objs.begin() + objs_end);
 	return wrap(
     List::create(
       Named("objects") = wrap(list_tmp),
-      Named("length") = wrap(parsed_start)));}
+      Named("length") = wrap(parsed_start),
+      Named("template") = rmr_template));}
 
 void T2raw(unsigned char data, raw & serialized) {
   serialized.push_back(data);}
@@ -412,8 +429,8 @@ void serialize_list(T & data, raw & serialized, bool native){
   for(typename T::iterator i = data.begin(); i < data.end(); i++) {
     serialize(wrap(*i), serialized, native);}}
 
-void serialize_native(const SEXP & object, raw & serialized) {
-  serialized.push_back(R_NATIVE);
+void serialize_native(const SEXP & object, raw & serialized, type_code tc = R_NATIVE) {
+  serialized.push_back(tc);
   Function r_serialize("serialize");
   RawVector tmp(r_serialize(object, R_NilValue));
   length_header(tmp.size(), serialized);
@@ -514,14 +531,17 @@ void serialize(const SEXP & object, raw & serialized, bool native) {
   RObject robj(object);
   bool has_attr = robj.attributeNames().size() > 0;
   if(has_attr && native) {
-    serialized.push_back(R_WITH_ATTRIBUTES);
-    raw serialized_object(0);
-    serialize_noattr(object, serialized_object, TRUE);
-    raw serialized_attributes(0);
-    serialize_attributes(object, serialized_attributes);
-    length_header(serialized_object.size() + serialized_attributes.size(), serialized);
-    serialized.insert(serialized.end(), serialized_object.begin(), serialized_object.end());
-    serialized.insert(serialized.end(), serialized_attributes.begin(), serialized_attributes.end());}
+    if(robj.hasAttribute("rmr.template")) {
+      serialize_native(object, serialized, RMR_TEMPLATE);}
+    else {
+      serialized.push_back(R_WITH_ATTRIBUTES);
+      raw serialized_object(0);
+      serialize_noattr(object, serialized_object, TRUE);
+      raw serialized_attributes(0);
+      serialize_attributes(object, serialized_attributes);
+      length_header(serialized_object.size() + serialized_attributes.size(), serialized);
+      serialized.insert(serialized.end(), serialized_object.begin(), serialized_object.end());
+      serialized.insert(serialized.end(), serialized_attributes.begin(), serialized_attributes.end());}}
   else {
     serialize_noattr(object, serialized, native);}}
   

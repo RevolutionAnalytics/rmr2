@@ -108,8 +108,8 @@ cmp =
     ky = keys(y)
     vx = values(x)
     vy = values(y)
-    ox = order(sapply(kx, digest), sapply(vx, function(z){attr(z, "rmr.input") = NULL; digest(z)}))
-    oy = order(sapply(ky, digest), sapply(vy, function(z){attr(z, "rmr.input") = NULL; digest(z)}))
+    ox = order(sapply(kx, digest), sapply(vx, digest))
+    oy = order(sapply(ky, digest), sapply(vy, digest))
     isTRUE(all.equal(kx[ox], ky[oy], check.attributes = FALSE)) &&
       isTRUE(all.equal(vx[ox], vy[oy], check.attributes = FALSE))}
 
@@ -216,28 +216,15 @@ to.dfs =
           close(con) 
         else lapply(con, close)), 
       envir=environment(keyval.writer))
-    move.results = 
-      function(action, action2 = action) {
-        if(is.null(format$sections))
-          action(tmp, dfs.output)
-        else {
-          s = format$sections[[1]]
-          action(file.path(tmp, s), file.path(dfs.output, s))          
-          lapply(
-            format$sections[-1], 
-            function(s) 
-              action2(file.path(tmp, s), file.path(dfs.output, s)))}}
     if(rmr.options('backend') == 'hadoop') {
       if(format$mode == "binary") 
-        move.results(loadtb, hdfs.put)
+        loadtb(tmp, dfs.output)
       else   #text
-        move.results(hdfs.put) }
+        hdfs.put(tmp, dfs.output)}
     else { #local
       if(file.exists(dfs.output))
         stop("Can't overwrite ", dfs.output)
-      if(!is.null(format$sections))
-        dfs.mkdir(dfs.output)
-      move.results(file.copy) }
+      file.copy(tmp, dfs.output)}
     unlink(tmp, recursive=TRUE)
     output}
 
@@ -251,11 +238,8 @@ from.dfs = function(input, format = "native") {
       retval(list(kv))
       kv = keyval.reader()}
     eval(
-      quote(
-        if(length(con) == 1)
-          close(con) 
-        else lapply(con, close)), 
-      envir=environment(keyval.reader))
+      quote(close(con)), 
+      envir = environment(keyval.reader))
     c.keyval(retval())}
   
   dumptb = function(src, dest){
@@ -264,30 +248,24 @@ from.dfs = function(input, format = "native") {
   getmerge = function(src, dest) {
     on.exit(unlink(tmp))
     tmp = tempfile()
-    lapply(src, function(x) {
-      hdfs.get(as.character(x), tmp)
-      if(.Platform$OS.type == "windows") {
-        cmd = paste('type', tmp, '>>' , dest)
-        system(paste(Sys.getenv("COMSPEC"),"/c",cmd))}
-      else {
-        system(paste('cat', tmp, '>>' , dest))}
-      unlink(tmp)})
+    lapply(
+      src, 
+      function(x) {
+        hdfs.get(as.character(x), tmp)
+        if(.Platform$OS.type == "windows") {
+          cmd = paste('type', tmp, '>>' , dest)
+          system(paste(Sys.getenv("COMSPEC"),"/c",cmd))}
+        else {
+          system(paste('cat', tmp, '>>' , dest))}})
     dest}
   
   fname = to.dfs.path(input)
   if(is.character(format)) format = make.input.format(format)
   if(rmr.options("backend") == "hadoop") {
-    tmp = tmp.data = tempfile()
-    if(!is.null(format$sections)){
-      dir.create(tmp)
-      tmp.data = file.path(tmp, format$sections[[1]])}
+    tmp = tempfile()
     if(format$mode == "binary") 
-      dumptb(part.list(fname), tmp.data)
-    else getmerge(part.list(fname), tmp.data)
-    if(!is.null(format$sections))
-      lapply(
-        file.path(fname, format$sections[-1]), 
-        function(fn) hdfs.get(hdfs.get.section(fn), tmp))}
+      dumptb(part.list(fname), tmp)
+    else getmerge(part.list(fname), tmp)}
   else
     tmp = fname
   retval = read.file(tmp)

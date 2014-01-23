@@ -105,7 +105,7 @@ typedbytes.reader =
 typedbytes.writer =
   function(objects, con, native) {
     writeBin(
-      .Call("typedbytes_writer", objects, native, PACKAGE = "rmr2"),
+      .Call("typedbytes_writer", objects, native,  PACKAGE = "rmr2"),
       con)}
 
 to.data.frame = 
@@ -130,17 +130,18 @@ from.list =
       unlist(x))}
 
 make.typedbytes.input.format =
-  function(read.size = 10^7) {
+  function(read.size = 10^7, native = FALSE) {
     obj.buffer = list()
     obj.buffer.rmr.length = 0
     raw.buffer = raw()
-    template.pe = NULL
+    template = NULL
     function(con) {
-      is.native = length(con) > 1
-      while(length(obj.buffer) < 2) {
-        raw.buffer <<- c(raw.buffer, readBin(con[[1]], raw(), read.size))
+      while(length(obj.buffer) < 2 || is.null(template)) {
+        raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
         if(length(raw.buffer) == 0) break;
         parsed = typedbytes.reader(raw.buffer, as.integer(read.size/20)) #this is a ridiculous upper bound
+        if(is.null(template) && !is.null(parsed$template))
+          template <<- parsed$template
         obj.buffer <<- c(obj.buffer, parsed$objects)
         if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
       straddler = list()
@@ -152,25 +153,22 @@ make.typedbytes.input.format =
             obj.buffer <<- obj.buffer[-length(obj.buffer)]}
           kk = odd(obj.buffer)
           vv = even(obj.buffer)
-          if(is.native) {
-            if(is.null(template.pe)) {
-              load(con[[2]])
-              template.pe <<- template}
+          if(native) {
             kk = rep(
               kk,
-              if(is.data.frame(template.pe[[2]]))
+              if(is.data.frame(template[[2]]))
                 sapply.rmr.length.lossy.data.frame(vv)
               else
                 sapply.rmr.length(vv))
             keyval(
-              from.list(kk, template.pe[[1]]),
-              from.list(vv, template.pe[[2]]))}
+              from.list(kk, template[[1]]),
+              from.list(vv, template[[2]]))}
           else 
             keyval(kk,vv)}}
       obj.buffer <<- straddler
       retval}}
 
-make.native.input.format = make.typedbytes.input.format
+make.native.input.format = Curry(make.typedbytes.input.format, native = TRUE)
 
 to.list = 
   function(x) {
@@ -188,27 +186,34 @@ make.native.or.typedbytes.output.format =
   function(native, write.size = 10^6) {
     template = NULL
     function(kv, con){
-      k = keys(kv)
-      v = values(kv)
-      if(is.null(template) && native)  {
-        template <<- 
-          list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))
-        save(template, file = con[[2]])}
-      kvs = {
-        if(native)
-          split.keyval(kv, write.size, TRUE)
+      if(length.keyval(kv) != 0) {
+        k = keys(kv)
+        v = values(kv)
+        kvs = {
+          if(native)
+            split.keyval(kv, write.size, TRUE)
+          else 
+            keyval(to.list(k), to.list(v))}
+        if(is.null(k)) {
+          if(!native) stop("Can't handle NULL in typedbytes")
+          ks =  rep(list(NULL), length.keyval(kvs)) }
         else 
-          keyval(to.list(k), to.list(v))}
-      if(is.null(k)) {
-        if(!native) stop("Can't handle NULL in typedbytes")
-        k =  rep(list(NULL), length.keyval(kvs)) }
-      else 
-        k = keys(kvs)
-      v = values(kvs)
-      typedbytes.writer(
-        interleave(k, v), 
-        con[[1]], 
-        native)}}
+          ks = keys(kvs)
+        vs = values(kvs)
+        if(native) {
+          if(is.null(template))  {
+            template <<-
+              list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))}
+          typedbytes.writer(
+            list(
+              sample(ks, 1)[[1]], 
+              structure(template, rmr.template = TRUE)),
+            con,
+            native)}
+        typedbytes.writer(
+          interleave(ks, vs), 
+          con, 
+          native)}}}
 
 make.native.output.format = 
   Curry(make.native.or.typedbytes.output.format, native = TRUE)
@@ -328,59 +333,19 @@ open.stdinout =
           "cat"}
       pipe(cat, ifelse(is.read, "rb", "wb"))}}
 
-#opens all required connections for a format. If in a task, replace first connection with stdin or out and
-#make all the other names unique before opening
-
-get.section = 
-  function(fname) {
-    fi = 
-      file.info(
-        list.files(
-          dirname(fname), 
-          pattern = basename(fname), 
-          full.names = TRUE))
-    arrange(
-      data.frame(path = rownames(fi), size = fi$size, stringsAsFactors = FALSE),
-      -size)$path[1]}
-
-hdfs.get.section =
-  function(fname) {
-    lso = hdfs.ls(dirname(fname))
-    lso = lso[grep(paste("^", rmr.normalize.path(fname), sep = ""), lso$file),]
-    arrange(lso, -size)[1,"file"]}
-
-make.section =
-  function(fname)        
-    paste(c(fname, if(in.a.task()) current.task()), collapse = "-")
 
 make.keyval.readwriter = 
   function(fname, format, is.read) {
-    if(length(fname) > 1)
-      fname = current.input()
-    if(!is.null(format$sections)) {
-      if(!is.read) dir.create(fname) 
-      fname = file.path(fname, format$sections)}
-    con = list()
-    if(in.a.task()){
-      con[[1]] = open.stdinout(format$mode, is.read)
-      fname = fname[-1]}
-    con = 
-      c(
-        con,
-        lapply(
+    con = { 
+      if(is.null(fname))
+        open.stdinout(format$mode, is.read)
+      else
+        file(
           fname,
-          function(fn) 
-            file(
-              if(is.read)
-                get.section(fn)
-              else
-                make.section(fn), 
-              paste(
-                if(is.read) "r" else "w", 
-                if(format$mode == "text") "" else "b",
-                sep = ""))))
-    if (is.null(format$sections))
-      con = con[[1]]
+          paste(
+            if(is.read) "r" else "w", 
+            if(format$mode == "text") "" else "b",
+            sep = ""))}
     if (is.read) {
       function() 
         format$format(con)}
@@ -401,7 +366,6 @@ make.input.format =
     mode = c("binary", "text"),
     streaming.format = NULL, 
     backend.parameters = NULL,
-    sections = NULL,
     ...) {
     mode = match.arg(mode)
     args = list(...)
@@ -420,8 +384,7 @@ make.input.format =
           mode = "text"}, 
         native = {
           format = make.native.input.format(...) 
-          mode = "binary"
-          sections = c("part-00000", "_rmr2_template")}, 
+          mode = "binary"}, 
         sequence.typedbytes = {
           format = make.typedbytes.input.format(...) 
           mode = "binary"},
@@ -495,8 +458,7 @@ make.input.format =
     list(mode = mode, 
          format = format, 
          streaming.format = streaming.format, 
-         backend.parameters = backend.parameters,
-         sections = sections)}
+         backend.parameters = backend.parameters)}
 
 set.separator.options =
   function(sep) {
@@ -526,7 +488,6 @@ make.output.format =
     mode = c("binary", "text"),
     streaming.format = NULL, 
     backend.parameters = NULL,
-    sections = NULL,
     ...) {
     mode = match.arg(mode)
     args = list(...)
@@ -557,8 +518,7 @@ make.output.format =
         native = {
           format = make.native.output.format(...)
           mode = "binary"
-          streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"
-          sections = c("part-00000", "_rmr2_template")}, 
+          streaming.format = "org.apache.hadoop.mapred.SequenceFileOutputFormat"}, 
         sequence.typedbytes = {
           format = make.typedbytes.output.format(...)
           mode = "binary"
@@ -584,5 +544,4 @@ make.output.format =
       mode = mode, 
       format = format, 
       streaming.format = streaming.format, 
-      backend.parameters = backend.parameters, 
-      sections = sections)}
+      backend.parameters = backend.parameters)}

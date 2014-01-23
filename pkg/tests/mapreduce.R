@@ -94,20 +94,20 @@ for (be in c("local", "hadoop")) {
         function(x) if(class(x) == "raw" || length(x) == 1) x else as.list(x),
         how = "replace")    
   
-  fmt = "sequence.typedbytes"
-  unit.test(
-    function(l) 
-      kv.cmp(
-        keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
-        from.dfs(
-          to.dfs(
-            keyval(1, l), 
-            format = fmt), 
-          format = fmt)), 
-    generators = list(tdgg.list()),
-    precondition = function(l) length(l) > 0,
-    sample.size = 10)
-  
+#   fmt = "sequence.typedbytes"
+#   unit.test(
+#     function(l) 
+#       kv.cmp(
+#         keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
+#         from.dfs(
+#           to.dfs(
+#             keyval(1, l), 
+#             format = fmt), 
+#           format = fmt)), 
+#     generators = list(tdgg.list()),
+#     precondition = function(l) length(l) > 0,
+#     sample.size = 10)
+#   
   ##mapreduce
   
   ##simplest mapreduce, all default
@@ -168,23 +168,23 @@ for (be in c("local", "hadoop")) {
     generators = list(tdgg.data.frame()),
     sample.size = 10)
   
-  #sequence.typedbytes
-  fmt = "sequence.typedbytes"
-  unit.test(
-    function(l) {
-      kv.cmp(
-        keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
-        from.dfs(
-          mapreduce(
-            to.dfs(
-              keyval(1, l), 
-              format = fmt), 
-            input.format = fmt,
-            output.format = fmt),
-          format = fmt))}, 
-      generators = list(tdgg.list()),
-      precondition = function(l) length(l) > 0,
-      sample.size = 10)
+#   #sequence.typedbytes
+#   fmt = "sequence.typedbytes"
+#   unit.test(
+#     function(l) {
+#       kv.cmp(
+#         keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
+#         from.dfs(
+#           mapreduce(
+#             to.dfs(
+#               keyval(1, l), 
+#               format = fmt), 
+#             input.format = fmt,
+#             output.format = fmt),
+#           format = fmt))}, 
+#       generators = list(tdgg.list()),
+#       precondition = function(l) length(l) > 0,
+#       sample.size = 10)
   
   #equijoin
   stopifnot(
