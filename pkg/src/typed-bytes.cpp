@@ -173,8 +173,7 @@ int get_length(const raw & data, int & start) {
   return len;}
   
 int get_type(const raw & data, int & start) {
-  int debug = (int)unserialize_scalar<unsigned char>(data, start); 
-  return debug;}
+  return (int)unserialize_scalar<unsigned char>(data, start);}
   
 template <typename T>
 vector<T> unserialize_vector(const raw & data, int & start, int raw_length) {

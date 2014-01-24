@@ -59,7 +59,7 @@ rmr.options =
     if(is.named.arg("dfs.tempdir")) {
       if(!is.null(dfs.tempdir)) {
         if(!dfs.exists(dfs.tempdir)) {
-          stopifnot(dfs.mkdir(dfs.tempdir))
+          dfs.mkdir(dfs.tempdir)
           add.last(function() if(!in.a.task()) dfs.rmr(dfs.tempdir))}
         opt.assign("dfs.tempdir", dfs.tempdir)}}
     if(is.named.arg("backend.parameters"))
@@ -126,7 +126,7 @@ part.list =
     else {
       if(dfs.is.dir(fname)) {
         du = hdfs.ls(fname)
-        du[!is.hidden.file(du[,"file"]),"file"]}
+        du[!is.hidden.file(du[,"path"]),"path"]}
       else fname}}
 
 dfs.exists = 
@@ -141,13 +141,14 @@ dfs.rmr =
     fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop')
       hdfs.rmr(fname)
-    else unlink(fname, recursive = TRUE)}
+    else stopifnot(unlink(fname, recursive = TRUE) == 0)
+  NULL}
 
 dfs.is.dir = 
   function(fname) { 
     fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.stat(fname)[["isDir"]]
+      hdfs.isdir(fname)
     else file.info(fname)[["isdir"]]}
 
 dfs.empty = 
@@ -161,8 +162,8 @@ dfs.size =
       du = hdfs.ls(fname)
       if(is.null(du)) 0 
       else
-        sum(du[!is.hidden.file(du[["file"]]), "size"])}
-    else file.info(fname)[1, 'size'] }
+        sum(du[!is.hidden.file(du[["path"]]), "size"])}
+    else file.info(fname)[1, "size"] }
 
 dfs.mv = 
   function(from, to) { 
@@ -170,7 +171,8 @@ dfs.mv =
     if(rmr.options('backend') == 'hadoop') 
       hdfs.mv(fname, to)
     else 
-      file.rename(fname, to)}
+      stopifnot(file.rename(fname, to))
+  NULL}
 
 dfs.mkdir = 
   function(fname) { 
@@ -178,7 +180,8 @@ dfs.mkdir =
     if (rmr.options('backend') == 'hadoop') 
       hdfs.mkdir(fname)
     else
-      dir.create(fname)}
+      stopifnot(all(dir.create(fname)))
+    NULL}
 
 
 # dfs bridge

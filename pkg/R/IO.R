@@ -154,6 +154,7 @@ make.typedbytes.input.format =
           kk = odd(obj.buffer)
           vv = even(obj.buffer)
           if(native) {
+            stopifnot(!is.null(template))
             kk = rep(
               kk,
               if(is.data.frame(template[[2]]))
