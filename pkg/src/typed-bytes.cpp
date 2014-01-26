@@ -90,7 +90,8 @@ public:
   
 template <typename T> 
 int nbytes(){
-  stop_unimplemented<T>("nbytes");}
+  stop_unimplemented<T>("nbytes");
+  return T();} //silence compiler
 
 //nbytes provides the size of a typedbytes type corresponding to a C type
 template<>
@@ -112,12 +113,12 @@ template<>
 int nbytes<char>(){return 1;}
 
 template <typename T>
-void check_length(const raw & data, int start, int length = nbytes<T>()) {
+void check_length(const raw & data, unsigned int start, unsigned int length = nbytes<T>()) {
   if(data.size() < start + length) {
       throw ReadPastEnd(typeid(T).name(), start);}}
 
 template <typename T> 
-T unserialize_integer(const raw & data, int & start) {
+T unserialize_integer(const raw & data, unsigned int & start) {
   check_length<T>(data, start);
   int retval = 0;
   for (int i = 0; i < nbytes<T>(); i ++) {
@@ -126,11 +127,12 @@ T unserialize_integer(const raw & data, int & start) {
   return retval;}
 
 template <typename T>
-T unserialize_numeric(const raw & data, int & start){
-  stop_unimplemented<T>("unserialize_numeric called");}
+T unserialize_numeric(const raw & data, unsigned int & start){
+  stop_unimplemented<T>("unserialize_numeric called");
+  return T();} //silence compiler
 
 template<>
-double unserialize_numeric<double>(const raw & data, int & start) {
+double unserialize_numeric<double>(const raw & data, unsigned int & start) {
   union udouble {
     double d;
     uint64_t u;} ud;
@@ -143,40 +145,41 @@ double unserialize_numeric<double>(const raw & data, int & start) {
   return ud.d;} 
  
 template <typename T>
-T unserialize_scalar(const raw & data, int & start){
+T unserialize_scalar(const raw & data, unsigned int & start){
   if(nbytes<T>() > 1) {
-    stop_unimplemented<T>("Multibyte unserialize_scalar ");}
+    stop_unimplemented<T>("Multibyte unserialize_scalar ");
+    return T();} //silence compiler
   check_length<T>(data, start);
   start = start + nbytes<T>();
   return (T)data[start - nbytes<T>()];}
 
 template<>
-int unserialize_scalar<int>(const raw & data, int & start){
+int unserialize_scalar<int>(const raw & data, unsigned int & start){
   return unserialize_integer<int>(data, start);}
   
 template<>
-long unserialize_scalar<long>(const raw & data, int & start){
+long unserialize_scalar<long>(const raw & data, unsigned int & start){
   return unserialize_integer<long>(data, start);}
   
 template<>
-double unserialize_scalar<double>(const raw & data, int & start){
+double unserialize_scalar<double>(const raw & data, unsigned int & start){
   return unserialize_numeric<double>(data, start);}
   
 template<>
-float unserialize_scalar<float>(const raw & data, int & start){
+float unserialize_scalar<float>(const raw & data, unsigned int & start){
   return unserialize_numeric<float>(data, start);}
     
-int get_length(const raw & data, int & start) {
+int get_length(const raw & data, unsigned int & start) {
   int len = unserialize_scalar<int>(data, start);
   if(len < 0) {
     throw NegativeLength();}
   return len;}
   
-int get_type(const raw & data, int & start) {
+int get_type(const raw & data, unsigned int & start) {
   return (int)unserialize_scalar<unsigned char>(data, start);}
   
 template <typename T>
-vector<T> unserialize_vector(const raw & data, int & start, int raw_length) {
+vector<T> unserialize_vector(const raw & data, unsigned int & start, int raw_length) {
   int length = raw_length/nbytes<T>();
   vector<T> vec(length);
   for(int i = 0; i < length; i++) {
@@ -184,7 +187,7 @@ vector<T> unserialize_vector(const raw & data, int & start, int raw_length) {
   return vec;}
   
 template <>
-vector<string> unserialize_vector<string>(const raw & data, int & start, int raw_length) {
+vector<string> unserialize_vector<string>(const raw & data, unsigned int & start, int raw_length) {
   int v_length = get_length(data, start);
   vector<string> retval(v_length);
   for(int i = 0; i < v_length; i++) {
@@ -195,24 +198,24 @@ vector<string> unserialize_vector<string>(const raw & data, int & start, int raw
     retval[i] = tmp_string;}
   return retval;}
       
-SEXP unserialize(const raw & data, int & start, int type_code = 255);
+SEXP unserialize(const raw & data, unsigned int & start, int type_code = 255);
 
-SEXP unserialize_list(const raw & data, int & start) {
+SEXP unserialize_list(const raw & data, unsigned int & start) {
   int length = get_length(data, start);
   List list(length);
   for(int i = 0; i < length; i++) {
     list[i] = unserialize(data, start);}
   return wrap(list);}
   
-SEXP unserialize_255_terminated_list(const raw & data, int & start) {
-  vector<RObject> vec;
+SEXP unserialize_255_terminated_list(const raw & data, unsigned int & start) {
+  vector<SEXP> vec;
   int type_code = get_type(data, start);
   while(type_code != 255){
     vec.push_back(unserialize(data, start, type_code));
     type_code = get_type(data, start);}
   return wrap(vec);}
       
-SEXP unserialize_map(const raw & data, int & start) {
+SEXP unserialize_map(const raw & data, unsigned int & start) {
   int length = get_length(data, start);
     List keys(length);
     List values(length);
@@ -225,7 +228,7 @@ SEXP unserialize_map(const raw & data, int & start) {
           Named("key") = keys,
           Named("val") = values));}
        
-SEXP unserialize_native(const raw & data, int & start) {
+SEXP unserialize_native(const raw & data, unsigned int & start) {
   int length = get_length(data, start);
   check_length<SEXP>(data, start, length);
   Function r_unserialize("unserialize");
@@ -234,14 +237,14 @@ SEXP unserialize_native(const raw & data, int & start) {
   return r_unserialize(wrap(tmp));}
 
 template <typename T>
-SEXP wrap_unserialize_vector(const raw & data, int & start, int length) {
+SEXP wrap_unserialize_vector(const raw & data, unsigned int & start, unsigned int length) {
   return wrap(unserialize_vector<T>(data, start, length));}
 
 template <typename T>
-SEXP wrap_unserialize_scalar(const raw & data, int & start) {
+SEXP wrap_unserialize_scalar(const raw & data, unsigned int & start) {
   return wrap(unserialize_scalar<T>(data, start));}
 
-SEXP unserialize(const raw & data, int & start, int type_code){
+SEXP unserialize(const raw & data, unsigned int & start, int type_code){
   RObject new_object;
   if(type_code == 255) {
     type_code = get_type(data, start);}
@@ -338,16 +341,18 @@ SEXP unserialize(const raw & data, int & start, int type_code){
 
 SEXP typedbytes_reader(SEXP data, SEXP _nobjs){
 	NumericVector nobjs(_nobjs);
-	List objs(floor(nobjs[0]));
+	//List objs(floor(nobjs[0]));
+  std::vector<SEXP> objs;
 	RawVector tmp(data);
 	raw rd(tmp.begin(), tmp.end());
-	int start = 0;
-	int parsed_start = 0;
-	int objs_end = 0;
+	unsigned int start = 0;
+	unsigned int parsed_start = 0;
+	unsigned int objs_end = 0;
   SEXP rmr_template = R_NilValue;
 	while(rd.size() > start && objs_end < nobjs[0]) {
  		try{
-      objs[objs_end] = unserialize(rd, start);
+      //objs[objs_end] = unserialize(rd, start);
+      objs.push_back(unserialize(rd, start));
       objs_end = objs_end + 1;
       parsed_start = start;}
     catch (ReadPastEnd rpe){
@@ -357,11 +362,13 @@ SEXP typedbytes_reader(SEXP data, SEXP _nobjs){
 		catch (NegativeLength nl) {
       safe_stop("Negative length exception");}
     catch (RmrTemplate rt) {
-      objs_end = objs_end - 1; //discard key
+      //objs_end = objs_end - 1; //discard key
+      objs.pop_back();
       parsed_start = start;
       rmr_template = rt.rmr_template;
     }}
-  List list_tmp(objs.begin(), objs.begin() + objs_end);
+  //List list_tmp(objs.begin(), objs.begin() + objs_end);
+  List list_tmp(objs.begin(), objs.end());
 	return wrap(
     List::create(
       Named("objects") = wrap(list_tmp),
@@ -522,7 +529,7 @@ void serialize_attributes(const SEXP & object, raw & serialized) {
   vector<string> names = robj.attributeNames();
   serialize(wrap(names), serialized, TRUE);
   vector<SEXP> attributes;
-  for(int i = 0; i < names.size(); i++) {
+  for(unsigned int i = 0; i < names.size(); i++) {
     attributes.push_back(wrap(robj.attr(names[i])));}
   serialize(wrap(attributes), serialized, TRUE);}
   
