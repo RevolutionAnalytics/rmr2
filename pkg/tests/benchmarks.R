@@ -29,7 +29,6 @@ for (be in c("local", "hadoop")) {
       report[[be]], 
       write = 
         system.time({
-          out = 
 ## @knitr write
   input = to.dfs(1:input.size)
 ## @knitr end  
