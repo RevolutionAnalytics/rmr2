@@ -97,10 +97,10 @@ make.csv.output.format =
                 col.names = FALSE)}
 
 typedbytes.reader =
-  function(data, nobjs) {
+  function(data) {
     if(is.null(data)) NULL
     else
-      .Call("typedbytes_reader", data, nobjs, PACKAGE = "rmr2")}
+      .Call("typedbytes_reader", data, PACKAGE = "rmr2")}
 
 typedbytes.writer =
   function(objects, con, native) {
@@ -139,7 +139,7 @@ make.typedbytes.input.format =
       while(length(obj.buffer) < 2 || is.null(template)) {
         raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
         if(length(raw.buffer) == 0) break;
-        parsed = typedbytes.reader(raw.buffer, as.integer(read.size/20)) #this is a ridiculous upper bound
+        parsed = typedbytes.reader(raw.buffer) 
         if(is.null(template) && !is.null(parsed$template))
           template <<- parsed$template
         obj.buffer <<- c(obj.buffer, parsed$objects)
@@ -286,8 +286,7 @@ make.hbase.input.format =
             typedbytes = 
               function(x, family = NULL, column = NULL) 
                 typedbytes.reader(
-                  do.call(c, x),  
-                  nobjs = length(x)),
+                  do.call(c, x)),
             raw = function(x, family = NULL, column = NULL) pRawToChar(x))
         deser}
     key.deserialize = deserialize.opt(key.deserialize)
