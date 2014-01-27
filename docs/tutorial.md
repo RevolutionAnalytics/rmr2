@@ -5,7 +5,6 @@
 
 
 
-
 # Mapreduce in R
 
 ## My first mapreduce job
@@ -19,7 +18,7 @@
 ```
 
 
-The example is trivial, just computing the first 10 squares, but we just want to get the basics here, there are interesting examples later on. Now to the mapreduce equivalent:
+The example is trivial, just computing the first thousand squares, but we just want to get the basics here, there are interesting examples later on. Now to the mapreduce equivalent:
 
 
 ```r
