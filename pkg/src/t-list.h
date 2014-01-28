@@ -18,7 +18,7 @@
 #include <Rcpp.h>
 
 
-RcppExport SEXP t_list(SEXP _ll, SEXP _tll);
+RcppExport SEXP t_list(SEXP _ll);
 
 
 #endif

@@ -74,14 +74,8 @@ mapply.list =
 t.list = 
   function(l) {
     if(length(l) == 0) l
-    else {
-      nc = length(l)
-      nr = length(l[[1]])
-      tl = 
-        split(
-          as.list(runif(nc*nr)),
-          ceiling((1:(nc*nr))/nc))
-      .Call("t_list", l, tl, PACKAGE = "rmr2")}}
+    else 
+      .Call("t_list", l, PACKAGE = "rmr2")}
 
 #data frame manip
 

@@ -19,12 +19,13 @@ using std::vector;
 using std::cerr;
 using std::endl;
 
-SEXP t_list(SEXP _ll, SEXP _tll) {
+
+SEXP t_list(SEXP _ll) {
   List ll(_ll);
-  List tll(_tll);
+  List l_1(as<List>(ll[1]));
+  vector<vector<RObject> >  tll(l_1.size());
   for(int i = 0; i < ll.size(); i++) {
     List l_i(as<List>(ll[i]));
     for(int j = 0; j < l_i.size(); j++) {
-      List tl_j(as<List>(tll[j]));
-      tl_j[i] = l_i[j];};}
+      tll[j].push_back(l_i[j]);};}
   return wrap(tll);}
