@@ -152,9 +152,13 @@ dfs.is.dir =
     else file.info(fname)[["isdir"]]}
 
 dfs.empty = 
-  function(fname) 
-    dfs.size(fname) == 0
-
+  function(fname) {
+    if(dfs.size(fname) > 1000) #size heuristic
+      FALSE
+    else
+      length.keyval(from.dfs(fname)) == 0}
+    
+       
 dfs.size = 
   function(fname) {
     fname = to.dfs.path(fname)
