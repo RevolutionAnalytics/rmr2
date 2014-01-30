@@ -338,14 +338,16 @@ SEXP typedbytes_reader(SEXP data){
 	raw rd(tmp.begin(), tmp.end());
 	unsigned int start = 0;
   unsigned int parsed_start = 0;
+  bool starting_template = false;
 	RObject rmr_template = R_NilValue;
 	while(rd.size() > start) {
  		try{
       RObject new_object = unserialize(rd, start);
       if(new_object.hasAttribute("rmr.template")) {
         if(objs_end == 0) 
-          safe_stop("Found template at beginning of buffer. Tough luck");
-        objs_end--; // discard the key for the template
+          starting_template = true;
+        else
+          objs_end--; // discard the key for the template
         rmr_template = new_object;}
       else {
         if(objs_end >= (unsigned int)objs.size())
@@ -363,7 +365,8 @@ SEXP typedbytes_reader(SEXP data){
     List::create(
       Named("objects") = List(objs.begin(), objs.begin() + objs_end),
       Named("length") = parsed_start,
-      Named("template") = rmr_template));}
+      Named("template") = rmr_template,
+      Named("starting.template") = starting_template));}
 
 void T2raw(unsigned char data, raw & serialized) {
   serialized.push_back(data);}
