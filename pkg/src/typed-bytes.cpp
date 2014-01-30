@@ -446,6 +446,10 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
       case NILSXP: {
         serialize_null(serialized);}
       break;
+      case RAWSXP: {//raw
+      RawVector data(object);
+      serialize_many(data, 0, serialized);}
+      break;
       case LGLSXP: {
         LogicalVector data(object);  
         vector<unsigned char> bool_data(data.size());
