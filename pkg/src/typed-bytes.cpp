@@ -72,12 +72,6 @@ public:
     type_code = _type_code;
     start = _start;}};
 
-class RmrTemplate {
-public:
-  RObject rmr_template;
-  RmrTemplate(RObject _template) {
-    rmr_template = _template;}};
-    
 class UnsupportedType{
 public:
   unsigned char type_code;
@@ -291,7 +285,7 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       for(int i = 0; i < names.size(); i++) {
         char * c = names[i]; //workaround Rcpp bug now fixed, remove if assuming 0.10.2 and higher
         string s(c); 
-        new_object.attr(s)= attributes[i];}}
+        new_object.attr(s) = attributes[i];}}
       break;
     case R_VECTOR: {
       int raw_length = get_length(data, start);
@@ -324,38 +318,50 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
        new_object = wrap(unserialize_vector<string>(data, start, raw_length));}
       break;
     case RMR_TEMPLATE: {
-      throw RmrTemplate(unserialize_native(data, start));}
+      new_object = unserialize_native(data, start);}
       break;
     default: {
       throw UnsupportedType(type_code);}}
       return new_object;}
 
+List supersize(const List& x) {
+  unsigned int oldsize = x.size() ;
+  List y(2*oldsize) ;
+  for(unsigned int i = 0; i < oldsize; i++) 
+    y[i] = x[i] ;
+  return y ;}
+  
 SEXP typedbytes_reader(SEXP data){
-  std::vector<RObject> objs;
+  List objs(1);
+  unsigned int objs_end = 0;
 	RawVector tmp(data);
 	raw rd(tmp.begin(), tmp.end());
 	unsigned int start = 0;
-	unsigned int parsed_start = 0;
+  unsigned int parsed_start = 0;
 	RObject rmr_template = R_NilValue;
 	while(rd.size() > start) {
  		try{
-      objs.push_back(unserialize(rd, start));
-      parsed_start = start;}
+      RObject new_object = unserialize(rd, start);
+      if(new_object.hasAttribute("rmr.template")) {
+        if(objs_end == 0) 
+          safe_stop("Found template at beginning of buffer. Tough luck");
+        objs_end--; // discard the key for the template
+        rmr_template = new_object;}
+      else {
+        if(objs_end >= (unsigned int)objs.size())
+          objs = supersize(objs);
+        objs[objs_end] = new_object;
+        objs_end++;}
+      parsed_start = start;} //if rpe exception occurs parsed start won't move, unlike start
     catch (ReadPastEnd rpe){
       break;}
 		catch (UnsupportedType ue) {
       safe_stop("Unsupported type: " + to_string((int)ue.type_code));}
 		catch (NegativeLength nl) {
-      safe_stop("Negative length exception");}
-    catch (RmrTemplate rt) {
-      objs.pop_back();
-      parsed_start = start;
-      rmr_template = rt.rmr_template;
-    }}
-  List list_tmp(objs.begin(), objs.end());
-	return wrap(
+      safe_stop("Negative length exception");}}
+  return wrap(
     List::create(
-      Named("objects") = list_tmp,
+      Named("objects") = List(objs.begin(), objs.begin() + objs_end),
       Named("length") = parsed_start,
       Named("template") = rmr_template));}
 
@@ -415,7 +421,7 @@ void serialize_vector(T & data, unsigned char type_code, raw & serialized, bool 
 void serialize_list(List & data, raw & serialized, bool native){
   serialized.push_back(TB_VECTOR);
   length_header(data.size(), serialized);
-  for(unsigned int i = 0; i < data.size(); i++) {
+  for(unsigned int i = 0; i < (unsigned int)data.size(); i++) {
     serialize(as<RObject>(data[i]), serialized, native);}}
 
 void serialize_native(const RObject & object, raw & serialized, type_code tc = R_NATIVE) {
@@ -508,11 +514,11 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
 
 void serialize_attributes(const RObject & object, raw & serialized) {
   vector<string> names = object.attributeNames();
-  serialize(RObject(wrap(names)), serialized, TRUE);
+  serialize(wrap(names), serialized, TRUE);
   vector<RObject> attributes;
   for(unsigned int i = 0; i < names.size(); i++) {
     attributes.push_back(object.attr(names[i]));}
-  serialize(RObject(wrap(attributes)), serialized, TRUE);}
+  serialize(wrap(attributes), serialized, TRUE);}
   
 void serialize(const RObject & object, raw & serialized, bool native) {
    bool has_attr = object.attributeNames().size() > 0;
@@ -535,7 +541,7 @@ SEXP typedbytes_writer(SEXP objs, SEXP native){
 	raw serialized(0);
 	List objects(objs);
   LogicalVector is_native(native);
-	for(unsigned int i = 0; i < objects.size(); i++) {
+	for(unsigned int i = 0; i < (unsigned int)objects.size(); i++) {
     try{
       serialize(as<RObject>(objects[i]), serialized, is_native[0]);}
     catch(UnsupportedType ut){

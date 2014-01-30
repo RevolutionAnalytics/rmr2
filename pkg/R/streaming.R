@@ -194,7 +194,7 @@ rmr.stream =
     preamble = paste(sep = "", '
   sink(file = stderr())
   options(warn = 1) 
-  options(error = quote({sink(stderr()); traceback(); q()}))
+  options(error = quote({sink(stderr()); traceback(); stop()}))
   library(functional)
   invisible(
     if(is.null(formals(load)$verbose)) #recent R change

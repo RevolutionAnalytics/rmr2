@@ -179,9 +179,25 @@ to.list =
       if (is.matrix(x)) x = as.data.frame(x)
       if (is.data.frame(x)) 
         unname(
-          t.list(lapply(x, as.list)))
+          t.list(x))
       else
         as.list(x)}}
+
+intersperse = 
+  function(a.list, another.list, every.so.many) 
+    splat(c)(
+      mapply(
+        lapply(another.list, list), 
+        split(a.list, ceiling(seq_along(a.list)/every.so.many), drop = TRUE), 
+        FUN = c, 
+        SIMPLIFY = FALSE))
+
+intersperse.one = 
+  function(a.list, an.element, every.so.many) 
+    splat(c)(
+      lapply(
+        split(a.list, ceiling(seq_along(a.list)/every.so.many)), 
+        function(y) c(list(an.element),y)))
 
 make.native.or.typedbytes.output.format = 
   function(native, write.size = 10^6) {
@@ -205,12 +221,14 @@ make.native.or.typedbytes.output.format =
           if(is.null(template))  {
             template <<-
               list(key = rmr.slice(k, 0), val = rmr.slice(v, 0))}
-          typedbytes.writer(
-            list(
-              sample(ks, 1)[[1]], 
-              structure(template, rmr.template = TRUE)),
-            con,
-            native)}
+          N = { 
+            if(length(vs) < 100) 1 
+            else {
+              r = ceiling((object.size(ks) + object.size(vs))/10^6)
+              if (r < 100) length(vs) / 100
+              else r}}
+          ks = intersperse(ks, sample(ks, ceiling(length(ks)/N)), N)
+          vs = intersperse.one(vs, structure(template, rmr.template = TRUE), N)}
         typedbytes.writer(
           interleave(ks, vs), 
           con, 

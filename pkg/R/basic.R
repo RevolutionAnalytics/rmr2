@@ -75,7 +75,7 @@ t.list =
   function(l) {
     if(length(l) == 0) l
     else 
-      .Call("t_list", l, PACKAGE = "rmr2")}
+      .Call("t_list", lapply(l, as.list), PACKAGE = "rmr2")}
 
 #data frame manip
 

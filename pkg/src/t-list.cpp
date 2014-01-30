@@ -22,10 +22,12 @@ using std::endl;
 
 SEXP t_list(SEXP _ll) {
   List ll(_ll);
-  List l_1(as<List>(ll[1]));
-  vector<vector<RObject> >  tll(l_1.size());
+  List l_0(as<List>(ll[0]));
+  List  tll(l_0.size());
+  for(int j = 0; j < tll.size(); j++) 
+      tll[j] = List(ll.size());
   for(int i = 0; i < ll.size(); i++) {
     List l_i(as<List>(ll[i]));
-    for(int j = 0; j < l_i.size(); j++) {
-      tll[j].push_back(l_i[j]);};}
+    for(int j = 0; j < tll.size(); j++) {
+      as<List>(tll[j])[i] = l_i[j];};}
   return wrap(tll);}
