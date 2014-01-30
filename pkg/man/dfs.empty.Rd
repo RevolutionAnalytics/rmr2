@@ -6,7 +6,7 @@
 \alias{dfs.rmr}
 \title{Backend-independent file manipulation}
 
-\description{Check if a item is empty or return its size. Move an item or remove(recursively). Here item is a valid path or \code{\link{big.data.object}}}
+\description{Check if an item is empty or return its size. Move an item or remove(recursively). Here item is a valid path or \code{\link{big.data.object}}}
  
 \usage{
 dfs.empty(fname)
