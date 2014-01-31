@@ -45,8 +45,7 @@ enum type_code {
   R_VECTOR = 145,
   R_CHAR_VECTOR = 146,
   R_WITH_ATTRIBUTES = 147,
-  R_NULL = 148,
-  RMR_TEMPLATE = 149};
+  R_NULL = 148};
 
 typedef deque<unsigned char> raw;
 
@@ -315,11 +314,8 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
           throw UnsupportedType(vec_type_code);}}
       break;
     case R_CHAR_VECTOR: {
-       int raw_length = get_length(data, start);
-       new_object = wrap(unserialize_vector<string>(data, start, raw_length));}
-      break;
-    case RMR_TEMPLATE: {
-      new_object = unserialize_native(data, start);}
+        int raw_length = get_length(data, start);
+        new_object = wrap(unserialize_vector<string>(data, start, raw_length));}
       break;
     default: {
       throw UnsupportedType(type_code);}}
@@ -428,8 +424,8 @@ void serialize_list(List & data, raw & serialized, bool native){
   for(unsigned int i = 0; i < (unsigned int)data.size(); i++) {
     serialize(as<RObject>(data[i]), serialized, native);}}
 
-void serialize_native(const RObject & object, raw & serialized, type_code tc = R_NATIVE) {
-  serialized.push_back(tc);
+void serialize_native(const RObject & object, raw & serialized) {
+  serialized.push_back(R_NATIVE);
   cerr << "Calling r_serialize" << endl; 
   Function r_serialize("serialize");
   RawVector tmp(r_serialize(object, R_NilValue));
@@ -530,19 +526,16 @@ void serialize_attributes(const RObject & object, raw & serialized) {
   serialize(wrap(attributes), serialized, TRUE);}
   
 void serialize(const RObject & object, raw & serialized, bool native) {
-   bool has_attr = object.attributeNames().size() > 0;
+  bool has_attr = object.attributeNames().size() > 0;
   if(has_attr && native) {
-    if(object.hasAttribute("rmr.template")) {
-      serialize_native(object, serialized, RMR_TEMPLATE);}
-    else {
-      serialized.push_back(R_WITH_ATTRIBUTES);
-      raw serialized_object(0);
-      serialize_noattr(object, serialized_object, TRUE);
-      raw serialized_attributes(0);
-      serialize_attributes(object, serialized_attributes);
-      length_header(serialized_object.size() + serialized_attributes.size(), serialized);
-      serialized.insert(serialized.end(), serialized_object.begin(), serialized_object.end());
-      serialized.insert(serialized.end(), serialized_attributes.begin(), serialized_attributes.end());}}
+    serialized.push_back(R_WITH_ATTRIBUTES);
+    raw serialized_object(0);
+    serialize_noattr(object, serialized_object, TRUE);
+    raw serialized_attributes(0);
+    serialize_attributes(object, serialized_attributes);
+    length_header(serialized_object.size() + serialized_attributes.size(), serialized);
+    serialized.insert(serialized.end(), serialized_object.begin(), serialized_object.end());
+    serialized.insert(serialized.end(), serialized_attributes.begin(), serialized_attributes.end());}
   else {
     serialize_noattr(object, serialized, native);}}
   
