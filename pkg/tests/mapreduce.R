@@ -123,7 +123,7 @@ for (be in c("local", "hadoop")) {
   ##put in a reduce for good measure
   unit.test(
     function(kv) {
-      if(length(kv) == 0) TRUE
+      if(rmr2:::length.keyval(kv) == 0) TRUE
       else {
         kv1 = 
           from.dfs(
