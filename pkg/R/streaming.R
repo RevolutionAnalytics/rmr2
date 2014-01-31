@@ -195,6 +195,7 @@ rmr.stream =
   sink(file = stderr())
   options(warn = 1) 
   options(error = quote({sink(stderr()); traceback(); stop()}))
+  gcinfo(TRUE)
   library(functional)
   invisible(
     if(is.null(formals(load)$verbose)) #recent R change
