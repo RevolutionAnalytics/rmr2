@@ -263,7 +263,8 @@ from.dfs = function(input, format = "native") {
           cmd = paste('type', tmp, '>>' , dest)
           system(paste(Sys.getenv("COMSPEC"),"/c",cmd))}
         else {
-          system(paste('cat', tmp, '>>' , dest))}})
+          system(paste('cat', tmp, '>>' , dest))}
+        unlink(tmp)})
     dest}
   
   fname = to.dfs.path(input)
