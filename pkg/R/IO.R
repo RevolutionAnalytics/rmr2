@@ -187,19 +187,23 @@ to.list =
 
 intersperse = 
   function(a.list, another.list, every.so.many) 
-    splat(c)(
-      mapply(
-        lapply(another.list, list), 
-        split(a.list, ceiling(seq_along(a.list)/every.so.many), drop = TRUE), 
-        FUN = c, 
-        SIMPLIFY = FALSE))
+    c(
+      another.list[1],
+      splat(c)(
+        mapply(
+          split(a.list, ceiling(seq_along(a.list)/every.so.many), drop = TRUE), 
+          lapply(another.list, list), 
+          FUN = c, 
+          SIMPLIFY = FALSE)))
 
 intersperse.one = 
   function(a.list, an.element, every.so.many) 
-    splat(c)(
-      lapply(
-        split(a.list, ceiling(seq_along(a.list)/every.so.many)), 
-        function(y) c(list(an.element),y)))
+    c(
+      splat(c)(
+        lapply(
+          split(a.list, ceiling(seq_along(a.list)/every.so.many)), 
+          function(y) c(list(an.element),y))),
+    list(an.element))  
 
 make.native.or.typedbytes.output.format = 
   function(native, write.size = 10^6) {
