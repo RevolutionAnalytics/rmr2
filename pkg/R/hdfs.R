@@ -10,7 +10,7 @@ hdfs.exists =
     hdfs("test -e", fname, test = TRUE)
 hdfs.rmr = 
   function(fname)
-    hdfs("rmr", fname)
+    hdfs("rm -r", fname)
 hdfs.isdir = 
   function(fname)
     hdfs("test -d", fname, test = TRUE)
