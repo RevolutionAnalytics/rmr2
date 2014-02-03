@@ -55,9 +55,8 @@ make.json.output.format =
               "", 
               toJSON(k, .escapeEscapes=TRUE, collapse = "")),
             gsub("\n", "", toJSON(v, .escapeEscapes=TRUE, collapse = "")),
-            sep = "\t", 
-            write.size)
-      out = reduce.keyval(kv, ser, 1000)
+            sep = "\t")           
+      out = reduce.keyval(kv, ser, write.size)
       writeLines(paste(out, collapse = "\n"), sep = "", con = con)}
 
 make.text.input.format = 
