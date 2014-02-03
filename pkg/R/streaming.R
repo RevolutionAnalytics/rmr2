@@ -417,8 +417,13 @@ hadoop.cmd =
 
 hdfs.cmd = 
   function() {
-    #file.path(dirname(hadoop.cmd()), "hdfs")}
-    hadoop.cmd()}
+    alternatives = 
+      c(
+        Sys.getenv("HDFS_CMD"),
+        file.path(dirname(hadoop.cmd()), "hdfs"),
+        file.path(Sys.getenv("HADOOP_HOME"), "bin", "hdfs"),
+        hadoop.cmd())
+    alternatives[min(which(sapply(alternatives, file.exists)))]}
 
 hadoop.streaming = 
   function() {
