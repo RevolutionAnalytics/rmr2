@@ -449,10 +449,3 @@ current.task = nonempty.or.null("mapred_task_id")
     
 current.job = nonempty.or.null("mapred_job_id")
 
-job.output.dir =   
-  function()
-    rmr.normalize.path(nonempty.or.null("mapred_output_dir")())
-
-job.work.output.dir = 
-  function()
-    rmr.normalize.path(nonempty.or.null("mapred_work_output_dir")())
