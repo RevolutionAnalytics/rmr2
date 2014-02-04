@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="x-ua-compatible" content="IE=9" >
 
-<title>What&#39;s new in 2.3.0</title>
+<title>What&#39;s new in 3.0.0</title>
 
 <style type="text/css">
 body, td {
@@ -142,16 +142,18 @@ hr {
 </head>
 
 <body>
-<h1>What&#39;s new in 2.3.0</h1>
+<h1>What&#39;s new in 3.0.0</h1>
+
+<p>The main change in this release is a new serialization format. To simplify, it&#39;s faster than the old one. To be a bit more accurate, it is neck and neck wih the old one in many use cases, but trumps the old one where the old one was slow. So the result is a more consistent performance across use cases. The average test in <code>benchmarks.R</code> takes 16 seconds instead of 49, but, even more importantly, the longest goes from 533 to 51. Workarounds such as preferring simple vector types and hashing keys to a smaller domain should not be needed as often anymore. Performance is a lot more predictable. The main ingredient, besides an additional sprinkling of C++ magic to resolve differences between the R world and the Java/Hadoop one, is a new format that splits data and metadata. This way we don&#39;t have to, for instance, represent column names in each record. It can get pretty expensive when a record contains a single float and the column name is very long. With all new and shiny things there can be some surprises. The new format required a lot of new code that is not battle-tested yet and is not compatible with previous versions. rmr2 3.x will not read rmr2 2.x <code>native</code> format data. These are the main reason we decided to go for a major release even if this latest version is almost backward compatbile with the previous one. On the bright side, programs should keep working in most cases and require minor changes otherwise. Other noteworthy changes</p>
 
 <ul>
-<li>Interchange format with hive and pig (&ldquo;pig.hive&rdquo;)</li>
-<li>exclude large objects from being broadcasted to the cluster with <code>rmr.options(exclude.objects = ...)</code></li>
-<li>environment setup now leave a trail in stderr, to more easily identify problems (R3.x only).</li>
-<li>better key normalization: in some instances absolutely identical R objects still serialized in a different way, which made Hadoop believe it was dealing with separate keys.</li>
-<li>speed improvements, specifically as related to data.frame as keys and values</li>
-<li><code>dfs.mv</code> and <code>dfs.rmr</code> to move and delete files, backend independent.</li>
+<li>The option <code>keyval.length</code> to <code>rmr.options</code> has been removed. It meant too many different things depending on what format was being used. It&#39;s now up to each format how it reads data and how big of a chunk it is willing to read or write in one step. Input format functions just take an open connection and return a key-value pair, output formats and open connection and a key-value pair to write out. Users can use closures to write more flexible I/O formats.</li>
+<li><code>dfs.exists</code>: an addition to the repertoire of backend-independent file manipulations, <code>dfs.exists</code> checks if a file exists.</li>
+<li>Updated hbase I/O formats to use base64 encoding of arguments, which fixes an incompatibility with the an upgraded Java HBase I/O format.</li>
+<li>Fixed reduce call counter: it did grossly overestimate the number of calls, should be an actual count now. This is important because it can help tackle performance issues. Too few reduce calls and you may bust memory limits, too many and it may slow down your program.</li>
 </ul>
+
+<p>So why a major release, that is why increment the first component of the version number? First, we follow <a href="http://semver.org">Semantic Versioning</a> and since removing <code>keyval.length</code> is a backward incompatible change, we had no choice. We could have left the option, deprecated it and made it do nothing and we could have narrowly fit the criteria for a minor release. But the changes behind the scenes are important if invisible and we want people to be aware that this is not just a minor release and that they should kick the tires before upgrading their nuclear attack rapid response cluster. This release passed the usual battery of test, no change there, but tests only increase our confidence: they don&#39;t prove correctness. There isn&#39;t a lot of new code here, but it&#39;s C++ code and it supports everything that rmr2 does. I can&#39;t think of a single use case that won&#39;t execute new code.</p>
 
 </body>
 
