@@ -24,6 +24,8 @@ src-x86_64
 *.o
 *.so
 *.rds
+
+
 Rprof.out
 *.aup
 *.au
@@ -31,12 +33,8 @@ Rprof.out
 *.gz
 !build/*.gz
 
-rmr2-*-template-*
-_rmr2_template
-
 out/*
 
-job_local*
 *.Rout
 
 file*
