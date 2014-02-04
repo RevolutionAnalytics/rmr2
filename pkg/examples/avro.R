@@ -3,6 +3,7 @@
 # from.dfs(mapreduce(some.input, input.format = avroIF)) or mapreduce(to.dfs(some.data), output.format = avroOF)
 # avroOF uses a fixed schema "bytes" containing the JSON representation of the data.
 
+avro.jar = "/Users/antonio/Downloads/avro-mapred-1.7.4-hadoop1.jar"
 
 paste.fromJSON = 
   function(...)
@@ -35,7 +36,7 @@ avroIF =
     	list(
     		hadoop = 
     			list(
-    				libjars = "/Users/antonio/Downloads/avro-mapred-1.7.4-hadoop1.jar")))
+    				libjars = avro.jar)))
 
 
 avro.output.format =
@@ -60,7 +61,7 @@ avroOF =
     	list(
     		hadoop =
     			list(
-    				libjars = "/Users/antonio/Downloads/avro-mapred-1.7.4-hadoop1.jar")))
+    				libjars = avro.jar)))
 
 
 avro.test = 
