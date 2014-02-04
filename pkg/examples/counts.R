@@ -31,6 +31,6 @@ count =
         data, 
         map = map.count, 
         reduce = reduce.count,
-        combine = T,
+        combine = TRUE,
         ...))} 
 ## @knitr end

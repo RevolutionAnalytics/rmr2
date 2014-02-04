@@ -36,7 +36,7 @@ SEXP string_to_raw(std::string source) {
 SEXP p_string_to_raw(SEXP _source) {
   std::vector<std::string> source = Rcpp::as<std::vector<std::string> >(_source);
   Rcpp::List retval(source.size());
-  for(int i = 0; i < source.size(); i++) {
+  for(unsigned int i = 0; i < source.size(); i++) {
     retval[i] = Rcpp::wrap(string_to_raw(source[i]));}
   return Rcpp::wrap(retval);}
     

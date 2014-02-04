@@ -13,7 +13,6 @@
 # limitations under the License.
 
 library(rmr2)
-#timings from macbook pro i7 2011, standalone CDH4, one core, SDD
 
 report = list()
 for (be in c("local", "hadoop")) {
@@ -21,7 +20,7 @@ for (be in c("local", "hadoop")) {
 ## @knitr input
   input.size = {  
     if(rmr.options('backend') == "local") 
-      10^4   
+      10^4
     else 
       10^6} 
 ## @knitr end
@@ -30,7 +29,6 @@ for (be in c("local", "hadoop")) {
       report[[be]], 
       write = 
         system.time({
-          out = 
 ## @knitr write
   input = to.dfs(1:input.size)
 ## @knitr end  
@@ -150,7 +148,6 @@ for (be in c("local", "hadoop")) {
   group = function(x) x%%10
   aggregate = function(x) sum(x)
 ## @knitr end  
-  rmr.options(keyval.length=10^4)
   report[[be]] =
     rbind(
       report[[be]],
@@ -168,39 +165,18 @@ for (be in c("local", "hadoop")) {
       combine = TRUE)
 ## @knitr end        
       }))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df1 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df10 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:10), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df100 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:100), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df1000 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:1000), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df10E4 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:10000), data.frame(x =1:10^5))))))
-  report[[be]] =
-    rbind(
-      report[[be]],
-      df10E5 = system.time(from.dfs(to.dfs(keyval(data.frame(x = 1:100000), data.frame(x =1:10^5))))))
+  log.input.size = log10(input.size)
+  z = splat(rbind)(
+    c(
+      lapply(0:log.input.size, function(i) system.time(to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))))),
+      lapply(0:log.input.size, function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); system.time(from.dfs(z))}),
+      lapply(0:log.input.size, function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); system.time(mapreduce(z))}),
+      lapply(0:(log.input.size-2), function(i) {z = to.dfs(keyval(data.frame(1:10^i), data.frame(1:10^log.input.size))); 
+                               system.time(mapreduce(z, reduce = function(k,v) as.data.frame(t(colSums(v)))))})))
+  row.names(z) = make.names(t(outer(c("to.dfs","from.dfs", "map only", "map reduce"), c(0:log.input.size), paste)))[1:(4*(1 + log.input.size) - 2)]
+  report[[be]] = rbind(report[[be]], z)
 }
+
+
 print(report)
-# 
-# $hadoop
-# user.self sys.self elapsed user.child sys.child
-# write               1.155    0.043   3.688      2.465     0.315
-# read                0.843    0.099   3.028      3.201     0.269
-# pass.through        0.887    0.014   5.472      5.375     0.749
-# filter              0.173    0.007   4.760      5.025     0.773
-# select              0.199    0.008   6.828      6.633     1.100
-# bigsum              0.728    0.024   6.683      6.683     0.970
-# group.aggregate     0.726    0.029  12.860     12.260     1.595
+

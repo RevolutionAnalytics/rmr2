@@ -1,4 +1,4 @@
-//Copyright 2011 Revolution Analytics
+//Copyright 2013 Revolution Analytics
 //   
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
@@ -12,15 +12,13 @@
 //See the License for the specific language governing permissions and
 //limitations under the License.
 
-#include "extras.h"
-#include <vector>
+#ifndef _RMR_TLIST_H
+#define _RMR_TLIST_H
+
 #include <Rcpp.h>
 
-SEXP vsum(SEXP xx) {
-  Rcpp::List _xx (xx);
-  std::vector<double> results(_xx.size());
-  for(int i = 0; i < _xx.size(); i ++) {
-    std::vector<double> x = Rcpp::as<std::vector<double> >(_xx[i]);
-    for(unsigned int j = 0; j < x.size(); j++) {
-      results[i] += x[j];}}
-  return Rcpp::wrap(results);}
+
+RcppExport SEXP t_list(SEXP _ll);
+
+
+#endif

@@ -26,7 +26,7 @@ cluster.mr =
 			map = 
 				function(., data.chunk) 
 					keyval(1, list(subcluster(data.chunk))),
-			combine = T,
+			combine = TRUE,
 			reduce = 
 				function(., clusterings)
 					keyval(1, list(merge(clusterings))))
@@ -38,7 +38,7 @@ subclara =
 			clara(
 				data, 
 				n.centers, 
-				keep.data=F)
+				keep.data = FALSE)
 		list(
 			size = nrow(data),
 			sample = data[clust$sample,],

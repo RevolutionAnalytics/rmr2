@@ -46,11 +46,9 @@ Make.single.or.multi.arg = function(f, from = c("single", "multi")) {
       f.multi(...)}}
   
 
-`%:%` = function(f,g) function(...) do.call(f, g(...))
+`%|%` = function(f,g) function(...) do.call(g, f(...))
 
 all.predicate = function(x, P) all(sapply(x, P))
-
-mapply.data.frame = function(data, FUN) do.call(function(...) mapply(FUN = FUN, ...), data)
 
 #data structures
 
@@ -69,6 +67,15 @@ make.fast.list = function(l = list()) {
       i <<- i + length(els)}}}
 
 named.slice = function(x, n) x[which(names(x) == n)]
+
+mapply.list = 
+  function(...) mapply(FUN = list, ..., SIMPLIFY = FALSE)
+
+t.list = 
+  function(l) {
+    if(length(l) == 0) l
+    else 
+      .Call("t_list", lapply(l, as.list), PACKAGE = "rmr2")}
 
 #data frame manip
 
@@ -105,7 +112,7 @@ rbind.fill.fast =
           function(x) 
             if (is.atomic(x)) x
                 else I(x)), 
-        stringsAsFactors = F))}
+        stringsAsFactors = FALSE))}
 
 
 
@@ -118,8 +125,8 @@ every.second =
       options(warn = opt)
       y}
 
-odd = every.second(c(T,F))
-even = every.second(c(F,T))
+odd = every.second(c(TRUE, FALSE))
+even = every.second(c(FALSE, TRUE))
 
 interleave = 
   function(l1, l2) {
@@ -127,3 +134,5 @@ interleave =
     l[2*(1:length(l1)) - 1] = l1
     l[2*(1:length(l1))] = l2
     l}
+
+#con

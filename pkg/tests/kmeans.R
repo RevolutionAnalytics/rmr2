@@ -38,7 +38,7 @@ kmeans.mr =
             sample(
               1:num.clusters, 
               nrow(P), 
-              replace = T)
+              replace = TRUE)
           else {
             D = dist.fun(C, P)
             nearest = max.col(-D)}}

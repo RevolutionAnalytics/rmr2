@@ -10,4 +10,7 @@ A stub representing data on disk that can be manipulated by other functions in r
 
 \examples{
 some.big.data = to.dfs(1:10)
-to.dfs(1:10, "/tmp/some/big/data")}
+path = "/tmp/some/big/data"
+if(dfs.exists(path))
+  dfs.rmr(path)
+to.dfs(1:10, path)}

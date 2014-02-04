@@ -30,3 +30,13 @@ Rprof.out
 *.swp
 *.gz
 !build/*.gz
+
+rmr2-*-template-*
+_rmr2_template
+
+out/*
+
+job_local*
+*.Rout
+
+file*

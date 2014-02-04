@@ -17,7 +17,6 @@
 rmr.options.env = new.env(parent=emptyenv())
 
 rmr.options.env$backend = "hadoop"
-rmr.options.env$keyval.length = 10^4
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
 rmr.options.env$exclude.objects = NULL
@@ -40,7 +39,6 @@ rmr.options =
   function(
     backend = c("hadoop", "local"), 
     profile.nodes = c("off", "calls", "memory", "both"),
-    keyval.length = 10^4,
     dfs.tempdir = NULL,
     exclude.objects = NULL,
     backend.parameters = list()) {
@@ -48,9 +46,7 @@ rmr.options =
     args = as.list(sys.call())[-1]
     is.named.arg = function(x) is.element(x, names(args))
     if(is.named.arg("backend"))
-      opt.assign("backend", match.arg(backend))
-    if(is.named.arg("keyval.length"))
-      opt.assign("keyval.length", keyval.length)
+      opt.assign("backend", match.arg(backend))  
     if(is.named.arg("profile.nodes")) {
       if (is.logical(profile.nodes)) {
         profile.nodes = {
@@ -63,7 +59,7 @@ rmr.options =
     if(is.named.arg("dfs.tempdir")) {
       if(!is.null(dfs.tempdir)) {
         if(!dfs.exists(dfs.tempdir)) {
-          stopifnot(dfs.mkdir(dfs.tempdir))
+          dfs.mkdir(dfs.tempdir)
           add.last(function() if(!in.a.task()) dfs.rmr(dfs.tempdir))}
         opt.assign("dfs.tempdir", dfs.tempdir)}}
     if(is.named.arg("backend.parameters"))
@@ -112,8 +108,8 @@ cmp =
     ky = keys(y)
     vx = values(x)
     vy = values(y)
-    ox = order(sapply(kx, digest), sapply(vx, function(z){attr(z, "rmr.input") = NULL; digest(z)}))
-    oy = order(sapply(ky, digest), sapply(vy, function(z){attr(z, "rmr.input") = NULL; digest(z)}))
+    ox = order(sapply(kx, digest), sapply(vx, digest))
+    oy = order(sapply(ky, digest), sapply(vy, digest))
     isTRUE(all.equal(kx[ox], ky[oy], check.attributes = FALSE)) &&
       isTRUE(all.equal(vx[ox], vy[oy], check.attributes = FALSE))}
 
@@ -129,15 +125,15 @@ part.list =
     if(rmr.options('backend') == "local") fname
     else {
       if(dfs.is.dir(fname)) {
-        du = hdfs.du(fname)
-        du[!is.hidden.file(du[,2]),2]}
+        du = hdfs.ls(fname)
+        du[!is.hidden.file(du[,"path"]),"path"]}
       else fname}}
 
 dfs.exists = 
   function(fname) {
     fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.test(e = fname) 
+      hdfs.exists(fname) 
     else file.exists(fname)}
 
 dfs.rmr = 
@@ -145,28 +141,33 @@ dfs.rmr =
     fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop')
       hdfs.rmr(fname)
-    else unlink(fname, recursive = TRUE)}
+    else stopifnot(unlink(fname, recursive = TRUE) == 0)
+  NULL}
 
 dfs.is.dir = 
   function(fname) { 
     fname = to.dfs.path(fname)
     if (rmr.options('backend') == 'hadoop') 
-      hdfs.test(d = fname)
-    else file.info(fname)['isdir']}
+      hdfs.isdir(fname)
+    else file.info(fname)[["isdir"]]}
 
 dfs.empty = 
-  function(fname) 
-    dfs.size(fname) == 0
-
+  function(fname) {
+    if(dfs.size(fname) > 1000) #size heuristic
+      FALSE
+    else
+      length.keyval(from.dfs(fname)) == 0}
+    
+       
 dfs.size = 
   function(fname) {
     fname = to.dfs.path(fname)
     if(rmr.options('backend') == 'hadoop') {
-      du = hdfs.du(fname)
+      du = hdfs.ls(fname)
       if(is.null(du)) 0 
       else
-        sum(as.numeric(du[!is.hidden.file(du[,2]), 1]))}
-    else file.info(fname)[1, 'size'] }
+        sum(du[!is.hidden.file(du[["path"]]), "size"])}
+    else file.info(fname)[1, "size"] }
 
 dfs.mv = 
   function(from, to) { 
@@ -174,7 +175,8 @@ dfs.mv =
     if(rmr.options('backend') == 'hadoop') 
       hdfs.mv(fname, to)
     else 
-      file.rename(fname, to)}
+      stopifnot(file.rename(fname, to))
+  NULL}
 
 dfs.mkdir = 
   function(fname) { 
@@ -182,7 +184,9 @@ dfs.mkdir =
     if (rmr.options('backend') == 'hadoop') 
       hdfs.mkdir(fname)
     else
-      dir.create(fname)}
+      stopifnot(all(dir.create(fname)))
+    NULL}
+
 
 # dfs bridge
 
@@ -194,6 +198,11 @@ to.dfs.path =
       if(is.function(input)) {
         input()}}}
 
+loadtb = 
+  function(inf, outf)
+    system(paste(hadoop.streaming(),  "loadtb", outf, "<", inf))
+
+
 to.dfs = 
   function(
     kv, 
@@ -203,43 +212,41 @@ to.dfs =
       warning("Converting to.dfs argument to keyval with a NULL key")
     kv = as.keyval(kv)
     tmp = tempfile()
-    dfsOutput = to.dfs.path(output)
-    if(is.character(format)) format = make.output.format(format)
-    
-    write.file = 
-      function(kv, fname) {
-        con = file(fname, if(format$mode == "text") "w" else "wb")
-        keyval.writer = make.keyval.writer(format$mode, 
-                                           format$format, 
-                                           con)
-        keyval.writer(kv)
-        
-        close(con)}
-    
-    write.file(kv, tmp)      
+    dfs.output = to.dfs.path(output)
+    if(is.character(format)) 
+      format = make.output.format(format)
+    keyval.writer = make.keyval.writer(tmp, format)
+    keyval.writer(kv)
+    eval(
+      quote(
+        if(length(con) == 1)
+          close(con) 
+        else lapply(con, close)), 
+      envir=environment(keyval.writer))
     if(rmr.options('backend') == 'hadoop') {
-      if(format$mode == "binary")
-        system(paste(hadoop.streaming(),  "loadtb", dfsOutput, "<", tmp))
-      else  hdfs.put(tmp, dfsOutput)}
-    else {
-      if(file.exists(dfsOutput))
-        stop("Can't overwrite ", dfsOutput)
-      else
-        file.copy(tmp, dfsOutput, overwrite = FALSE)}
-    file.remove(tmp)
+      if(format$mode == "binary") 
+        loadtb(tmp, dfs.output)
+      else   #text
+        hdfs.put(tmp, dfs.output)}
+    else { #local
+      if(file.exists(dfs.output))
+        stop("Can't overwrite ", dfs.output)
+      file.copy(tmp, dfs.output)}
+    unlink(tmp, recursive=TRUE)
     output}
 
 from.dfs = function(input, format = "native") {
-  
   read.file = function(fname) {
-    con = file(fname, if(format$mode == "text") "r" else "rb")
-    keyval.reader = make.keyval.reader(format$mode, format$format, rmr.options('keyval.length'), con)
+    keyval.reader = 
+      make.keyval.reader(fname, format)
     retval = make.fast.list()
     kv = keyval.reader()
     while(!is.null(kv)) {
       retval(list(kv))
       kv = keyval.reader()}
-    close(con)
+    eval(
+      quote(close(con)), 
+      envir = environment(keyval.reader))
     c.keyval(retval())}
   
   dumptb = function(src, dest){
@@ -248,23 +255,24 @@ from.dfs = function(input, format = "native") {
   getmerge = function(src, dest) {
     on.exit(unlink(tmp))
     tmp = tempfile()
-    lapply(src, function(x) {
-      hdfs.get(as.character(x), tmp)
-      if(.Platform$OS.type == "windows") {
-        cmd = paste('type', tmp, '>>' , dest)
-        system(paste(Sys.getenv("COMSPEC"),"/c",cmd))
-      }
-      else {
-        system(paste('cat', tmp, '>>' , dest))
-      }
-      unlink(tmp)})
+    lapply(
+      src, 
+      function(x) {
+        hdfs.get(as.character(x), tmp)
+        if(.Platform$OS.type == "windows") {
+          cmd = paste('type', tmp, '>>' , dest)
+          system(paste(Sys.getenv("COMSPEC"),"/c",cmd))}
+        else {
+          system(paste('cat', tmp, '>>' , dest))}
+        unlink(tmp)})
     dest}
   
   fname = to.dfs.path(input)
   if(is.character(format)) format = make.input.format(format)
   if(rmr.options("backend") == "hadoop") {
     tmp = tempfile()
-    if(format$mode == "binary") dumptb(part.list(fname), tmp)
+    if(format$mode == "binary") 
+      dumptb(part.list(fname), tmp)
     else getmerge(part.list(fname), tmp)}
   else
     tmp = fname
@@ -274,25 +282,44 @@ from.dfs = function(input, format = "native") {
 
 # mapreduce
 
-in.a.task = 
-  function()
-    Sys.getenv("mapred_task_id") != ""
 
-dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
-  if(is.null(tmpdir)) { 
-    tmpdir = tempdir()
-    rmr.options(dfs.tempdir = tmpdir)}
-  fname  = tempfile(pattern, tmpdir)
-  subfname = strsplit(fname, ":")
-  if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
-  namefun = function() {fname}
-  reg.finalizer(environment(namefun), 
-                function(e) {
-                  fname = eval(expression(fname), envir = e)
-                  if(!in.a.task() && dfs.exists(fname)) dfs.rmr(fname)
-                },
-                onexit = TRUE)
-  namefun}
+rmr.normalize.path = 
+  function(url.or.path) {
+    if(.Platform$OS.type == "windows")
+      url.or.path = gsub("\\\\","/", url.or.path)
+    gsub(
+      "/$",
+      "",
+      gsub(
+        "/+", 
+        "/", 
+        paste(
+          "/", 
+          parse_url(url.or.path)$path, 
+          sep = "")))}
+
+current.input = 
+  function() {
+    fname = Sys.getenv("map_input_file")
+    if (fname == "") NULL 
+    else rmr.normalize.path(fname)}
+
+dfs.tempfile = 
+  function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
+    if(is.null(tmpdir)) { 
+      tmpdir = tempdir()
+      rmr.options(dfs.tempdir = tmpdir)}
+    fname  = tempfile(pattern, tmpdir)
+    subfname = strsplit(fname, ":")
+    if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
+    namefun = function() {fname}
+    reg.finalizer(environment(namefun), 
+                  function(e) {
+                    fname = eval(expression(fname), envir = e)
+                    if(!in.a.task() && dfs.exists(fname)) dfs.rmr(fname)
+                  },
+                  onexit = TRUE)
+    namefun}
 
 dfs.managed.file = function(call, managed.dir = rmr.options('managed.dir')) {
   file.path(managed.dir, digest(lapply(call, eval)))}
@@ -376,9 +403,10 @@ equijoin =
     map.left = to.map(identity), 
     map.right = to.map(identity), 
     reduce  = reduce.default) { 
-    
-    stopifnot(xor(!is.null(left.input), !is.null(input) &&
-                    (is.null(left.input) == is.null(right.input))))
+    stopifnot(
+      xor(
+        !is.null(left.input), !is.null(input) &&
+          (is.null(left.input) == is.null(right.input))))
     outer = match.arg(outer)
     left.outer = outer == "left"
     right.outer = outer == "right"
@@ -392,25 +420,17 @@ equijoin =
                lapply(values(kv),
                       function(v) {
                         list(val = v, is.left = is.left)}))}
-    rmr.normalize.path = 
-      function(url.or.path) {
-        if(.Platform$OS.type == "windows")
-          url.or.path = gsub("\\\\","/", url.or.path)
-        gsub(
-          "/+", 
-          "/", 
-          paste(
-            "/", 
-            gsub(
-              "part-[0-9]+$", 
-              "", 
-              parse_url(url.or.path)$path), 
-            "/", 
-            sep = ""))}
+    prefix.cmp = 
+      function(l,r)
+        suppressWarnings(
+          min(
+            which(!(strsplit(l,split="")[[1]] == strsplit(r, split = "")[[1]]))))
     is.left.side = 
-      function(left.input) {
-        rmr.normalize.path(to.dfs.path(left.input)) ==
-          rmr.normalize.path(Sys.getenv("map_input_file"))}
+      function(left.input, right.input) {
+        li = rmr.normalize.path(to.dfs.path(left.input))
+        ri = rmr.normalize.path(to.dfs.path(right.input))
+        ci = rmr.normalize.path(current.input())
+        prefix.cmp(ci, li) > prefix.cmp(ci, ri)}
     reduce.split =
       function(vv) {
         tapply(
@@ -424,7 +444,7 @@ equijoin =
     map = 
       if (is.null(input)) {
         function(k, v) {
-          ils = is.left.side(left.input)
+          ils = is.left.side(left.input, right.input)
           mark.side(if(ils) map.left(k, v) else map.right(k, v), ils)}}
     else {
       function(k, v) {

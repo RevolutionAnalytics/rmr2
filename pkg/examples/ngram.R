@@ -24,10 +24,10 @@ writeLines(
   apply(
     cbind(
       sample(sapply(1:20000, function(x) substr(digest(x),start=1,stop=3)), fake.size, replace = TRUE), 
-      sample(1800:1819, fake.size, replace = T),
-      sample (1:200, fake.size, replace=T), 
-      sample (1:200, fake.size, replace=T), 
-      sample (1:200, fake.size, replace=T)),
+      sample(1800:1819, fake.size, replace = TRUE),
+      sample (1:200, fake.size, replace = TRUE), 
+      sample (1:200, fake.size, replace = TRUE), 
+      sample (1:200, fake.size, replace = TRUE)),
     1, 
     function(x)paste(x, collapse = "\t")), 
   file("/tmp/fake-ngram-data", "w"))
@@ -69,7 +69,6 @@ filter.map = function(., lines) {
 ## @knitr filtered.data
 source = "/user/antonio/1gram/data"
 library(rmr2)
-rmr.options(keyval.length = 10^5)
 filtered.data = 
   mapreduce(input = source,
             map = filter.map)

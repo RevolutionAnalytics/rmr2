@@ -6,7 +6,6 @@
 rmr.options(
   backend = c("hadoop", "local"), 
   profile.nodes = c("off", "calls", "memory", "both"), 
-  keyval.length = 10^4, 
   dfs.tempdir = NULL,
   exclude.objects = NULL,                 
   backend.parameters = list())
@@ -15,7 +14,6 @@ rmr.options(
   \item{...}{Names of options to get values of, as length one character vectors}
   \item{backend}{One of "hadoop" or "local", the latter being implemented entirely in the current R interpreter, sequentially, for learning and debugging.}
   \item{profile.nodes}{Collect profiling and memory information when running additional R interpreters (besides the current one) on the cluster. No effect on the local backend, use Rprof instead. For backward compatibility, \code{"calls"} is equivalent to \code{TRUE} and \code{"off"} to \code{FALSE}}
-  \item{keyval.length}{Min number of records to read into a single, key-value pair or how many to write to when the key is \code{NULL}. Controls both \code{\link{from.dfs}} and \code{\link{to.dfs}} and \code{\link{mapreduce}} behavior. This setting will be ignored at the end of file or partitions, when not enough records are avilable}
   \item{dfs.tempdir}{The directory to use for temporary files, including \code{\link{mapreduce}} intermediate results files, on the distributed file system.}
   \item{exclude.objects}{Objects in the Global environment that are not needed by the map or reduce functions, as character vector}
   \item{backend.parameters}{Parameters to pass directly to the backend. See equally named argument for the function \code{\link{mapreduce}}. Use this setting for backend parameters that need to be different from default but can be the same from job to job}

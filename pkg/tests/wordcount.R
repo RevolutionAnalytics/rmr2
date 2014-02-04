@@ -44,7 +44,7 @@ wordcount =
       output = output,
       map = wc.map,
       reduce = wc.reduce,
-      combine = T)}
+      combine = TRUE)}
 ## @knitr end
 
 text = capture.output(license())

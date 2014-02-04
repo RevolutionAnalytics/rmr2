@@ -46,7 +46,7 @@ logistic.regression =
             input,
             map = lr.map,     
             reduce = lr.reduce,
-            combine = T)))
+            combine = TRUE)))
     plane = plane + alpha * gradient }
   plane }
 ## @knitr end

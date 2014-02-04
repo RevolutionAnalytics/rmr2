@@ -46,7 +46,7 @@ rmr.sample = function(input, output = NULL, method = c("any", "Bernoulli"), ...)
     mapreduce(input, 
               output,
               map = some,
-              combine = T,
+              combine = TRUE,
               reduce = some)}
   else
     if(method == "Bernoulli"){
@@ -68,7 +68,7 @@ partitioned.map =
         data.frame(
           sample(
             1:n, size=length(k), 
-            replace=T), k),
+            replace = TRUE), k),
         v)}
 
 partitioned.combine = 
@@ -86,33 +86,11 @@ vsum =
     else  
       stop(paste("can't vsum a ", class(x)))}
             
-##optimizer
-
-is.mapreduce = function(x) {
-  is.call(x) && x[[1]] == "mapreduce"}
-
-mapreduce.arg = function(x, arg) {
-  match.call(mapreduce, x) [[arg]]}
-
-optimize = function(mrex) {
-  mrin = mapreduce.arg(mrex, 'input')
-  if (is.mapreduce(mrex) && 
-    is.mapreduce(mrin) &&
-    is.null(mapreduce.arg(mrin, 'output')) &&
-    is.null(mapreduce.arg(mrin, 'reduce'))) {
-    bquote(
-      mapreduce(input =  .(mapreduce.arg(mrin, 'input')), 
-                output = .(mapreduce.arg(mrex, 'output')), 
-                map = .(compose.mapred)(.(mapreduce.arg(mrex, 'map')), 
-                                        .(mapreduce.arg(mrin, 'map'))), 
-                reduce = .(mapreduce.arg(mrex, 'reduce'))))}
-  else mrex }
-
 ## dev support
 
 reload = 
   function() {
-    detach("package:rmr2", unload=T)
+    detach("package:rmr2", unload = TRUE)
     library.dynam.unload("rmr2",system.file(package="rmr2"))
     library(rmr2)}
 
