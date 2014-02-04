@@ -16,7 +16,7 @@
 make.json.input.format =
   function(key.class = rmr2:::qw(list, vector, data.frame, matrix),
            value.class = rmr2:::qw(list, vector, data.frame, matrix),#leave the pkg qualifier in here
-           read.size = 1000) { 
+           nrows = 10^4) { 
     key.class = match.arg(key.class)
     value.class = match.arg(value.class)
     cast =
@@ -31,7 +31,7 @@ make.json.input.format =
       function(field, class)
         cast(class)(fromJSON(field, asText = TRUE))
     function(con) {
-      lines = readLines(con, read.size)
+      lines = readLines(con, nrows)
       if (length(lines) == 0) NULL
       else {
         splits =  strsplit(lines, "\t")
@@ -45,7 +45,7 @@ make.json.input.format =
 
 
 make.json.output.format = 
-  function(write.size = 1000)
+  function(write.size = 10^4)
     function(kv, con) {
       ser =
         function(k, v) 
@@ -60,9 +60,9 @@ make.json.output.format =
       writeLines(paste(out, collapse = "\n"), sep = "", con = con)}
 
 make.text.input.format = 
-  function(read.size = 1000)
+  function(nrows = 10^4)
     function(con) {
-      lines = readLines(con, read.size)
+      lines = readLines(con, nrows)
       if (length(lines) == 0) NULL
       else keyval(NULL, lines)}
 
@@ -73,17 +73,18 @@ text.output.format =
     writeLines(paste(out, "\n", collapse="", sep = ""), sep = "", con = con)}
 
 make.csv.input.format =
-  function(...) function(con) {
-    df = 
-      tryCatch(
-        read.table(file = con, header = FALSE, ...),
-        error = 
-          function(e) {
-            if(e$message != "no lines available in input")
-              stop(e$message)
-            NULL})  
-    if(is.null(df) || dim(df)[[1]] == 0) NULL
-    else keyval(NULL, df)}
+  function(..., nrows = 10^4) 
+    function(con) {
+      df = 
+        tryCatch(
+          read.table(file = con, header = FALSE, ...),
+          error = 
+            function(e) {
+              if(e$message != "no lines available in input")
+                stop(e$message)
+              NULL})  
+      if(is.null(df) || dim(df)[[1]] == 0) NULL
+      else keyval(NULL, df)}
 
 make.csv.output.format =
   function(...) function(kv, con) {
