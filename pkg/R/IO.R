@@ -143,7 +143,7 @@ make.typedbytes.input.format =
         if(is.null(template) && !is.null(parsed$template))
           template <<- parsed$template
         if(parsed$starting.template)
-          obj.buffer = obj.buffer[-length(obj.buffer)]
+          obj.buffer <<- obj.buffer[-length(obj.buffer)]
         obj.buffer <<- c(obj.buffer, parsed$objects)
         if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
       straddler = list()
