@@ -115,7 +115,7 @@ to.data.frame =
       lapply(
         seq_along(x), 
         function(i)
-          if(is.atomic(template[[i]])) unlist(x[[i]]) else x[[i]])
+          if(is.atomic(template[[i]])) unlist(x[[i]]) else I(x[[i]]))
     names(y) = names(template)
     data.frame(y)}
 
