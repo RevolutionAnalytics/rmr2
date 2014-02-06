@@ -226,7 +226,7 @@ RObject unserialize_native(const raw & data, unsigned int & start) {
   Function r_unserialize("unserialize");
   raw tmp(data.begin() + start, data.begin() + start + length);
   start = start + length;
-  return r_unserialize(tmp);}
+  return List(r_unserialize(tmp))[0];}
 
 RObject unserialize(const raw & data, unsigned int & start, int type_code){
   RObject new_object;
@@ -426,7 +426,9 @@ void serialize_list(List & data, raw & serialized, bool native){
 void serialize_native(const RObject & object, raw & serialized) {
   serialized.push_back(R_NATIVE);
   Function r_serialize("serialize");
-  RawVector tmp(r_serialize(object, R_NilValue));
+  List eval_protect(1);
+  eval_protect[0] = object; 
+  RawVector tmp(r_serialize(eval_protect, R_NilValue));
   length_header(tmp.size(), serialized);
   serialized.insert(serialized.end(), tmp.begin(), tmp.end());}
 
