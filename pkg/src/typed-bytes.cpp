@@ -223,7 +223,6 @@ List unserialize_map(const raw & data, unsigned int & start) {
 RObject unserialize_native(const raw & data, unsigned int & start) {
   int length = get_length(data, start);
   check_length<RObject>(data, start, length);
-  cerr << "Calling r_unserialize" << endl;
   Function r_unserialize("unserialize");
   raw tmp(data.begin() + start, data.begin() + start + length);
   start = start + length;
@@ -426,7 +425,6 @@ void serialize_list(List & data, raw & serialized, bool native){
 
 void serialize_native(const RObject & object, raw & serialized) {
   serialized.push_back(R_NATIVE);
-  cerr << "Calling r_serialize" << endl; 
   Function r_serialize("serialize");
   RawVector tmp(r_serialize(object, R_NilValue));
   length_header(tmp.size(), serialized);
