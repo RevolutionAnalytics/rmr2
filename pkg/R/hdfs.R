@@ -8,9 +8,19 @@ hdfs.ls =
 hdfs.exists = 
   function(fname)
     hdfs("test -e", fname, test = TRUE)
+test.rmr =
+  function()
+    length(rmr2:::hdfs("- 2>&1 | grep rmr", intern=T)) > 0
 hdfs.rmr = 
-  function(fname)
-    hdfs("rm -r", fname)
+  (function() {
+    rmr = NULL
+    function(fname) {
+      if(is.null(rmr))
+        rmr <<- test.rmr()
+      if(rmr)
+        hdfs("rmr", fname)
+      else 
+        hdfs("rm -r", fname)}})()
 hdfs.isdir = 
   function(fname)
     hdfs("test -d", fname, test = TRUE)
