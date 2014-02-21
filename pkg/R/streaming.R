@@ -341,10 +341,11 @@ rmr.stream =
                              stream.map.output,
                              stream.reduce.input,
                              stream.reduce.output)
+    rscript = 'Rscript --vanilla'
     mapper = paste.options(
       mapper = 
         paste(
-          'Rscript', 
+          rscript, 
           file.path(work.dir, basename(map.file))))
     m.fl = paste.options(file = map.file)
     if(!is.null(reduce) ) {
@@ -352,7 +353,7 @@ rmr.stream =
         paste.options(
           reducer = 
             paste(
-              'Rscript', 
+              rscript, 
               file.path(work.dir, basename(reduce.file))))
       r.fl = paste.options(file = reduce.file)}
     else {
@@ -363,7 +364,7 @@ rmr.stream =
         paste.options(
           combiner = 
             paste(
-              'Rscript', 
+              rscript, 
               file.path(work.dir, basename(combine.file))))  
       c.fl = paste.options(file = combine.file)}
     else {
