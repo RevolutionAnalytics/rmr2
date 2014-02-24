@@ -131,7 +131,7 @@ double unserialize_numeric<double>(const raw & data, unsigned int & start) {
     uint64_t u;} ud;
   check_length<double>(data, start);
   uint64_t retval = 0;
-  for(int i = 0; i < nbytes<double>(); i++) {
+  for(unsigned int i = 0; i < nbytes<double>(); i++) {
     retval = retval + (((uint64_t) data[start + i] & 255) << (8*(7 - i)));}
   start = start + nbytes<double>(); 
   ud.u = retval;
@@ -175,7 +175,7 @@ template <typename T>
 vector<T> unserialize_vector(const raw & data, unsigned int & start, int raw_length) {
   int length = raw_length/nbytes<T>();
   vector<T> vec(length);
-  for(int i = 0; i < length; i++) {
+  for(unsigned int i = 0; i < length; i++) {
     vec[i] = unserialize_scalar<T>(data, start);}
   return vec;}
   
@@ -183,7 +183,7 @@ template <>
 vector<string> unserialize_vector<string>(const raw & data, unsigned int & start, int raw_length) {
   int v_length = get_length(data, start);
   vector<string> retval(v_length);
-  for(int i = 0; i < v_length; i++) {
+  for(unsigned int i = 0; i < v_length; i++) {
     get_type(data, start); //we know it's 07 already
     int str_length = get_length(data, start);
     vector<char> tmp_vec_char = unserialize_vector<char>(data, start, str_length);
@@ -196,7 +196,7 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code = 255)
 List unserialize_list(const raw & data, unsigned int & start) {
   int length = get_length(data, start);
   List list(length);
-  for(int i = 0; i < length; i++) {
+  for(unsigned int i = 0; i < length; i++) {
     list[i] = unserialize(data, start);}
   return list;}
   
@@ -212,7 +212,7 @@ List unserialize_map(const raw & data, unsigned int & start) {
   int length = get_length(data, start);
     List keys(length);
     List values(length);
-    for(int i = 0; i < length; i++) {
+    for(unsigned int i = 0; i < length; i++) {
       keys[i] = unserialize(data, start);
       values[i] = unserialize(data, start);}
     return  
@@ -281,7 +281,7 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       new_object = unserialize(data, start, 255);
       CharacterVector names(unserialize(data, start, 255));
       List attributes(unserialize(data, start, 255));
-      for(int i = 0; i < names.size(); i++) {
+      for(unsigned int i = 0; i < names.size(); i++) {
         char * c = names[i]; //workaround Rcpp bug now fixed, remove if assuming 0.10.2 and higher
         string s(c); 
         new_object.attr(s) = attributes[i];}}
@@ -368,11 +368,11 @@ void T2raw(unsigned char data, raw & serialized) {
   serialized.push_back(data);}
 
 void T2raw(int data, raw & serialized) {
-  for(int i = 0; i < 4; i++) {
+  for(unsigned int i = 0; i < 4; i++) {
     serialized.push_back((data >> (8*(3 - i))) & 255);}}
 
 void T2raw(uint64_t data, raw & serialized) {
-  for(int i = 0; i < 8; i++) {  
+  for(unsigned int i = 0; i < 8; i++) {  
     serialized.push_back((data >> (8*(7 - i))) & 255);}}
 
 void T2raw(double data, raw & serialized) {
@@ -449,7 +449,7 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
       case LGLSXP: {
         LogicalVector data(object);  
         vector<unsigned char> bool_data(data.size());
-        for(int i = 0; i < data.size(); i++) {
+        for(unsigned int i = 0; i < data.size(); i++) {
           bool_data[i] = (unsigned char) data[i];} 
         serialize_vector(bool_data, 2, serialized, TRUE);}
       break;
@@ -461,11 +461,11 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
         CharacterVector data(object);
         serialized.push_back(R_CHAR_VECTOR);
         int raw_size = data.size() * 5 + 4;
-        for(int i = 0; i < data.size(); i++) {
+        for(unsigned int i = 0; i < data.size(); i++) {
           raw_size += data[i].size();}
         length_header(raw_size, serialized);
         length_header(data.size(), serialized);
-        for(int i = 0; i < data.size(); i++) {
+        for(unsigned int i = 0; i < data.size(); i++) {
           serialize_many(data[i], 7, serialized);}}
       break; 
       case INTSXP: {
@@ -492,13 +492,13 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
           if(data.size() > 1) {
             serialized.push_back(TB_VECTOR);
             length_header(data.size(), serialized);}
-          for(int i = 0; i < data.size(); i++) {
+          for(unsigned int i = 0; i < data.size(); i++) {
             serialize_many(data[i], TB_STRING, serialized);}}
           break; 
         case LGLSXP: { //logical
           LogicalVector data(object);
           vector<unsigned char> bool_data(data.size());
-          for(int i = 0; i < data.size(); i++) {
+          for(unsigned int i = 0; i < data.size(); i++) {
             bool_data[i] = (unsigned char) data[i];}
           serialize_vector(bool_data, TB_BOOLEAN, serialized, FALSE);}
           break;

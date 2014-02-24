@@ -24,10 +24,10 @@ SEXP t_list(SEXP _ll) {
   List ll(_ll);
   List l_0(as<List>(ll[0]));
   List  tll(l_0.size());
-  for(int j = 0; j < tll.size(); j++) 
+  for(unsigned int j = 0; j < tll.size(); j++) 
       tll[j] = List(ll.size());
-  for(int i = 0; i < ll.size(); i++) {
+  for(unsigned int i = 0; i < ll.size(); i++) {
     List l_i(as<List>(ll[i]));
-    for(int j = 0; j < tll.size(); j++) {
+    for(unsigned int j = 0; j < tll.size(); j++) {
       as<List>(tll[j])[i] = l_i[j];};}
   return wrap(tll);}
