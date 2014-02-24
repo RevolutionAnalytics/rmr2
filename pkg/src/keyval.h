@@ -23,6 +23,7 @@ RcppExport SEXP sapply_rmr_length(SEXP xx);
 RcppExport SEXP sapply_rmr_length_lossy_data_frame(SEXP xx);
 RcppExport SEXP sapply_length_keyval(SEXP kvs);
 RcppExport SEXP sapply_null_keys(SEXP kvs);
+RcppExport SEXP sapply_is_list(SEXP l);
 RcppExport SEXP lapply_keys(SEXP kvs);
 RcppExport SEXP lapply_values(SEXP kvs);
 RcppExport SEXP are_factor(SEXP xx);

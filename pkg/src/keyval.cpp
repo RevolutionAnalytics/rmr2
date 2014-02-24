@@ -88,6 +88,13 @@ SEXP sapply_null_keys(SEXP kvs) {
     results[i] = Rf_isNull(kv["key"]);}
   return(wrap(results));}
 
+SEXP sapply_is_list(SEXP l) {
+  List _l(l);
+  std::vector<bool> results(_l.size());
+  for(unsigned int i = 0; i < _l.size(); i++) {
+    results[i] = (as<RObject>(_l[i]).sexp_type() == VECSXP);}
+  return wrap(results);}
+
 SEXP lapply_key_val(SEXP kvs, std::string slot) {
   List _kvs(kvs);
   List results(_kvs.size());

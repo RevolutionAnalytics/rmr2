@@ -169,6 +169,10 @@ sapply.null.keys =
   function(kvs)
     .Call("sapply_null_keys", kvs, PACKAGE = "rmr2")
 
+sapply.is.list =
+  function(l)
+    .Call("sapply_is_list", l, PACKAGE = "rmr2")
+
 lapply.values = 
   function(kvs)
     .Call("lapply_values", kvs, PACKAGE = "rmr2")
