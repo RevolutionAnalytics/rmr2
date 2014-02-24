@@ -54,14 +54,14 @@ int rmr_length(SEXP x) {
 SEXP sapply_rmr_length(SEXP xx) {
   List _xx(xx);
   std::vector<int> results(_xx.size());
-  for(int i = 0; i < _xx.size(); i++) {
+  for(unsigned int i = 0; i < _xx.size(); i++) {
     results[i] = rmr_length(_xx[i]);}
   return(wrap(results));}
   
 SEXP sapply_rmr_length_lossy_data_frame(SEXP xx){
   List _xx(xx);
   std::vector<int> results(_xx.size());
-  for(int i = 0; i < _xx.size(); i++) {
+  for(unsigned int i = 0; i < _xx.size(); i++) {
     List cols(as<List>(_xx[i]));
     results[i] = rmr_length(cols[0]);}
   return wrap(results);}
@@ -76,14 +76,14 @@ int length_keyval(SEXP kv) {
 SEXP sapply_length_keyval(SEXP kvs) {
   List _kvs(kvs);
   std::vector<int> results(_kvs.size());
-  for(int i = 0; i < _kvs.size(); i++) {
+  for(unsigned int i = 0; i < _kvs.size(); i++) {
     results[i] = length_keyval(_kvs[i]);}
   return(wrap(results));}
 
 SEXP sapply_null_keys(SEXP kvs) {
   List _kvs(kvs);
   std::vector<bool> results(_kvs.size());
-  for(int i = 0; i < _kvs.size(); i++) {
+  for(unsigned int i = 0; i < _kvs.size(); i++) {
     List kv(wrap(_kvs[i]));
     results[i] = Rf_isNull(kv["key"]);}
   return(wrap(results));}
@@ -98,7 +98,7 @@ SEXP sapply_is_list(SEXP l) {
 SEXP lapply_key_val(SEXP kvs, std::string slot) {
   List _kvs(kvs);
   List results(_kvs.size());
-  for(int i = 0; i < _kvs.size(); i++) {
+  for(unsigned int i = 0; i < _kvs.size(); i++) {
     List kv(wrap(_kvs[i]));
     results[i] = kv[slot];}
   return wrap(results);}
@@ -112,7 +112,7 @@ SEXP lapply_values(SEXP kvs) {
 SEXP are_factor(SEXP xx) {
   List _xx(xx);
   std::vector<bool> results(_xx.size());
-  for(int i = 0; i < _xx.size(); i++) {
+  for(unsigned int i = 0; i < _xx.size(); i++) {
     results[i] = Rf_isFactor(_xx[i]);}
   return wrap(results);}
 
@@ -126,13 +126,13 @@ bool is_data_frame(SEXP x) {
 SEXP are_data_frame(SEXP xx) {
   List _xx(xx);
     std::vector<bool> results(_xx.size());
-  for(int i = 0; i < _xx.size(); i++) {
+  for(unsigned int i = 0; i < _xx.size(); i++) {
     results[i] = is_data_frame(_xx[i]);}
   return wrap(results);}
   
 SEXP are_matrix(SEXP xx) {
   List _xx(xx);
     std::vector<bool> results(_xx.size());
-  for(int i = 0; i < _xx.size(); i++) {
+  for(unsigned int i = 0; i < _xx.size(); i++) {
     results[i] = Rf_isMatrix(_xx[i]);}
   return wrap(results);}

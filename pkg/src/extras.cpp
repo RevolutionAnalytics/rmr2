@@ -19,7 +19,7 @@
 SEXP vsum(SEXP xx) {
   Rcpp::List _xx (xx);
   std::vector<double> results(_xx.size());
-  for(int i = 0; i < _xx.size(); i ++) {
+  for(unsigned int i = 0; i < _xx.size(); i ++) {
     std::vector<double> x = Rcpp::as<std::vector<double> >(_xx[i]);
     for(unsigned int j = 0; j < x.size(); j++) {
       results[i] += x[j];}}
