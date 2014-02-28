@@ -27,7 +27,7 @@ default =
 
 Make.single.arg = 
   function(f)
-    function(x) do.call(f,x)
+    function(x) do.call(f, x)
 
 Make.multi.arg = 
   function(f)
@@ -49,7 +49,7 @@ Make.single.or.multi.arg = function(f, from = c("single", "multi")) {
       f.multi(...)}}
   
 
-`%:%` = function(f,g) function(...) do.call(f, g(...))
+`%:%` = function(f, g) function(...) do.call(f, g(...))
 
 all.predicate = function(x, P) all(sapply(x, P))
 
@@ -91,7 +91,7 @@ rbind.fill.fast =
         cols, 
         function(n) 
           do.call(
-            sane.c,
+            sane.c, 
             lapply(
               xx, 
               function(x){
@@ -121,8 +121,8 @@ every.second =
       options(warn = opt)
       y}
 
-odd = every.second(c(T,F))
-even = every.second(c(F,T))
+odd = every.second(c(T, F))
+even = every.second(c(F, T))
 
 interleave = 
   function(l1, l2) {
