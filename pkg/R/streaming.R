@@ -51,16 +51,45 @@ make.input.files = function(infiles) {
         collapse=" ")}
 
 ## loops section, or what runs on the nodes
+job.id = 
+  function()
+    default(
+      Sys.getenv('mapreduce_job_id'), 
+      Sys.getenv('mapred_job_id'), 
+      "")
+
+task.id =
+  function()
+    default(
+      Sys.getenv("mapreduce_task_id"),
+      Sys.getenv('mapred_task_id'),
+      "")
+
+in.a.task =
+  function()
+    task.id() != ""
+
+attempt.id = 
+  function()
+    default(
+      basename(parse_url(Sys.getenv('mapreduce_task_output_dir'))$path),
+      Sys.getenv('mapred_tip_id'), 
+      "")
 
 activate.profiling = function(profile) {
-  dir = file.path("/tmp/Rprof", Sys.getenv('mapred_job_id'), Sys.getenv('mapred_tip_id'))
+  dir = 
+    file.path(
+      rmr.options("dfs.tempdir"),
+      "Rprof", 
+      job.id(), 
+      attempt.id())
   dir.create(dir, recursive = T)
   if(is.element(profile, c("calls", "both"))) {
-    prof.file = file.path(dir, paste(Sys.getenv('mapred_task_id'), Sys.time(), sep = "-")) 
+    prof.file = file.path(dir, paste(task.id(), Sys.time(), sep = "-")) 
     warning("Profiling data in ", prof.file)
     Rprof(prof.file)}
   if(is.element(profile, c("memory", "both"))) {
-    mem.prof.file = file.path(dir, paste(Sys.getenv('mapred_task_id'), Sys.time(), "mem", sep = "-")) 
+    mem.prof.file = file.path(dir, paste(task.id(), Sys.time(), "mem", sep = "-")) 
     warning("Memory profiling data in ", mem.prof.file)
     Rprofmem(mem.prof.file)}}
 

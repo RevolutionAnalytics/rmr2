@@ -274,10 +274,6 @@ from.dfs = function(input, format = "native") {
 
 # mapreduce
 
-in.a.task = 
-  function()
-    Sys.getenv("mapred_task_id") != ""
-
 dfs.tempfile = function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
   if(is.null(tmpdir)) { 
     tmpdir = tempdir()
