@@ -16,3 +16,33 @@
 if(require(quickcheck)) {
   tdgg.keyval = function(keytdg = tdgg.double(), valtdg = tdgg.any()) function() keyval(keytdg(), valtdg())
   tdgg.keyvalsimple = function() function() keyval(runif(1), runif(1))} #we can do better than this
+
+## generic sorting for normalized comparisons
+gorder = function(...) UseMethod("gorder")
+gorder.default = order
+gorder.factor = function(x) order(as.character(x))
+gorder.data.frame = 
+  function(x) splat(gorder)(lapply(x, function(x) if(is.factor(x)) as.character(x) else if(is.list(x) || is.raw(x)) cksum(x) else x))
+gorder.matrix = function(x) gorder(as.data.frame(x))
+gorder.raw = gorder.list = function(x) gorder(cksum(x))
+
+reorder = function(x, o) if(rmr2:::has.rows(x)) x[o, , drop = FALSE] else x[o]
+
+gsort = function(x) reorder(x, gorder(x))
+
+gsort.keyval = 
+  function(kv) {
+    k = keys(kv)
+    v = values(kv)
+    o = {
+      if(is.null(k)) gorder(v)
+      else 
+        gorder(
+          data.frame(
+            if(is.list(k) && !is.data.frame(k)) cksum(k) else k,
+            if(is.list(v) && !is.data.frame(v)) cksum(v) else v))}
+    keyval(reorder(k, o), reorder(v, o))}
+
+## keyval compare
+kv.cmp = function(kv1, kv2) 
+  isTRUE(all.equal(gsort.keyval(kv1), gsort.keyval(kv2), tolerance=1e-4, check.attributes=FALSE))

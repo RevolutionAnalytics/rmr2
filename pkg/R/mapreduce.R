@@ -101,18 +101,6 @@ union.mapred =
   function(mr1, mr2) function(k, v) {
     c.keyval(mr1(k, v), mr2(k, v))}
 
-#output cmp
-cmp = 
-  function(x, y) {
-    kx  = keys(x)
-    ky = keys(y)
-    vx = values(x)
-    vy = values(y)
-    ox = order(sapply(kx, digest), sapply(vx, digest))
-    oy = order(sapply(ky, digest), sapply(vy, digest))
-    isTRUE(all.equal(kx[ox], ky[oy], check.attributes = FALSE)) &&
-      isTRUE(all.equal(vx[ox], vy[oy], check.attributes = FALSE))}
-
 # backend independent dfs section
 
 is.hidden.file = 

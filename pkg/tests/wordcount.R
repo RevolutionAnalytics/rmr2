@@ -52,4 +52,4 @@ out = list()
 for(be in c("local", "hadoop")) {
   rmr.options(backend = be)
   out[[be]] = from.dfs(wordcount(to.dfs(keyval(NULL, text)), pattern = " +"))}
-stopifnot(rmr2:::cmp(out$hadoop, out$local))
+stopifnot(rmr2:::kv.cmp(out$hadoop, out$local))
