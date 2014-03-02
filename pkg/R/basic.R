@@ -18,7 +18,10 @@ qw = function(...) as.character(match.call())[-1]
 
 #assignment
 
-default = function(x, value) if(!is.null(x)) x else value
+default = 
+  function(x, value, bad.value = is.null) {
+    test = if(is.function(bad.value)) bad.value(x) else identical(bad.value, x)
+    if(test) value else x}
 
 #functional
 

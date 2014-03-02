@@ -300,7 +300,11 @@ rmr.normalize.path =
 
 current.input = 
   function() {
-    fname = Sys.getenv("map_input_file")
+    fname = 
+      default(
+        Sys.getenv("mapreduce_map_input_file"),
+        Sys.getenv("map_input_file"),
+        "")
     if (fname == "") NULL 
     else rmr.normalize.path(fname)}
 
