@@ -434,6 +434,7 @@ make.input.format =
           family.columns = args$family.columns
           start.row = args$start.row
           stop.row = args$stop.row
+          regex.row.filter=args$regex.row.filter
           backend.parameters = 
             list(
               hadoop = 
@@ -474,6 +475,13 @@ make.input.format =
                         paste(
                           "hbase.mapred.stoprowb64=",
                           base64encode(stop.row),
+                          sep = "")),
+                  if(!is.null(regex.row.filter))
+                    list(
+                      D = 
+                        paste(
+                          "hbase.mapred.rowfilter=",
+                          regex.row.filter,
                           sep = "")),
                   list(
                     libjars = system.file(package = "rmr2", "hadoopy_hbase.jar"))))})}
