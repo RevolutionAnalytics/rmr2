@@ -27,7 +27,7 @@ default =
 
 Make.single.arg = 
   function(f)
-    function(x) do.call(f,x)
+    function(x) do.call(f, x)
 
 Make.multi.arg = 
   function(f)
@@ -102,7 +102,7 @@ rbind.fill.fast =
         cols, 
         function(n) 
           do.call(
-            sane.c,
+            sane.c, 
             lapply(
               xx, 
               function(x){
