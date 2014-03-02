@@ -10,7 +10,7 @@ hdfs.exists =
     hdfs("test -e", fname, test = TRUE)
 test.rmr =
   function()
-    length(rmr2:::hdfs("- 2>&1 | grep rmr", intern=T)) > 0
+    suppressWarnings(length(rmr2:::hdfs("- 2>&1 | grep rmr", intern=T))) > 0
 hdfs.rmr = 
   (function() {
     rmr = NULL
