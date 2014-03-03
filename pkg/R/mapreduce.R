@@ -130,7 +130,7 @@ dfs.rmr =
     if(rmr.options('backend') == 'hadoop')
       hdfs.rmr(fname)
     else stopifnot(unlink(fname, recursive = TRUE) == 0)
-  NULL}
+    NULL}
 
 dfs.is.dir = 
   function(fname) { 
@@ -145,8 +145,8 @@ dfs.empty =
       FALSE
     else
       length.keyval(from.dfs(fname)) == 0}
-    
-       
+
+
 dfs.size = 
   function(fname) {
     fname = to.dfs.path(fname)
@@ -164,7 +164,7 @@ dfs.mv =
       hdfs.mv(fname, to)
     else 
       stopifnot(file.rename(fname, to))
-  NULL}
+    NULL}
 
 dfs.mkdir = 
   function(fname) { 
@@ -189,7 +189,6 @@ to.dfs.path =
 loadtb = 
   function(inf, outf)
     system(paste(hadoop.streaming(),  "loadtb", outf, "<", inf))
-
 
 to.dfs = 
   function(
@@ -301,12 +300,13 @@ dfs.tempfile =
     subfname = strsplit(fname, ":")
     if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
     namefun = function() {fname}
-    reg.finalizer(environment(namefun), 
-                  function(e) {
-                    fname = eval(expression(fname), envir = e)
-                    if(!in.a.task() && dfs.exists(fname)) dfs.rmr(fname)
-                  },
-                  onexit = TRUE)
+    reg.finalizer(
+      environment(namefun), 
+      function(e) {
+        fname = eval(expression(fname), envir = e)
+        if(!in.a.task() && dfs.exists(fname)) dfs.rmr(fname)
+      },
+      onexit = TRUE)
     namefun}
 
 dfs.managed.file = function(call, managed.dir = rmr.options('managed.dir')) {
