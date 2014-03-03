@@ -38,7 +38,7 @@ mr.local = function(
           in.folder, 
           function(fname) {
             kv = get.data(fname)
-            Sys.setenv(map_input_file = fname)
+            Sys.setenv(mapreduce_map_input_file = fname)
             lkv = length.keyval(kv)
             unname(
               tapply(

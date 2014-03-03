@@ -18,13 +18,16 @@ qw = function(...) as.character(match.call())[-1]
 
 #assignment
 
-default = function(x, value) if(!is.null(x)) x else value
+default = 
+  function(x, value, bad.value = is.null) {
+    test = if(is.function(bad.value)) bad.value(x) else identical(bad.value, x)
+    if(test) value else x}
 
 #functional
 
 Make.single.arg = 
   function(f)
-    function(x) do.call(f,x)
+    function(x) do.call(f, x)
 
 Make.multi.arg = 
   function(f)
@@ -46,7 +49,6 @@ Make.single.or.multi.arg = function(f, from = c("single", "multi")) {
       f.multi(...)}}
   
 
-`%|%` = function(f,g) function(...) do.call(g, f(...))
 
 all.predicate = function(x, P) all(sapply(x, P))
 
@@ -100,7 +102,7 @@ rbind.fill.fast =
         cols, 
         function(n) 
           do.call(
-            sane.c,
+            sane.c, 
             lapply(
               xx, 
               function(x){
