@@ -26,7 +26,8 @@ rmr.options(
 \examples{
 old.backend = rmr.options("backend")
 rmr.options(backend = "hadoop")
-rmr.options(backend = old.backend)
+rmr.options(backend = old.backend)}
+\dontrun{
 rmr.options(
   dfs.tempdir = 
     file.path(
