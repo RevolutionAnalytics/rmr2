@@ -6,7 +6,7 @@
 rmr.options(
   backend = c("hadoop", "local"), 
   profile.nodes = c("off", "calls", "memory", "both"), 
-  dfs.tempdir = NULL,
+  hdfs.tempdir = NULL,
   exclude.objects = NULL,                 
   backend.parameters = list())
 }
@@ -14,7 +14,7 @@ rmr.options(
   \item{...}{Names of options to get values of, as length one character vectors}
   \item{backend}{One of "hadoop" or "local", the latter being implemented entirely in the current R interpreter, sequentially, for learning and debugging.}
   \item{profile.nodes}{Collect profiling and memory information when running additional R interpreters (besides the current one) on the cluster. No effect on the local backend, use Rprof instead. For backward compatibility, \code{"calls"} is equivalent to \code{TRUE} and \code{"off"} to \code{FALSE}}
-  \item{dfs.tempdir}{The directory to use for temporary files, including \code{\link{mapreduce}} intermediate results files, on the distributed file system.}
+  \item{hdfs.tempdir}{The directory to use for temporary files, including \code{\link{mapreduce}} intermediate results files, on the distributed file system (not used when running on the local backend).}
   \item{exclude.objects}{Objects in the Global environment that are not needed by the map or reduce functions, as character vector}
   \item{backend.parameters}{Parameters to pass directly to the backend. See equally named argument for the function \code{\link{mapreduce}}. Use this setting for backend parameters that need to be different from default but can be the same from job to job}
 }
@@ -26,9 +26,10 @@ rmr.options(
 \examples{
 old.backend = rmr.options("backend")
 rmr.options(backend = "hadoop")
-rmr.options(backend = old.backend)
+rmr.options(backend = old.backend)}
+\donotrun{
 rmr.options(
-  dfs.tempdir = 
+  hdfs.tempdir = 
     file.path(
       "/user", 
       system("whoami", TRUE),

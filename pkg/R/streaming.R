@@ -174,7 +174,6 @@ rmr.stream =
     backend.parameters, 
     verbose, 
     debug) {
-    dfs.tempfile() #initialize dfs.tempdir if empty
     pkg.opts = as.list(rmr.options.env)
     profile.nodes = pkg.opts$profile.nodes
     

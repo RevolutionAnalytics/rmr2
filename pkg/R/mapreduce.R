@@ -18,7 +18,7 @@ rmr.options.env = new.env(parent=emptyenv())
 
 rmr.options.env$backend = "hadoop"
 rmr.options.env$profile.nodes = "off"
-rmr.options.env$dfs.tempdir = NULL # tempdir() here doesn't work!
+rmr.options.env$hdfs.tempdir = "/tmp" #can't check it exists here
 rmr.options.env$exclude.objects = NULL
 rmr.options.env$backend.parameters = list()
 
@@ -39,7 +39,7 @@ rmr.options =
   function(
     backend = c("hadoop", "local"), 
     profile.nodes = c("off", "calls", "memory", "both"),
-    dfs.tempdir = NULL,
+    hdfs.tempdir = "/tmp",
     exclude.objects = NULL,
     backend.parameters = list()) {
     opt.assign = Curry(assign, envir = rmr.options.env)
@@ -56,16 +56,17 @@ rmr.options =
             "off"}}
       else
         opt.assign("profile.nodes", match.arg(profile.nodes))}
-    if(is.named.arg("dfs.tempdir")) {
-      if(!is.null(dfs.tempdir)) {
-        if(!dfs.exists(dfs.tempdir)) {
-          dfs.mkdir(dfs.tempdir)
-          add.last(function() if(!in.a.task()) dfs.rmr(dfs.tempdir))}
-        opt.assign("dfs.tempdir", dfs.tempdir)}}
+    if(is.named.arg("hdfs.tempdir")) {
+      if(!dfs.exists(hdfs.tempdir)) {
+        hdfs.mkdir(hdfs.tempdir)
+        add.last(function() if(!in.a.task()) hdfs.rmr(hdfs.tempdir))}
+      opt.assign("hdfs.tempdir", hdfs.tempdir)}
     if(is.named.arg("backend.parameters"))
       opt.assign("backend.parameters", backend.parameters)
     if(is.named.arg("exclude.objects"))
       opt.assign("exclude.objects", exclude.objects)
+    if(!hdfs.exists(hdfs.tempdir)) #can't do this at package load time
+      warning("Please set an HDFS temp directory with rmr.options(hdfs.tempdir = ...)")
     read.args = {
       if(is.null(names(args)))
         args
@@ -292,10 +293,13 @@ current.input =
     else rmr.normalize.path(fname)}
 
 dfs.tempfile = 
-  function(pattern = "file", tmpdir = rmr.options("dfs.tempdir")) {
-    if(is.null(tmpdir)) { 
-      tmpdir = tempdir()
-      rmr.options(dfs.tempdir = tmpdir)}
+  function(
+    pattern = "file", 
+    tmpdir = {
+      if(rmr.options("backend") == "hadoop")
+        rmr.options("hdfs.tempdir")
+      else
+        tempdir()}) {
     fname  = tempfile(pattern, tmpdir)
     subfname = strsplit(fname, ":")
     if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
