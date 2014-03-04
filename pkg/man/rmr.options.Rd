@@ -29,6 +29,7 @@ rmr.options(
 old.backend = rmr.options("backend")
 rmr.options(backend = "hadoop")
 rmr.options(backend = old.backend)
+\dontrun{
 rmr.options(
   dfs.tempdir = 
     file.path(
@@ -36,5 +37,5 @@ rmr.options(
       system("whoami", TRUE),
       "tmp-rmr2", 
       basename(tempdir())))
-}
+}}
  
