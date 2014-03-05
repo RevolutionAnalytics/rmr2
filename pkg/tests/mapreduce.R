@@ -197,8 +197,8 @@ for (be in c("local", "hadoop")) {
 			else {
 				tf1 = tempfile()
 				write.avro(df, tf1)
-				tf2 = tempfile()
-				hdfs.put(tf1, tf2)
+				tf2 = rmr2:::dfs.tempfile()
+				rmr2:::hdfs.put(tf1, tf2())
 				isTRUE(
 					all.equal(
 						df, 
@@ -206,7 +206,7 @@ for (be in c("local", "hadoop")) {
 							from.dfs(
 								mapreduce(
 									tf2, 
-									format = 
+									input.format = 
 										make.input.format(
 											format = "avro",
 											schema.file = paste("file", tf1, sep = ":"))))), 
