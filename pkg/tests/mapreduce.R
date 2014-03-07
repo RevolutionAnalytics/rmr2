@@ -196,16 +196,18 @@ for (be in c("local", "hadoop")) {
 			if(rmr.options("backend") == "local") TRUE 
 			else {
 				tf1 = tempfile()
-				write.avro(df, tf1)
+				ravro:::write.avro(df, tf1)
 				tf2 = rmr2:::dfs.tempfile()
-				rmr2:::hdfs.put(tf1, tf2())
+				tf3 = paste(tf2(), "avro", sep = ".") 
+				rmr2:::hdfs.put(tf1, tf3)
 				isTRUE(
 					all.equal(
 						df, 
 						values(
 							from.dfs(
 								mapreduce(
-									tf2, 
+									tf3, 
+									map = function(k,v) rmr.str(v),
 									input.format = 
 										make.input.format(
 											format = "avro",
