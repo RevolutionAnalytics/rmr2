@@ -227,8 +227,8 @@ rmr.split =
     y = spl(x,ind, drop = TRUE)
     if (is.matrix(ind))
       ind = as.data.frame(ind)
-    perm = c()
-    perm[unlist(split(1:rmr.length(y), unique(ind)))] = 1:rmr.length(y)
+    perm = NULL
+    perm[unlist(split(1:rmr.length(y), unique(ind), drop = TRUE))] = 1:rmr.length(y)
     rmr.slice(y, perm)}
 
 key.normalize= function(k) {
