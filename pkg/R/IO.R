@@ -361,7 +361,8 @@ make.input.format =
 										paste(
 											ravro:::AVRO_TOOLS,
 											file.path(dirname(ravro:::AVRO_TOOLS), "avro-1.7.5.jar"),
-											sep= ",")))})}
+											sep= ","),
+									D = "mapreduce.task.classpath.user.precedence=true"))})}
 		if(is.null(streaming.format) && mode == "binary") 
 			streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
 		list(
