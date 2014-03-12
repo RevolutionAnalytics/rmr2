@@ -360,7 +360,7 @@ make.input.format =
 									libjars = 
 										paste(
 											ravro:::AVRO_TOOLS,
-											file.path(dirname(ravro:::AVRO_TOOLS), "avro-1.7.5.jar"),
+											file.path(dirname(ravro:::AVRO_TOOLS), "avro-1.7.4.jar"),
 											sep= ","),
 									D = "mapreduce.task.classpath.user.precedence=true"))})}
 		if(is.null(streaming.format) && mode == "binary") 
