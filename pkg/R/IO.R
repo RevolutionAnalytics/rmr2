@@ -427,7 +427,8 @@ make.input.format =
               default(args$dense, FALSE),
               default(args$atomic, FALSE),
               default(args$key.deserialize, "raw"),
-              default(args$cell.deserialize, "raw"))
+              default(args$cell.deserialize, "raw"),
+              default(args$read.size, 10^6))
           mode = "binary"
           streaming.format = 
             "com.dappervision.hbase.mapred.TypedBytesTableInputFormat"
