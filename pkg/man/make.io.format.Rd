@@ -30,7 +30,7 @@ make.output.format(format = "native", mode = c("binary", "text"), streaming.form
   \item{\code{dense}}{contols whether the data read from hbase is returned as a 4-column data frame (key, family, column and cell) or a number of columns equal to the number of columns selected, plus one for the key;} 
   \item{\code{atomic}}{contols whether the data frame columns are atomic or returned "as is", see \code{\link{I}}.}
   \item{\code{start.row} and \code{stop.row}}{limit input to a range of keys between the two supplied arguments, each optional; remeber the order is based on the byte representation of the keys}
-  \item{\code{row.filter}{specify a regex to filter the input table}}}}}}
+  \item{\code{row.filter}}{specify a regex to filter the input table}}}}}
 
 \details{
 The goal of these functions is to encapsulate some of the complexity of the IO settings, providing meaningful defaults and predefined combinations.  If you don't want to deal with the full complexity of defining custom IO formats, there are prepackaged combinations. 
