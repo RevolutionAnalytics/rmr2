@@ -352,17 +352,7 @@ make.input.format =
 				avro = {
 					format = make.avro.input.format.function(optlist$schema.file)
 					mode = "text"
-					streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat"
-					backend.parameters = 
-						list(
-							hadoop = 
-								list(
-									libjars = 
-										paste(
-											ravro:::AVRO_TOOLS,
-											file.path(dirname(ravro:::AVRO_TOOLS), "avro-1.7.4.jar"),
-											sep= ","),
-									D = "mapreduce.task.classpath.user.precedence=true"))})}
+					streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat"})}
 		if(is.null(streaming.format) && mode == "binary") 
 			streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
 		list(
