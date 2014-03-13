@@ -108,16 +108,21 @@ typedbytes.writer =
       .Call("typedbytes_writer", objects, native,  PACKAGE = "rmr2"),
       con)}
 
+setAs("character", "factor", function(from) as.factor(from))
+
 to.data.frame = 
   function(x, template){
     x = t.list(x)
     y = 
       lapply(
         seq_along(x), 
-        function(i)
-          if(is.atomic(template[[i]])) unlist(x[[i]]) else I(splat(c)(x[[i]])))
+        function(i) 
+            if(is.atomic(template[[i]])) 
+              as(unlist(x[[i]]), class(template[[i]])) 
+            else 
+              I(as(splat(c)(x[[i]]), class(template[[i]]))))
     names(y) = names(template)
-    data.frame(y)}
+    data.frame(y, stringsAsFactors = FALSE)}
 
 from.list = 
   function (x, template) {
