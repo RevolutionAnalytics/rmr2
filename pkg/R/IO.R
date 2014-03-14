@@ -364,7 +364,7 @@ make.input.format =
 							hadoop = 
 								list(
 									libjars = 
-											ravro:::AVRO_TOOLS))})}
+											gsub(":", ",", Sys.getenv("AVRO_LIBS"))))})}
 		if(is.null(streaming.format) && mode == "binary") 
 			streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
 		list(
