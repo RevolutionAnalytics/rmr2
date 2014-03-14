@@ -6,7 +6,7 @@
 rmr.options(
   backend = c("hadoop", "local"), 
   profile.nodes = c("off", "calls", "memory", "both"), 
-  hdfs.tempdir = NULL,
+  hdfs.tempdir = "/tmp",
   exclude.objects = NULL,                 
   backend.parameters = list())
 }
