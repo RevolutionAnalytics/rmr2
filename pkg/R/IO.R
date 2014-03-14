@@ -264,7 +264,13 @@ make.keyval.writer = Curry(make.keyval.readwriter, keyval.length = NULL, read = 
 
 paste.fromJSON = 
 	function(...)
-		rjson::fromJSON(paste("[", paste(..., sep = ","), "]"))
+		tryCatch(
+			rjson::fromJSON(paste("[", paste(..., sep = ","), "]")),
+			error = 
+				function(e){ 
+					if(is.element(e$message, paste0("unexpected character '", c("N", "I"), "'\n")))
+						e$message = ("Found unexpected character, try updating Avro to 1.7.7 or trunk")
+					stop(e$message)})
 
 make.avro.input.format.function =
 	function(schema.file) {
@@ -352,7 +358,13 @@ make.input.format =
 				avro = {
 					format = make.avro.input.format.function(optlist$schema.file)
 					mode = "text"
-					streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat"})}
+					streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat"
+					backend.parameters = 
+						list(
+							hadoop = 
+								list(
+									libjars = 
+											ravro:::AVRO_TOOLS))})}
 		if(is.null(streaming.format) && mode == "binary") 
 			streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
 		list(
