@@ -109,6 +109,7 @@ typedbytes.writer =
       con)}
 
 setAs("character", "factor", function(from) as.factor(from))
+setAs("list", "AsIs", function(from) I(from))
 
 to.data.frame = 
   function(x, template){
