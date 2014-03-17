@@ -261,13 +261,13 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       new_object =  wrap(string(vec_tmp.begin(), vec_tmp.end()));}
       break;
     case TB_VECTOR:
-      new_object = unserialize_list(data, start);
+      new_object = wrap(unserialize_list(data, start));
       break;
     case TB_LIST: 
-      new_object = unserialize_255_terminated_list(data, start);
+      new_object = wrap(unserialize_255_terminated_list(data, start));
       break;
     case TB_MAP: 
-      new_object = unserialize_map(data, start);
+      new_object = wrap(unserialize_map(data, start));
       break;
     case R_NULL:{
       new_object = R_NilValue;
