@@ -211,7 +211,7 @@ for (be in c("local", "hadoop")) {
 									input.format = 
 										make.input.format(
 											format = "avro",
-											schema.file = paste("file", tf1, sep = ":"))))), 
+											schema.file = tf1)))), #paste("file", tf1, sep = ":"))))), 
 						tolerance = 1e-4, 
 						check.attributes = FALSE))}},
 		generators = list(tdgg.data.frame()),
