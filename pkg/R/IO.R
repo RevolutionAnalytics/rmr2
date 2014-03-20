@@ -268,7 +268,7 @@ paste.fromJSON =
 			rjson::fromJSON(paste("[", paste(..., sep = ","), "]")),
 			error = 
 				function(e){ 
-					if(is.element(e$message, paste0("unexpected character '", c("N", "I"), "'\n")))
+					if(is.element(e$message, paste0("unexpected character", c(" 'N'", " 'I'", ": I"), "\n")))
 						e$message = ("Found unexpected character, try updating Avro to 1.7.7 or trunk")
 					stop(e$message)})
 
