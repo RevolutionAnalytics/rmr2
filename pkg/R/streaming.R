@@ -212,9 +212,7 @@ rmr.stream =
         output.format$backend.parameters$hadoop,
         backend.parameters)
     ## prepare map and reduce executables
-    work.dir = 
-      if(.Platform$OS.type == "windows") "../../jars"
-    else "."
+    work.dir = "."
     rmr.local.env = tempfile(pattern = "rmr-local-env")
     rmr.global.env = tempfile(pattern = "rmr-global-env")
         
