@@ -273,7 +273,7 @@ paste.fromJSON =
 					stop(e$message)})
 
 make.avro.input.format.function =
-	function(schema.file) {
+	function(schema.file,...) {
 		schema = ravro:::avro_get_schema(file=schema.file)
 		function(con, n) {
 			lines = 
@@ -281,7 +281,8 @@ make.avro.input.format.function =
 			if  (length(lines) == 0) NULL
 			else {
 				x = splat(paste.fromJSON)(lines)
-				y = ravro:::parse_avro(x, schema,encoded_unions=FALSE)
+				y = ravro:::parse_avro(x, schema,encoded_unions=FALSE,
+                               ...)
 				keyval(NULL, y)}}}
 
 IO.formats = c("text", "json", "csv", "native",
@@ -356,7 +357,7 @@ make.input.format =
 															collapse = " ")))),
 									libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))},
 				avro = {
-					format = make.avro.input.format.function(optlist$schema.file)
+					format = make.avro.input.format.function(optlist$schema.file,...)
 					mode = "text"
 					streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat"
 					backend.parameters = 
