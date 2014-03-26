@@ -303,7 +303,7 @@ dfs.tempfile =
         rmr.options("hdfs.tempdir")
       else
         tempdir()}) {
-    fname  = tempfile(pattern, tmpdir)
+    fname  = rmr.normalize.path(tempfile(pattern, tmpdir))
     subfname = strsplit(fname, ":")
     if(length(subfname[[1]]) > 1) fname = subfname[[1]][2]
     namefun = function() {fname}
