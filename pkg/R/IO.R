@@ -108,8 +108,15 @@ typedbytes.writer =
       .Call("typedbytes_writer", objects, native,  PACKAGE = "rmr2"),
       con)}
 
-setAs("character", "factor", function(from) as.factor(from))
-setAs("list", "AsIs", function(from) I(from))
+rmr.coerce = 
+  function(x, template) {
+    if(is.atomic(template)) 
+      switch(
+        class(template),
+        factor = factor(unlist(x), levels = levels(template)),
+        as(unlist(x),class(template)))
+    else
+      I(splat(c)(x))}
 
 to.data.frame = 
   function(x, template){
@@ -117,11 +124,8 @@ to.data.frame =
     y = 
       lapply(
         seq_along(x), 
-        function(i) 
-            if(is.atomic(template[[i]])) 
-              as(unlist(x[[i]]), class(template[[i]])) 
-            else 
-              I(as(splat(c)(x[[i]]), class(template[[i]]))))
+        function(i)
+          rmr.coerce(x[[i]], template[[i]]))
     names(y) = names(template)
     data.frame(y, stringsAsFactors = FALSE)}
 
@@ -133,7 +137,10 @@ from.list =
       list = splat(c)(x),
       matrix = splat(rbind)(x), 
       data.frame = to.data.frame(x, template),
-      unlist(x))}
+      unlist(
+        if(is.factor(template)) 
+          factor(x, levels = levels(template)) 
+        else x))}
 
 make.typedbytes.input.format =
   function(read.size = 10^7, native = FALSE) {
@@ -187,9 +194,12 @@ to.list =
       if (is.matrix(x)) x = as.data.frame(x)
       if (is.data.frame(x)) 
         unname(
-          t.list(x))
+          t.list(
+            lapply(
+              x,
+              function(x) if(is.factor(x)) as.character(x) else x)))
       else
-        as.list(x)}}
+        as.list(if(is.factor(x)) as.character(x) else x)}}
 
 intersperse = 
   function(a.list, another.list, every.so.many) 

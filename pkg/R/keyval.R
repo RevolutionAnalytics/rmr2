@@ -215,7 +215,11 @@ split.data.frame.fastest =
     t.list(
       lapply(
         x, 
-        Curry(split, f = ind, drop = drop)))
+        function(y) 
+          split(
+            if(is.factor(y)) as.character(y) else y, 
+            f = ind, 
+            drop = drop)))
 
 rmr.split = 
   function(x, ind, lossy) {
@@ -257,7 +261,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
           NULL,
           unname(rmr.split(v, k, lossy = lossy)))}
       else {
-        k = keys(kv)
+        k = keys(kv) # TODO are these two redundant?
         v = values(kv)
         ind = {
           if(is.list(k) && !is.data.frame(k)) 
@@ -282,6 +286,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
             list = x,
             data.frame = if(lossy) t.list(x) else rmr.split(x, x , FALSE),
             matrix = if(lossy) t.list(as.data.frame(x)) else rmr.split(x, as.data.frame(x), FALSE),
+            factor = as.list(as.character(x)),
             as.list(x))
         keyval(x, unname(rmr.split(v, ind, lossy = lossy)))}}}}
 

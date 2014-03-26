@@ -80,7 +80,7 @@ t.list =
       .Call(
         "t_list", 
         if(!all(sapply.is.list(l))) 
-          lapply(l, function(x) as.list(if(is.factor(x)) as.character(x) else x)) 
+          lapply(l, as.list) 
         else l, 
         PACKAGE = "rmr2")}
 
