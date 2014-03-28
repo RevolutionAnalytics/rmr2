@@ -357,7 +357,7 @@ make.input.format =
 															collapse = " ")))),
 									libjars = system.file(package = "rmr2", "hadoopy_hbase.jar")))},
 				avro = {
-					format = make.avro.input.format.function(optlist$schema.file,...)
+					format = make.avro.input.format.function(...)
 					mode = "text"
 					streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat"
 					backend.parameters = 
