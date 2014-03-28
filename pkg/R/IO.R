@@ -142,7 +142,7 @@ make.typedbytes.input.format =
     raw.buffer = raw()
     template = NULL
     function(con) {
-      while(length(obj.buffer) < 2 || is.null(template)) {
+      while(length(obj.buffer) < 2 || (native && is.null(template))) {
         raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
         if(length(raw.buffer) == 0) break;
         parsed = typedbytes.reader(raw.buffer) 
