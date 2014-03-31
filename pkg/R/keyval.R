@@ -279,7 +279,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
         x = 
           switch(
             class(x),
-            list = x,
+            list = split(x, 1:length(x)),
             data.frame = if(lossy) t.list(x) else rmr.split(x, x , FALSE),
             matrix = if(lossy) t.list(as.data.frame(x)) else rmr.split(x, as.data.frame(x), FALSE),
             as.list(x))
