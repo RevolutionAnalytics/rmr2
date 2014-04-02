@@ -3,11 +3,11 @@
 ## Features
 
 * The way the temporary directory to be used by `rmr` is specified changed. For local files, it uses R's own `tempfile` and `tempdir`, for HDFS, the rmr option `hdfs.tempfile`, defaulting to `"/tmp"`. The option `dfs.tempfile`, that aimed at covering both cases, has been removed.
-* Added start and stop row filter and regex filter for the hbase input format
+* Added start and stop row filter and regex filter for the hbase input format,  courtesy @khharut.
 
 ## Bugs Fixed
 
-* Hbase format build on Debian, courtesy @khharut
+* Hbase format build on Debian, courtesy @khharut.
 * Extreme efficiency problem when the key is a data frame with many columns.
 * Incomplete reduce groups when factors used as keys.
 * Reduce error when key is a single col data frame.
