@@ -214,7 +214,7 @@ split.data.frame.fastest =
   function(x, ind, drop) 
     t.list(
       lapply(
-        x, 
+        row.names.to.column(x), 
         function(y) 
           split(
             if(is.factor(y)) as.character(y) else y, 
@@ -245,6 +245,11 @@ key.normalize= function(k) {
   if(!is.null(attributes(k)))
     attributes(k) = attributes(k)[sort(names(attributes(k)))]
   k}
+
+row.names.to.column = 
+  function(df){
+    df[, ncol(df) + 1] = rownames(df)
+    df}
 
 split.keyval = function(kv, size, lossy = FALSE) {
   k = keys(kv)

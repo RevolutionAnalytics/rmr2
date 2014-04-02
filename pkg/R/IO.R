@@ -123,11 +123,13 @@ to.data.frame =
     x = t.list(x)
     y = 
       lapply(
-        seq_along(x), 
+        seq_along(template), 
         function(i)
           rmr.coerce(x[[i]], template[[i]]))
     names(y) = names(template)
-    data.frame(y, stringsAsFactors = FALSE)}
+    df = data.frame(y, stringsAsFactors = FALSE)
+    rownames(df) = make.unique(rmr.coerce(x[[length(x)]], character()))
+    df}
 
 from.list = 
   function (x, template) {
