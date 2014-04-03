@@ -399,6 +399,8 @@ rmr.stream =
     backend.parameters = c(list(D = 'mapred.reduce.tasks=0'), backend.parameters)
   #debug.opts = "-mapdebug kdfkdfld -reducexdebug jfkdlfkja"
   
+  on.exit(splat(file.remove)(c(image.files, map.file, reduce.file, combine.file)), add = TRUE)
+  
   final.command = 
     paste(
       hadoop.command, 
