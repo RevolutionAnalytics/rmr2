@@ -28,6 +28,8 @@ mr.local = function(
   profile.nodes = rmr.options("profile.nodes")
   get.data =
     function(fname) {
+      environment(input.format$format) =
+        list2env(as.list(environment(input.format$format)))
       kv = from.dfs(fname, format = input.format)
       kv}
   map.out = 
