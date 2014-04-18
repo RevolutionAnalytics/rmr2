@@ -29,7 +29,7 @@ for (be in c("local", "hadoop")) {
       kv.cmp(
         kv, 
         from.dfs(to.dfs(kv))),
-    generators = list(rmr2:::tdgg.keyval()),
+    generators = list(rmr2:::rkeyval),
     sample.size = 10)
   
   ## csv
@@ -42,7 +42,7 @@ for (be in c("local", "hadoop")) {
             keyval(NULL, df), 
             format = "csv"), 
           format = "csv")),
-    generators = list(tdgg.data.frame()),
+    generators = list(rdata.frame),
     sample.size = 10)
   
   #json
@@ -56,7 +56,7 @@ for (be in c("local", "hadoop")) {
             keyval(1, df), 
             format = fmt), 
           format = make.input.format("json", key.class = "list", value.class = "data.frame"))), 
-    generators = list(tdgg.data.frame()),
+    generators = list(rdata.frame),
     sample.size = 10)
   
   #sequence.typedbytes
@@ -77,7 +77,7 @@ for (be in c("local", "hadoop")) {
             keyval(1, l), 
             format = fmt), 
           format = fmt)), 
-    generators = list(tdgg.list()),
+    generators = list(rlist),
     precondition = function(l) length(l) > 0,
     sample.size = 10)
   
@@ -90,7 +90,7 @@ for (be in c("local", "hadoop")) {
     else {
       kv1 = from.dfs(mapreduce(input = to.dfs(kv)))
       kv.cmp(kv, kv1)}},
-    generators = list(rmr2:::tdgg.keyval()),
+    generators = list(rmr2:::rkeyval),
     sample.size = 10)
   
   ##put in a reduce for good measure
@@ -104,11 +104,11 @@ for (be in c("local", "hadoop")) {
               input = to.dfs(kv),
               reduce = to.reduce(identity)))
         kv.cmp(kv, kv1)}},
-    generators = list(rmr2:::tdgg.keyval()),
+    generators = list(rmr2:::rkeyval),
     sample.size = 10)
   
   ## csv
-   z= unit.test(
+  unit.test(
     function(df)
       kv.cmp(
         keyval(NULL, df),
@@ -120,7 +120,7 @@ for (be in c("local", "hadoop")) {
             input.format = "csv",
             output.format = "csv"),
           format = "csv")),
-    generators = list(tdgg.data.frame()),
+    generators = list(rdata.frame),
     sample.size = 10, stop = FALSE)
   
   #json
@@ -138,7 +138,7 @@ for (be in c("local", "hadoop")) {
             input.format = make.input.format("json", key.class = "list", value.class = "data.frame"),
             output.format = fmt),
           format = make.input.format("json", key.class = "list", value.class = "data.frame"))),
-    generators = list(tdgg.data.frame()),
+    generators = list(rdata.frame),
     sample.size = 10)
   
   #sequence.typedbytes
@@ -155,7 +155,7 @@ for (be in c("local", "hadoop")) {
             input.format = fmt,
             output.format = fmt),
           format = fmt))}, 
-      generators = list(tdgg.list()),
+      generators = list(rlist),
       precondition = function(l) length(l) > 0,
       sample.size = 10)
   

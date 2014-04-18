@@ -26,4 +26,4 @@ library(rmr2)
 #     isTRUE(all.equal(l, 
 #                      rmr2:::typedbytes.reader(rmr2:::typedbytes.writer(l), length(l) + 5)$objects, 
 #                      check.attributes = FALSE))},
-#   generators = list(tdgg.list()))
+#   generators = list(rlist))

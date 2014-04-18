@@ -23,7 +23,7 @@ unit.test(
   function(ss) {
     ss = paste("v", ss, sep = "")
     ss == eval(parse(text = paste("rmr2:::qw(", paste(ss, collapse = ","), ")")))},
-  list(tdgg.character()))
+  list(rcharacter))
 
 # Make.single.arg
 unit.test(
@@ -31,7 +31,7 @@ unit.test(
     f = function(...) list(...)
     g = rmr2:::Make.single.arg(f)
     identical(do.call(f, l), g(l))},
-  list(tdgg.list()))
+  list(rlist))
                   
 # Make.multi.arg
 unit.test(
@@ -39,7 +39,7 @@ unit.test(
     f = function(x) x
     g = rmr2:::Make.multi.arg(f)
     identical(do.call(g, l), f(l))},
-  list(tdgg.list()))
+  list(rlist))
 
 # Make.single.or.multi.arg
 unit.test(
@@ -47,8 +47,8 @@ unit.test(
     f = if(arity == "single") identity else c 
     g = rmr2:::Make.single.or.multi.arg(f, from = arity)
     identical(g(l), do.call(g, l))},
-  list(tdgg.list(),
-       tdgg.select(rmr2:::qw(single, multi))))
+  list(rlist,
+       make.rselect(rmr2:::qw(single, multi))))
 
 #%:% TODO
 # all.predicate TODO
@@ -63,7 +63,7 @@ unit.test(
 #     print(x=as.list(do.call(c, l)))
 #     print(x=fl())
 #     identical(as.list(do.call(c, l)), fl())},
-#   list(tdgg.list(lambda=1, max.level=8)))
+#   list(Curry(rlist,lambda=1, max.level=8)))
 #     
 
 #named.slice TODO

@@ -14,8 +14,8 @@
 
 ##app-specific generators
 if(require(quickcheck)) {
-  tdgg.keyval = function(keytdg = tdgg.double(), valtdg = tdgg.any()) function() keyval(keytdg(), valtdg())
-  tdgg.keyvalsimple = function() function() keyval(runif(1), runif(1))} #we can do better than this
+  rkeyval = function(keytdg = rdouble, valtdg = make.rany()) keyval(keytdg(), valtdg())
+  rkeyvalsimple = function() keyval(runif(1), runif(1))} #we can do better than this
 
 ## generic sorting for normalized comparisons
 gorder = function(...) UseMethod("gorder")
