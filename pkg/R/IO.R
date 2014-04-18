@@ -73,18 +73,19 @@ text.output.format =
     writeLines(paste(out, "\n", collapse="", sep = ""), sep = "", con = con)}
 
 make.csv.input.format =
-  function(..., nrows = 10^4) 
+  function(..., nrows = 10^4) {
+    args = list(...)
     function(con) {
       df = 
         tryCatch(
-          read.table(file = con, header = FALSE, ...),
+          do.call(read.table, c(list(file = con, header = FALSE, nrows = nrows), args)),
           error = 
             function(e) {
               if(e$message != "no lines available in input")
                 stop(e$message)
               NULL})  
       if(is.null(df) || dim(df)[[1]] == 0) NULL
-      else keyval(NULL, df)}
+      else keyval(NULL, df)}}
 
 make.csv.output.format =
   function(...) function(kv, con) {

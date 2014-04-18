@@ -19,7 +19,7 @@ library(rmr2)
 unit.test(
   function(x) {
     is.null(nrow(x)) == !rmr2:::has.rows(x)},
-  list(tdgg.any()))
+  list(make.rany()))
 
 #all.have rows TODO
 #rmr.length TODO
@@ -28,11 +28,11 @@ unit.test(
 unit.test(
   function(x){
     k = x
-    v = lapply(x, function(x) tdgg.any()())
+    v = lapply(x, function(x) make.rany()())
     kv = keyval(k, v)
     identical(keys(kv), k) &&
       identical(values(kv), v)},
-  list(tdgg.any()))
+  list(make.rany()))
 
 #NULL key case
 unit.test(
@@ -41,4 +41,4 @@ unit.test(
     kv = keyval(k, v)
     identical(keys(kv), k) &&
       identical(values(kv), v)},
-  list(tdgg.any()))
+  list(make.rany()))

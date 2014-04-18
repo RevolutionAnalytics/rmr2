@@ -7,7 +7,7 @@ Equijoins using map reduce
 }
 
 \description{
-A generalized form of equijoin, hybrid between the SQL brethen and mapreduce
+A generalized form of equijoin, hybrid between the SQL brethren and mapreduce
 }
 
 \usage{

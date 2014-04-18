@@ -237,44 +237,50 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       int length = get_length(data, start);
       new_object = wrap(unserialize_vector<unsigned char>(data, start, length));}
       break;
-    case TB_BYTE:
-      new_object = wrap(unserialize_scalar<unsigned char>(data, start));
+    case TB_BYTE:{
+      new_object = wrap(unserialize_scalar<unsigned char>(data, start));}
       break;
-    case TB_BOOLEAN: //boolean
-      new_object = wrap(unserialize_scalar<bool>(data, start));
+    case TB_BOOLEAN:{
+      char x = (int) unserialize_scalar<char>(data, start);
+      LogicalVector y(1);
+      if(x == -1) {y[0] = NA_LOGICAL;}
+      else {
+        if(x == 1) {y[0] = true;}
+        else {y[0] = false;}}
+      new_object = wrap(y);}
       break;
-    case TB_INTEGER: 
-      new_object = wrap(unserialize_scalar<int>(data, start));
+    case TB_INTEGER:{ 
+      new_object = wrap(unserialize_scalar<int>(data, start));}
       break;
-    case TB_LONG:
-      new_object = wrap(unserialize_scalar<long>(data, start));
+    case TB_LONG:{
+      new_object = wrap(unserialize_scalar<long>(data, start));}
       break;
-    case TB_FLOAT:
-      new_object = wrap(unserialize_scalar<float>(data, start));
+    case TB_FLOAT:{
+      new_object = wrap(unserialize_scalar<float>(data, start));}
       break;
-    case TB_DOUBLE:
-      new_object = wrap(unserialize_scalar<double>(data, start));
+    case TB_DOUBLE:{
+      new_object = wrap(unserialize_scalar<double>(data, start));}
       break;
     case TB_STRING: {
       int length = get_length(data, start);
       vector<char> vec_tmp = unserialize_vector<char>(data, start, length);
       new_object =  wrap(string(vec_tmp.begin(), vec_tmp.end()));}
       break;
-    case TB_VECTOR:
-      new_object = wrap(unserialize_list(data, start));
+    case TB_VECTOR:{
+      new_object = wrap(unserialize_list(data, start));}
       break;
-    case TB_LIST: 
-      new_object = wrap(unserialize_255_terminated_list(data, start));
+    case TB_LIST:{ 
+      new_object = wrap(unserialize_255_terminated_list(data, start));}
       break;
-    case TB_MAP: 
-      new_object = wrap(unserialize_map(data, start));
+    case TB_MAP:{ 
+      new_object = wrap(unserialize_map(data, start));}
       break;
     case R_NULL:{
       new_object = R_NilValue;
       get_length(data, start);} 
       break;
-    case R_NATIVE: 
-      new_object = unserialize_native(data, start);
+    case R_NATIVE:{ 
+      new_object = unserialize_native(data, start);}
       break;
     case R_WITH_ATTRIBUTES: {
       get_length(data, start);
@@ -291,26 +297,33 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       int vec_type_code  = get_type(data, start);
       raw_length = raw_length - 1;
       switch(vec_type_code) {
-        case TB_BYTE:
-          new_object = wrap(unserialize_vector<unsigned char>(data, start, raw_length));
+        case TB_BYTE:{
+          new_object = wrap(unserialize_vector<unsigned char>(data, start, raw_length));}
         break;
-        case TB_BOOLEAN:
-          new_object = wrap(unserialize_vector<bool>(data, start, raw_length));
+        case TB_BOOLEAN:{
+          vector<char> x = unserialize_vector<char>(data, start, raw_length);
+          LogicalVector y(x.size());
+          for(unsigned int i = 0; i < y.size(); i++) {
+            if(x[i] == -1) {y[i] = NA_LOGICAL;}
+            else {
+              if(x[i] == 1) {y[i] = true;}
+              else y[i] = false;}}
+          new_object = wrap(y);}
         break;
-        case TB_INTEGER:
-          new_object = wrap(unserialize_vector<int>(data, start, raw_length));
+        case TB_INTEGER:{
+          new_object = wrap(unserialize_vector<int>(data, start, raw_length));}
         break;
-        case TB_LONG:
-          new_object = wrap(unserialize_vector<long>(data, start, raw_length));
+        case TB_LONG:{
+          new_object = wrap(unserialize_vector<long>(data, start, raw_length));}
         break;
-        case TB_FLOAT:
-          new_object = wrap(unserialize_vector<float>(data, start, raw_length));
+        case TB_FLOAT:{
+          new_object = wrap(unserialize_vector<float>(data, start, raw_length));}
         break;
-        case TB_DOUBLE:
-          new_object = wrap(unserialize_vector<double>(data, start, raw_length));
+        case TB_DOUBLE:{
+          new_object = wrap(unserialize_vector<double>(data, start, raw_length));}
         break;
-        default: 
-          throw UnsupportedType(vec_type_code);}}
+        default:{ 
+          throw UnsupportedType(vec_type_code);}}}
       break;
     case R_CHAR_VECTOR: {
         int raw_length = get_length(data, start);
@@ -444,18 +457,21 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
       break;
       case RAWSXP: {//raw
       RawVector data(object);
-      serialize_many(data, 0, serialized);}
+      serialize_many(data, TB_BYTES, serialized);}
       break;
       case LGLSXP: {
-        LogicalVector data(object);  
+        IntegerVector data(object);  
         vector<unsigned char> bool_data(data.size());
         for(unsigned int i = 0; i < data.size(); i++) {
-          bool_data[i] = (unsigned char) data[i];} 
-        serialize_vector(bool_data, 2, serialized, TRUE);}
+          if(data[i] == 0 || data[i] == 1) {
+            bool_data[i] = (unsigned char) data[i];}
+          else {
+            bool_data[i] = (unsigned char) (-1);}} 
+        serialize_vector(bool_data, TB_BOOLEAN, serialized, TRUE);}
       break;
       case REALSXP: {
         NumericVector data(object);  
-          serialize_vector(data, 6, serialized, TRUE);}
+          serialize_vector(data, TB_DOUBLE, serialized, TRUE);}
       break;
       case STRSXP: { //character
         CharacterVector data(object);
@@ -466,11 +482,11 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
         length_header(raw_size, serialized);
         length_header(data.size(), serialized);
         for(unsigned int i = 0; i < data.size(); i++) {
-          serialize_many(data[i], 7, serialized);}}
+          serialize_many(data[i], TB_STRING, serialized);}}
       break; 
       case INTSXP: {
         IntegerVector data(object);  
-        serialize_vector(data, 3, serialized, TRUE);}
+        serialize_vector(data, TB_INTEGER, serialized, TRUE);}
       break;
       case VECSXP: { //list
         List data(object);

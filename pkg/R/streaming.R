@@ -332,19 +332,16 @@ rmr.stream =
     default.output.format = make.output.format("native")
     
     libs = sub("package:", "", grep("package", search(), value = TRUE))
-    image.cmd.line = 
-      paste(
-        "-file",
-        c(
-          save.env(
-            environment(), 
-            rmr.local.env, 
-            NULL),
-          save.env(
-            .GlobalEnv, 
-            rmr.global.env, 
-            pkg.opts$exclude.objects)),
-        collapse = " ")
+    image.files = 
+    c(
+      save.env(
+        environment(), 
+        rmr.local.env, 
+        NULL),
+      save.env(
+        .GlobalEnv, 
+        rmr.global.env, 
+        pkg.opts$exclude.objects))
     ## prepare hadoop streaming command
     hadoop.command = hadoop.streaming()
     input = make.input.files(in.folder)
@@ -372,19 +369,17 @@ rmr.stream =
         paste(
           rscript, 
           file.path(work.dir, basename(map.file))))
-    m.fl = paste.options(file = map.file)
-    if(!is.null(reduce) ) {
+  if(!is.null(reduce))
+    reducer = 
+    paste.options(
       reducer = 
-        paste.options(
-          reducer = 
-            paste(
-              rscript, 
-              file.path(work.dir, basename(reduce.file))))
-      r.fl = paste.options(file = reduce.file)}
-    else {
-      reducer = ""
-      r.fl = "" }
-    if(is.function(combine)) {
+        paste(
+          rscript, 
+          file.path(work.dir, basename(reduce.file))))
+  else {
+    reducer = ""
+    reduce.file = NULL }
+  if(is.function(combine)) {
       combiner = 
         paste.options(
           combiner = 
@@ -394,30 +389,35 @@ rmr.stream =
       c.fl = paste.options(file = combine.file)}
     else {
       combiner = ""
-      c.fl = "" }
-    if(is.null(reduce) && 
-         !is.element("mapred.reduce.tasks",
-                     sapply(strsplit(as.character(named.slice(backend.parameters, 'D')), '='), 
-                            function(x)x[[1]])))
-      backend.parameters = c(list(D = 'mapred.reduce.tasks=0'), backend.parameters)
-    #debug.opts = "-mapdebug kdfkdfld -reducexdebug jfkdlfkja"
-    
-    final.command = 
-      paste(
-        hadoop.command, 
-        stream.mapred.io,  
-        if(is.null(backend.parameters)) ""
-        else
-          do.call(paste.options, backend.parameters), 
-        input, 
-        output, 
-        mapper, 
-        combiner,
-        reducer, 
-        image.cmd.line, 
-        m.fl, 
-        r.fl, 
-        c.fl,
+      combine.file = NULL}
+  if(is.null(reduce) && 
+       !is.element(
+         "mapred.reduce.tasks",
+         sapply(
+           strsplit(as.character(named.slice(backend.parameters, 'D')), '='), 
+           function(x)x[[1]])))
+    backend.parameters = c(list(D = 'mapred.reduce.tasks=0'), backend.parameters)
+  #debug.opts = "-mapdebug kdfkdfld -reducexdebug jfkdlfkja"
+  
+  on.exit(splat(file.remove)(c(image.files, map.file, reduce.file, combine.file)), add = TRUE)
+  
+  final.command = 
+    paste(
+      hadoop.command, 
+      stream.mapred.io,  
+      if(is.null(backend.parameters)) ""
+      else
+        do.call(paste.options, backend.parameters), 
+      paste.options(
+        files = 
+          paste(
+            collapse = ",",           
+            c(image.files, map.file, reduce.file, combine.file))),
+      input, 
+      output, 
+      mapper, 
+      combiner,
+      reducer, 
         input.format.opt, 
         output.format.opt, 
         "2>&1")
