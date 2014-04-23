@@ -109,6 +109,8 @@ typedbytes.writer =
       .Call("typedbytes_writer", objects, native,  PACKAGE = "rmr2"),
       con)}
 
+setAs("integer", "Date", function(from) as.Date(from, origin = "1970-1-1"))
+
 rmr.coerce = 
   function(x, template) {
     if(is.atomic(template)) 
