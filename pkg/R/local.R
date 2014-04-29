@@ -68,4 +68,4 @@ mr.local = function(
     else
       map.out}
   to.dfs(reduce.out, out.folder, format = output.format)
-NULL}
+  NULL}
