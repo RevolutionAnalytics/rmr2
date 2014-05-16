@@ -232,12 +232,17 @@ rmr.stream =
       load("',file.path(work.dir, basename(rmr.local.env)),'")
     else 
       load("',file.path(work.dir, basename(rmr.local.env)),'", verbose = TRUE))
-    lapply(
-      libs, 
-        function(l)
-          if (!require(l, character.only = TRUE)) 
-            warning(paste("can\'t load", l)))
-    sink(NULL)
+  lapply(
+    libs, 
+      function(l)
+        if (!require(l, character.only = TRUE)) 
+          warning(paste("can\'t load", l)))
+  invisible(
+    if(is.null(formals(load)$verbose)) #recent R change
+      load("',file.path(work.dir, basename(rmr.local.env)),'")
+    else 
+      load("',file.path(work.dir, basename(rmr.local.env)),'", verbose = TRUE))
+  sink(NULL)
     input.reader = 
       function()
         rmr2:::make.keyval.reader(
