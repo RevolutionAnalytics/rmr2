@@ -211,10 +211,10 @@ split.data.frame.fast =
     mapply(function(a, na) {rownames(a) = na; a}, y, rn, SIMPLIFY = FALSE)}
 
 split.data.frame.fastest = 
-  function(x, ind, drop) 
+  function(x, ind, drop, keep.rownames) 
     t.list(
       lapply(
-        row.names.to.column(x), 
+        if(keep.rownames) row.names.to.column(x) else x, 
         function(y) 
           split(
             if(is.factor(y)) as.character(y) else y, 
@@ -222,13 +222,13 @@ split.data.frame.fastest =
             drop = drop)))
 
 rmr.split = 
-  function(x, ind, lossy) {
+  function(x, ind, lossy, keep.rownames) {
     spl = 
       switch(
         class(x),
         matrix = split.data.frame,
         data.frame = {
-          if(lossy) split.data.frame.fastest
+          if(lossy) Curry(split.data.frame.fastest, keep.rownames = keep.rownames)
           else split.data.frame.fast},
         split)
     y = spl(x,ind, drop = TRUE)
@@ -264,7 +264,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
         k =  ceiling((1:rmr.length(v))/(rmr.length(v) /(object.size(v)/size)))
         keyval(
           NULL,
-          unname(rmr.split(v, k, lossy = lossy)))}
+          unname(rmr.split(v, k, lossy = lossy, keep.rownames = TRUE)))}
       else {
         k = keys(kv) # TODO are these two redundant?
         v = values(kv)
@@ -280,20 +280,18 @@ split.keyval = function(kv, size, lossy = FALSE) {
               else
                 k}}}
         x = k 
-        if(has.rows(x)) 
-          rownames(x) = NULL
-        else
+        if(!has.rows(x)) 
           names(x) = NULL
         x = unique(x)
         x = 
           switch(
             class(x),
             list = split(x, 1:length(x)),
-            data.frame = if(lossy) t.list(x) else rmr.split(x, x , FALSE),
-            matrix = if(lossy) t.list(as.data.frame(x)) else rmr.split(x, as.data.frame(x), FALSE),
+            data.frame = if(lossy) t.list(x) else rmr.split(x, x , FALSE, keep.rownames = FALSE),
+            matrix = if(lossy) t.list(as.data.frame(x)) else rmr.split(x, as.data.frame(x), FALSE, keep.rownames = FALSE),
             factor = as.list(as.character(x)),
             as.list(x))
-        keyval(x, unname(rmr.split(v, ind, lossy = lossy)))}}}}
+        keyval(x, unname(rmr.split(v, ind, lossy = lossy, keep.rownames = TRUE)))}}}}
 
 unsplit.keyval = function(kv) {
   c.keyval(mapply(keyval, keys(kv), values(kv), SIMPLIFY = FALSE))}

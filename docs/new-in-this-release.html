@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="x-ua-compatible" content="IE=9" >
 
-<title>What&#39;s new in 3.1.0</title>
+<title>What&#39;s new in 3.1.1</title>
 
 <style type="text/css">
 body, td {
@@ -142,33 +142,21 @@ hr {
 </head>
 
 <body>
-<h1>What&#39;s new in 3.1.0</h1>
-
-<h2>Features</h2>
-
-<ul>
-<li>The way the temporary directory to be used by <code>rmr</code> is specified changed. For local files, it uses R&#39;s own <code>tempfile</code> and <code>tempdir</code>, for HDFS, the rmr option <code>hdfs.tempfile</code>, defaulting to <code>&quot;/tmp&quot;</code>. The option <code>dfs.tempfile</code>, that aimed at covering both cases, has been removed.</li>
-<li>Added start and stop row filter and regex filter for the hbase input format</li>
-</ul>
+<h1>What&#39;s new in 3.1.1</h1>
 
 <h2>Bugs Fixed</h2>
 
 <ul>
-<li>Hbase format build on Debian, courtesy @khharut</li>
-<li>Extreme efficiency problem when the key is a data frame with many columns.</li>
-<li>Incomplete reduce groups when factors used as keys.</li>
-<li>Reduce error when key is a single col data frame.</li>
-<li>Crash when calling <code>keyval(1, NULL)</code> &ndash; now returns <code>keyval(NULL, NULL)</code></li>
-<li>Compatibility issues with current Hadoop distro, see [[compatbility]].</li>
-<li>Map and reduce scripts not executed in  a vanilla session could load unwanted data or configuration from the work directory (most likely with hadoop in standalone mode).</li>
+<li>support for <code>Date</code> columns in data frames</li>
+<li>support for logical NAs</li>
+<li>uses Imports when possible</li>
 </ul>
 
-<h2>Other improvements</h2>
+<h2>Enhancement</h2>
 
 <ul>
-<li>Harmless warning in hdfs dfs syntax check removed</li>
-<li>One speed up in the serialization code, should affect many use cases.</li>
-<li>Eliminated all warnings with clang compile.</li>
+<li>drop use of deprecated <code>-file</code> streaming option</li>
+<li>switch to the new and improved quickcheck 2.0.0 for testing</li>
 </ul>
 
 </body>
