@@ -346,17 +346,23 @@ mapreduce = function(
               local = mr.local, 
               stop("Unsupported backend: ", backend))
   
-  mr(map = map, 
-     reduce = reduce, 
-     combine = combine, 
-     vectorized.reduce,
-     in.folder = if(is.list(input)) {lapply(input, to.dfs.path)} else to.dfs.path(input), 
-     out.folder = to.dfs.path(output), 
-     input.format = input.format, 
-     output.format = output.format, 
-     in.memory.combine = in.memory.combine,
-     backend.parameters = backend.parameters[[backend]], 
-     verbose = verbose)
+  ret = 
+    mr(
+      map = map, 
+      reduce = reduce, 
+      combine = combine, 
+      vectorized.reduce,
+      in.folder = if(is.list(input)) {lapply(input, to.dfs.path)} else to.dfs.path(input), 
+      out.folder = to.dfs.path(output), 
+      input.format = input.format, 
+      output.format = output.format, 
+      in.memory.combine = in.memory.combine,
+      backend.parameters = backend.parameters[[backend]], 
+      verbose = verbose)
+  attributes(output) = 
+    c(
+      attributes(output),
+      ret)
   output
 }
 

@@ -428,12 +428,24 @@ rmr.stream =
         "2>&1")
     if(verbose) {
       retval = system(final.command)
-      if (retval != 0) stop("hadoop streaming failed with error code ", retval, "\n")}
+      if (retval != 0) stop("hadoop streaming failed with error code ", retval, "\n")
+      NULL}
     else {
-      console.output = tryCatch(system(final.command, intern = TRUE), 
-                                warning = function(e) stop(e)) 
-      retval = 0}
-    retval}
+      console.output = 
+        tryCatch(
+          system(final.command, intern = TRUE), 
+          warning = function(e) stop(e)) 
+      list(
+        application.id = 
+          gsub(
+            "^.*Submitted application (.*) to ResourceManager.*$",
+            "\\1",
+            grep("^.*Submitted application", console.output, value=T)),
+        job.id = 
+          gsub(
+            "^.*Running job: (.*)$",
+            "\\1",
+            grep("Running job:", console.output, value=T)))}}
 
 
 #mapreduce env
