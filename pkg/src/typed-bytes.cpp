@@ -41,13 +41,12 @@ enum type_code {
   TB_VECTOR = 8,
   TB_LIST = 9,
   TB_MAP = 10,
-  R_NATIVE = 144,
-  R_VECTOR = 145,
-  R_CHAR_VECTOR = 146,
-  R_WITH_ATTRIBUTES = 147,
-  R_NULL = 148,
-  R_LOGICAL = 149};
-
+  R_NATIVE = 144, //0x90
+  R_VECTOR = 145, //0x91
+  R_CHAR_VECTOR = 146, //0x92
+  R_WITH_ATTRIBUTES = 147, //0x93
+  R_NULL = 148, //0x94
+  R_LOGICAL = 149,  //0x95
 typedef deque<unsigned char> raw;
 
 template<typename T> 
