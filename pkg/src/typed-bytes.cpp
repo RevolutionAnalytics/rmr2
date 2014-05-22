@@ -425,14 +425,14 @@ void serialize_vector(T & data, unsigned char type_code, raw & serialized, bool 
     serialized.push_back(type_code);
     for(typename T::iterator i = data.begin(); i < data.end(); i++) {
       serialize_scalar(*i, 255, serialized);}}
+  else {
+    if(data.size() == 1) {
+      serialize_scalar(data[0], type_code, serialized);}
     else {
-      if(data.size() == 1) {
-        serialize_scalar(data[0], type_code, serialized);}
-      else {
-        serialized.push_back(TB_VECTOR);
-        length_header(data.size(), serialized); 
-        for(typename T::iterator i = data.begin(); i < data.end(); i++) {
-          serialize_scalar(*i, type_code, serialized);}}}}
+      serialized.push_back(TB_VECTOR);
+      length_header(data.size(), serialized); 
+      for(typename T::iterator i = data.begin(); i < data.end(); i++) {
+        serialize_scalar(*i, type_code, serialized);}}}}
 
 void serialize_list(List & data, raw & serialized, bool native){
   serialized.push_back(TB_VECTOR);
