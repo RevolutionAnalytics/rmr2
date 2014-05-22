@@ -47,6 +47,8 @@ enum type_code {
   R_WITH_ATTRIBUTES = 147, //0x93
   R_NULL = 148, //0x94
   R_LOGICAL = 149,  //0x95
+  TYPE_UNKNOWN = 255};
+  
 typedef deque<unsigned char> raw;
 
 template<typename T> 
@@ -191,7 +193,7 @@ vector<string> unserialize_vector<string>(const raw & data, unsigned int & start
     retval[i] = tmp_string;}
   return retval;}
       
-RObject unserialize(const raw & data, unsigned int & start, int type_code = 255);
+RObject unserialize(const raw & data, unsigned int & start, int type_code = TYPE_UNKNOWN);
 
 List unserialize_list(const raw & data, unsigned int & start) {
   int length = get_length(data, start);
@@ -230,7 +232,7 @@ RObject unserialize_native(const raw & data, unsigned int & start) {
 
 RObject unserialize(const raw & data, unsigned int & start, int type_code){
   RObject new_object;
-  if(type_code == 255) {
+  if(type_code == TYPE_UNKNOWN) {
     type_code = get_type(data, start);}
   switch(type_code) {
     case TB_BYTES: { 
@@ -278,9 +280,9 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       break;
     case R_WITH_ATTRIBUTES: {
       get_length(data, start);
-      new_object = unserialize(data, start, 255);
-      CharacterVector names(unserialize(data, start, 255));
-      List attributes(unserialize(data, start, 255));
+      new_object = unserialize(data, start, TYPE_UNKNOWN);
+      CharacterVector names(unserialize(data, start, TYPE_UNKNOWN));
+      List attributes(unserialize(data, start, TYPE_UNKNOWN));
       for(unsigned int i = 0; i < names.size(); i++) {
         char * c = names[i]; //workaround Rcpp bug now fixed, remove if assuming 0.10.2 and higher
         string s(c); 
