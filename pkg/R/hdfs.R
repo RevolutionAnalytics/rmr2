@@ -25,8 +25,11 @@ hdfs.rmr =
       else 
         hdfs("rm -r", fname)}})()
 hdfs.isdir = 
-  function(fname)
-    hdfs("test -d", fname, test = TRUE)
+  function(fname) {
+    if(.Platform$OS.type == "windows")
+      length(grep(pattern = "^Found", hdfs("ls", fname))) == 1
+    else
+      hdfs("test -d", fname, test = TRUE)}
 hdfs.mv = 
   function(src, dst)
     hdfs("mv", src, dst)
