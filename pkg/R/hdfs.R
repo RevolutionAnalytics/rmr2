@@ -27,7 +27,7 @@ hdfs.rmr =
 hdfs.isdir = 
   function(fname) {
     if(.Platform$OS.type == "windows")
-      length(grep(pattern = "^Found", hdfs("ls", fname))) == 1
+      length(grep(pattern = "^Found", hdfs("ls", fname, intern = TRUE))) == 1
     else
       hdfs("test -d", fname, test = TRUE)}
 hdfs.mv = 
@@ -51,7 +51,11 @@ hdfs =
           hdfs.cmd(), 
           "dfs", 
           paste("-", cmd, sep = ""), 
-          paste(..., collapse=" ")), 
+          paste(
+            sapply(
+              list(...),
+              rmr.normalize.path), 
+            collapse=" ")), 
         intern = intern)
     if(intern)
       retval

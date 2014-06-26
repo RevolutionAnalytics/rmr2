@@ -190,7 +190,13 @@ to.dfs.path =
 
 loadtb = 
   function(inf, outf)
-    system(paste(hadoop.streaming(),  "loadtb", outf, "<", inf))
+    system(
+      paste(
+        hadoop.streaming(),  
+        "loadtb", 
+        rmr.normalize.path(outf), 
+        "<", 
+        rmr.normalize.path(inf)))
 
 to.dfs = 
   function(
@@ -237,7 +243,16 @@ from.dfs = function(input, format = "native") {
     c.keyval(retval())}
   
   dumptb = function(src, dest){
-    lapply(src, function(x) system(paste(hadoop.streaming(), "dumptb", x, ">>", dest)))}
+    lapply(
+      src, 
+      function(x) 
+        system(
+          paste(
+            hadoop.streaming(), 
+            "dumptb", 
+            rmr.normalize.path(x), 
+            ">>", 
+            rmr.normalize.path(dest))))}
   
   getmerge = function(src, dest) {
     on.exit(unlink(tmp))
@@ -248,7 +263,7 @@ from.dfs = function(input, format = "native") {
         hdfs.get(as.character(x), tmp)
         if(.Platform$OS.type == "windows") {
           cmd = paste('type', tmp, '>>' , dest)
-          system(paste(Sys.getenv("COMSPEC"),"/c",cmd))}
+          system(paste(Sys.getenv("COMSPEC"), "/c", cmd))}
         else {
           system(paste('cat', tmp, '>>' , dest))}
         unlink(tmp)})

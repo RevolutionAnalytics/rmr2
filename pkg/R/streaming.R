@@ -202,6 +202,10 @@ rmr.stream =
     backend.parameters, 
     verbose, 
     debug) {
+    out.folder = rmr.normalize.path(out.folder)
+    tempfile = 
+      function(...)
+        rmr.normalize.path(base::tempfile(...))
     pkg.opts = as.list(rmr.options.env)
     profile.nodes = pkg.opts$profile.nodes
     
