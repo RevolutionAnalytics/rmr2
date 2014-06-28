@@ -55,7 +55,9 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="compatibility-testing-for-rmr-3.1.2" class="section level1">
 <h1>Compatibility testing for rmr 3.1.2</h1>
-<p>In the table at the bottom we collect results concerning compatibility of rmr with a given combination of R/OS and Hadoop releases. We collect both positive and negative results if available. If a combination is not present in this table, it doesn’t imply lack of compatibility. In case of negative results, we may consider them bugs in need to be addressed or not, depending how common and recent the platform combination is. Compatibility is defined as passing <code>R CMD  check path-to-rmr</code> successfully and requires an additional dependency, quickcheck, also downloadable from our wiki. Failures on producing documentation in legacy formats are not important. Notes and warnings are not important in the sense that they do not determine compatibility, but it may be helpful to report them in the issue tracker.Please contribute with additional reports. If you are interested in the compatibility chart for other releases, choose one from the drop down menu on the top left, under tags and find this document again (under docs). Not every release gets a complete round of testing, so typically a bug fix release (change in the third number only) is equally or more compatible than the previous release, even if we don’t have the resources to test it directly.</p>
+<p>In the table at the bottom we collect results concerning compatibility of rmr with a given combination of R/OS and Hadoop releases. We collect both positive and negative results if available. If a combination is not present in this table, it doesn’t imply lack of compatibility. In case of negative results, they will be recorded but there is no guarantee that they will be fixed, albeit it’s likely for current and common setups.</p>
+<p>Compatibility is defined as passing <code>R CMD  check path-to-rmr</code> successfully and requires an additional dependency, quickcheck, also downloadable from our wiki. Failures on producing documentation in legacy formats are not important. Notes and warnings are not important in the sense that they do not determine compatibility, but it may be helpful to report them in the issue tracker. Please contribute with additional reports.</p>
+<p>If you are interested in the compatibility chart for other releases, choose one from the drop down menu on the top left, under tags and find this document again (under docs). Not every release gets a complete round of testing, so typically a bug fix release (change in the third number only) is equally or more compatible than the previous release, even if we don’t have the resources to test it directly.</p>
 <table>
 <thead>
 <tr><th>
@@ -82,6 +84,27 @@ mr1
 </td><td>
 <a href="mailto:rhadoop@revolutionanalytics.com">Revolution</a>
 </td></tr>
+<tr><td>
+CDH5.0.2
+</td><td>
+R 3.0.3
+</td><td>
+RHEL 6.5
+</td><td>
+mr2
+</td><td>
+<a href="mailto:rhadoop@revolutionanalytics.com">Revolution</a>
+</td></tr>
+<tr><td>
+HDP2.1.1
+</td><td>
+R 3.1.0
+</td><td>
+Windows 2012 Server
+</td><td></td><td>
+<a href="mailto:rhadoop@revolutionanalytics.com">Revolution</a>
+</td></tr>
+
 </tbody>
 </table>
 
