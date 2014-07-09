@@ -34,3 +34,4 @@ out/*
 *.Rout
 file*
 quickcheck*
+*.html
