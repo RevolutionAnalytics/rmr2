@@ -45,8 +45,18 @@ length.keyval =
 keyval = 
   function(key, val = NULL) {
     if(missing(val)) keyval(key = NULL, val = key)
-    else recycle.keyval(list(key = key, val = val))}
-
+    else {
+      if(rmr.length(key) > 0 && rmr.length(val) > 0)
+        return(recycle.keyval(list(key = key, val = val)))
+      else {
+        if(rmr.length(key) == 0 && rmr.length(val) == 0)
+          return(list(key = NULL, val = NULL))
+        else {
+          if(is.null(key) && rmr.length(val) > 0)
+            return(list(key = NULL, val = val))}}
+      rmr.str(list(key, val));
+      stop("invalid key val combination")}}
+      
 keys = function(kv) kv$key
 values = function(kv) kv$val
 
