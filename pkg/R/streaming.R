@@ -442,12 +442,12 @@ rmr.stream =
       list(
         application.id = 
           gsub(
-            "^.*Submitted application (.*) to ResourceManager.*$",
-            "\\1",
+            "^.*Submitted application ([a-zA-Z_][a-zA-Z0-9_]+).*$", 
+            "\\1", 
             grep("^.*Submitted application", console.output, value=T)),
         job.id = 
           gsub(
-            "^.*Running job: (.*)$",
+            "^.*Running job: ([a-zA-Z_][a-zA-Z0-9_]+).*$",
             "\\1",
             grep("Running job:", console.output, value=T)))}}
 
