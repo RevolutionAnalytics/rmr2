@@ -15,8 +15,7 @@
 has.rows = function(x) !is.null(nrow(x))
 all.have.rows = Curry(all.predicate, P = has.rows)
 
-rmr.length = 
-  function(x) if(has.rows(x)) nrow(x) else length(x)
+rmr.length = NROW
 
 sapply.rmr.length = 
   function(xx)
