@@ -79,40 +79,17 @@ rmr.slice =
       x[r]}
 
 rmr.recycle = 
-  function(this, upto) {
-    if(is.null(this))
-      NULL
-    else {
-      if(is.null(upto))
-        this
-      else {
-        l.this = rmr.length(this)
-        l.upto = if(is.null(upto)) 1 else rmr.length(upto)
-        if(l.this == l.upto) this
-        else {
-          if(min(l.this,l.upto) == 0)
-            stop("Can't recycle 0-length argument")
-          else
-            rmr.slice(
-              rmr.slice(
-                this,
-                rep(1:rmr.length(this), ceiling(l.upto/l.this))),
-              1:max(l.upto, l.this))}}}}
+  function(args) {
+    index = 
+      suppressWarnings(
+        do.call(cbind, lapply(args, function(x) 1:rmr.length(x))))
+    mapply(
+      rmr2:::rmr.slice, 
+      args, 
+      split(index, col(index)), 
+      SIMPLIFY = FALSE)}
 
-recycle.keyval =
-  function(kv) {
-    k = keys(kv)
-    v = values(kv)
-    if((rmr.length(k) == rmr.length(v)) ||
-         is.null(k))
-      kv
-    else {
-      if(rmr.length(v) == 0)
-        list(key = NULL, value = NULL)
-      else
-        keyval(
-          rmr.recycle(k, v),
-          rmr.recycle(v, k))}}
+recycle.keyval = rmr.recycle
 
 slice.keyval = 
   function(kv, r) {
