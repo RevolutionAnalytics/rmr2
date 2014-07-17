@@ -81,7 +81,7 @@ attempt.id =
 activate.profiling = function(profile) {
   dir = 
     file.path(
-      rmr.options("dfs.tempdir"),
+      tempdir(),
       "Rprof", 
       job.id(), 
       attempt.id())
