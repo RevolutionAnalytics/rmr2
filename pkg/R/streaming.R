@@ -81,7 +81,7 @@ attempt.id =
 activate.profiling = function(profile) {
   dir = 
     file.path(
-      tempdir(),
+      "/tmp",
       "Rprof", 
       job.id(), 
       attempt.id())
