@@ -162,7 +162,7 @@ fi
 # check if 'ant' can be found
 if [ ! `which ant 2>/dev/null`]; then
     if [ ! -e apache-ant-1.9.2 ]; then
-        wget http://mirror.nus.edu.sg/apache/ant/binaries/apache-ant-1.9.2-bin.tar.gz
+        wget http://archive.apache.org/dist/ant/binaries/apache-ant-1.9.2-bin.tar.gz
         tar zxf apache-ant-1.9.2-bin.tar.gz
     fi
     export PATH=apache-ant-1.9.2/bin:$PATH
