@@ -116,7 +116,7 @@ rmr.coerce =
     if(is.atomic(template)) 
       switch(
         class(template),
-        factor = factor(unlist(x), levels = levels(template)),
+        factor = factor(unlist(x), levels = as.character(x)),
         as(unlist(x),class(template)))
     else
       I(splat(c)(x))}
@@ -144,7 +144,7 @@ from.list =
       data.frame = to.data.frame(x, template),
       unlist(
         if(is.factor(template)) 
-          factor(x, levels = levels(template)) 
+          factor(unlist(x), levels = as.character(x)) 
         else x))}
 
 make.typedbytes.input.format =
