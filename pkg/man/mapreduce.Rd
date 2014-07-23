@@ -31,7 +31,7 @@
 \item{output.format}{Output format specification, see  \code{\link{make.output.format}}}
 \item{backend.parameters}{This option is for advanced users only and may be removed in the future. Specify additional, backend-specific
     options, as in \code{backend.parameters = list(hadoop  = list(D = "mapred.reduce.tasks=1"), local = list())}. It is recommended not to use this argument to change the semantics of mapreduce (output should be independent of this argument). Each backend can only see the nested list named after the backend itself.  The interpretation is the following: for the hadoop backend, generate an additional hadoop streaming command line argument for each element of the list, "-name value". If the value is TRUE generate "-name" only, if it is FALSE skip. One possible use is to specify the number of mappers and reducers on a per-job basis. It is not guaranteed that the generated streaming command will be a legal command. In particular, remember to put any generic options before any specific ones, as per hadoop streaming manual. For the local backend, the list is currently ignored.}
-\item{verbose}{Run hadoop in verbose mode. No effect on the local backend}}
+\item{verbose}{Run hadoop in verbose mode. When \code{FALSE} job and, on YARN, application ids are returned as attributes. No effect on the local backend}}
 
 \value{The value of \code{output}, or, when missing, a \code{\link{big.data.object}}}
 

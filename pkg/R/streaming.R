@@ -81,7 +81,7 @@ attempt.id =
 activate.profiling = function(profile) {
   dir = 
     file.path(
-      rmr.options("dfs.tempdir"),
+      "/tmp",
       "Rprof", 
       job.id(), 
       attempt.id())
@@ -442,12 +442,12 @@ rmr.stream =
       list(
         application.id = 
           gsub(
-            "^.*Submitted application (.*) to ResourceManager.*$",
-            "\\1",
+            "^.*Submitted application ([a-zA-Z_][a-zA-Z0-9_]+).*$", 
+            "\\1", 
             grep("^.*Submitted application", console.output, value=T)),
         job.id = 
           gsub(
-            "^.*Running job: (.*)$",
+            "^.*Running job: ([a-zA-Z_][a-zA-Z0-9_]+).*$",
             "\\1",
             grep("Running job:", console.output, value=T)))}}
 
@@ -469,6 +469,7 @@ hdfs.cmd =
         Sys.getenv("HDFS_CMD"),
         file.path(dirname(hadoop.cmd()), "hdfs"),
         file.path(Sys.getenv("HADOOP_HOME"), "bin", "hdfs"),
+        suppressWarnings(system2(command = "which", args = "hdfs", stdout = TRUE)),
         hadoop.cmd())
     alternatives[min(which(sapply(alternatives, file.exists)))]}
 

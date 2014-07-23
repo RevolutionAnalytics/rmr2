@@ -391,22 +391,6 @@ mapreduce = function(
 ## equijoin(left.input="/tmp/reljoin.left", right.input="/tmp/reljoin.right", output = "/tmp/reljoin.out")
 ## from.dfs("/tmp/reljoin.out")
 
-reduce.default = 
-  function(k, vl, vr) {
-    if((is.list(vl) && !is.data.frame(vl)) || 
-         (is.list(vr) && !is.data.frame(vr)))
-      list(left = vl, right = vr)
-    else{
-      vl = as.data.frame(vl)
-      vr = as.data.frame(vr)
-      names(vl) = paste(names(vl), "l", sep = ".")
-      names(vr) = paste(names(vr), "r", sep = ".")
-      if(all(is.na(vl))) vr
-      else {
-        if(all(is.na(vr))) vl
-        else
-          merge(vl, vr, by = NULL)}}}
-
 equijoin = 
   function(
     left.input = NULL, 
@@ -457,15 +441,33 @@ equijoin =
     pad.side =
       function(vv, outer) 
         if (length(vv) == 0 && (outer)) c(NA) else c.or.rbind(vv)
-    map = 
+    map = {
       if (is.null(input)) {
         function(k, v) {
           ils = is.left.side(left.input, right.input)
           mark.side(if(ils) map.left(k, v) else map.right(k, v), ils)}}
-    else {
-      function(k, v) {
-        c.keyval(mark.side(map.left(k, v), TRUE), 
-                 mark.side(map.right(k, v), FALSE))}}
+      else {
+        function(k, v) {
+          c.keyval(mark.side(map.left(k, v), TRUE), 
+                   mark.side(map.right(k, v), FALSE))}}}
+    wrap.if.outer = 
+      function(x) 
+        if(outer == "") x else list(x)
+    reduce.default = 
+      function(k, vl, vr) {
+        if((is.list(vl) && !is.data.frame(vl)) || 
+             (is.list(vr) && !is.data.frame(vr)))
+          list(left = vl, right = vr)
+        else{
+          vl = as.data.frame(vl)
+          vr = as.data.frame(vr)
+          names(vl) = paste(names(vl), "l", sep = ".")
+          names(vr) = paste(names(vr), "r", sep = ".")
+          if(all(is.na(vl))) wrap.if.outer(vr)
+          else {
+            if(all(is.na(vr))) wrap.if.outer(vl)
+            else
+              wrap.if.outer(merge(vl, vr, by = NULL))}}}
     eqj.reduce = 
       function(k, vv) {
         rs = reduce.split(vv)
@@ -473,13 +475,27 @@ equijoin =
         right.side = pad.side(rs$`FALSE`, left.outer || full.outer)
         if(!is.null(left.side) && !is.null(right.side))
           reduce(k[[1]], left.side, right.side)}
+    out = 
+      mapreduce(
+        map = map, 
+        reduce = eqj.reduce,
+        input = c(left.input, right.input), 
+        output = output,
+        input.format = input.format,
+        output.format = output.format,)
+  if(outer == "") out
+  else {
+    template = 
+      values(
+        from.dfs(
+        mapreduce(
+          out, 
+          map = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
+          reduce = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
+          combine = TRUE)))
     mapreduce(
-      map = map, 
-      reduce = eqj.reduce,
-      input = c(left.input, right.input), 
-      output = output,
-      input.format = input.format,
-      output.format = output.format,)}
+      out,
+      map = function(k,v) plyr::rbind.fill(c(v, list(template[NULL,]))))}}
 
 status = function(value)
   cat(
