@@ -194,7 +194,13 @@ split.data.frame.fast =
           x, 
           Curry(split, f = ind, drop = drop)))
     rn = split(rownames(x), f = ind, drop = drop)
-    mapply(function(a, na) {rownames(a) = na; a}, y, rn, SIMPLIFY = FALSE)}
+    mapply(
+      function(a, na) {
+        rownames(a) = na
+        delevel(a)}, 
+      y, 
+      rn, 
+      SIMPLIFY = FALSE)}
 
 split.data.frame.fastest = 
   function(x, ind, drop, keep.rownames) 
