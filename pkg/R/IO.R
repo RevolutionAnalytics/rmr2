@@ -225,12 +225,14 @@ intersperse.one =
     list(an.element))  
 
 delevel = 
-  function(x) 
-    switch(
-      class(x), 
-      factor = factor(x), 
-      data.frame = data.frame(lapply(x, delevel)), 
-      x)
+  function(x) {
+    if(is.factor(x)) factor(x)
+    else{
+      if(is.data.frame(x))
+        structure(
+          data.frame(lapply(x, delevel)),
+          row.names = row.names(x))
+      else x}}
 
 make.native.or.typedbytes.output.format = 
   function(native, write.size = 10^6) {
