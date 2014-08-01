@@ -1,8 +1,8 @@
-# What's new in `rmr2` 3.1.3
+# What's new in `rmr2` 3.2.0
 
 ## Features
 
-* `mapreduce` now returns job id and application id (the latter YARN only) as attributes to the return value when `verbose = F` #105.
+* `mapreduce` now returns job id and application id (the latter on YARN only) as attributes to the return value when `verbose = F` #105.
 
 ## Bugs Fixed
 
