@@ -414,14 +414,14 @@ rmr.stream =
     paste(
       hadoop.command, 
       stream.mapred.io,  
-      if(is.null(backend.parameters)) ""
-      else
-        do.call(paste.options, backend.parameters), 
       paste.options(
         files = 
           paste(
             collapse = ",",           
             c(image.files, map.file, reduce.file, combine.file))),
+      if(is.null(backend.parameters)) ""
+      else
+        do.call(paste.options, backend.parameters), 
       input, 
       output, 
       mapper, 
