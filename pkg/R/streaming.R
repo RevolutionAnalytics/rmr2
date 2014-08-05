@@ -340,7 +340,7 @@ rmr.stream =
     default.input.format = make.input.format("native")
     default.output.format = make.output.format("native")
     
-    libs = sub("package:", "", grep("package", search(), value = TRUE))
+    libs = sub("package:", "", grep("package", rev(search()), value = TRUE))
     image.files = 
     c(
       save.env(

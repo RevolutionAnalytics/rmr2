@@ -116,8 +116,8 @@ rmr.coerce =
     if(is.atomic(template)) 
       switch(
         class(template),
-        factor = factor(unlist(x), levels = as.character(x)),
-        as(unlist(x),class(template)))
+        factor = factor(unlist(x)),
+        as(unlist(x), class(template)))
     else
       I(splat(c)(x))}
 
@@ -142,10 +142,8 @@ from.list =
       list = splat(c)(x),
       matrix = splat(rbind)(x), 
       data.frame = to.data.frame(x, template),
-      unlist(
-        if(is.factor(template)) 
-          factor(unlist(x), levels = as.character(x)) 
-        else x))}
+      factor = factor(unlist(x)),
+      unlist(x))}
 
 make.typedbytes.input.format =
   function(read.size = 10^7, native = FALSE) {
@@ -227,12 +225,14 @@ intersperse.one =
     list(an.element))  
 
 delevel = 
-  function(x) 
-    switch(
-      class(x), 
-      factor = factor(x), 
-      data.frame = data.frame(lapply(x, delevel)), 
-      x)
+  function(x) {
+    if(is.factor(x)) factor(x)
+    else{
+      if(is.data.frame(x))
+        structure(
+          data.frame(lapply(x, delevel)),
+          row.names = row.names(x))
+      else x}}
 
 make.native.or.typedbytes.output.format = 
   function(native, write.size = 10^6) {
