@@ -20,7 +20,12 @@ rmr.options.env$backend = "hadoop"
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$hdfs.tempdir = "/tmp" #can't check it exists here
 rmr.options.env$exclude.objects = NULL
-rmr.options.env$backend.parameters = list()
+rmr.options.env$backend.parameters =  
+  list(
+    hadoop = 
+      list(
+        D="mapreduce.map.java.opts=-Xmx400M",
+        D="mapreduce.reduce.java.opts=-Xmx400M")))
 
 add.last =
   function(action) {
