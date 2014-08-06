@@ -230,7 +230,7 @@ delevel =
     else{
       if(is.data.frame(x))
         structure(
-          data.frame(lapply(x, delevel)),
+          data.frame(lapply(x, delevel), stringsAsFactors = FALSE),
           row.names = row.names(x))
       else x}}
 
