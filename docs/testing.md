@@ -1,13 +1,20 @@
-# Compatibility testing for rmr 3.1.1
-Please contribute with additional reports. To claim compatibility you need to run `R CMD  check path-to-rmr` successfully.
-If you build your own Hadoop, see [Which Hadoop for rmr](https://github.com/RevolutionAnalytics/RHadoop/wiki/Which-Hadoop-for-rmr).
-If you are interested in the compatibility chart for other releases, choose one from the drop down menu on the top left, under tags and find this document again (under docs). Not every release gets a complete round of testing, so typically a bug fix release (change in the third number only) is equally or more compatible than the previous release, even if we don't have the resources to test it directly. 
+# Testing for rmr2 3.2.0
+
+In the table at the bottom we collect results concerning testing of rmr on a given combination of R/OS and Hadoop releases. We collect both positive and negative results if available. If a combination is not present in this table, it doesn't imply lack of compatibility. In case of negative results, they will be recorded but there is no guarantee that they will be fixed, albeit it's likely for current and common setups. In the early days `rmr` required a specific list of patches to be present in Hadoop to work. Currently, we expect it to work on any current or recent distibution by the Apache foundation, Hortonworks, Cloudera and MapR.
+
+Testing is conducted by running `R CMD  check path-to-rmr` and requires an additional dependency, quickcheck, also downloadable from our wiki. Failures on producing documentation in legacy formats are not important and are ignored. Notes and warnings are not important in the sense that they do not determine success, but it may be helpful to report them in the issue tracker. Please contribute additional testing reports. 
+
+If you are interested in the testing conducted on other releases, choose one from the drop down menu on the top left, under tags and find this document again (under docs). 
+
+
 
 <table>
 <thead>
 <tr><th>Hadoop</th><th>R</th><th>OS</th><th>Notes</th><th>Reporter</th></tr>
 </thead>
 <tbody>
-<tr><td>CDH4.6</td><td>R 3.0.2 (Revolution R 7.0)</td><td>CentOS 6.3</td><td>mr2</td><td><a href=mailto:rhadoop@revolutionanalytics.com>Revolution</a></td></tr>
+<tr><td>CDH5.0.2</td><td>R 3.0.3 (Revolution R 7.2)</td><td>RHEL 6.5</td><td></td><td><a href=mailto:rhadoop@revolutionanalytics.com>Revolution</a></td></tr>
+></td></tr>
+
 </tbody>
 </table>
