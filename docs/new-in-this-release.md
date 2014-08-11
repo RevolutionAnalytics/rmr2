@@ -11,4 +11,4 @@
 * The node profiling setting was ineffective because of wrong write location. As a workaround, it now writes under "tmp". Will think harder about this or add a configuration later on if there is demand 51f877d be1ae16.
 * Updated build procedure for hbase I/O format de890bd e9aebbf.
 * Fixed a problem with dropped factor levels and data bloat also related to factors #128 #129. In the current solution factor order is not preserved. If this is a problem please create an issue.
-* Load order for packages on the nodes was opposite of correct one 42b581a/
+* Load order for packages on the nodes was opposite of correct one 42b581a.
