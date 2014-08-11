@@ -469,7 +469,13 @@ hdfs.cmd =
         Sys.getenv("HDFS_CMD"),
         file.path(dirname(hadoop.cmd()), "hdfs"),
         file.path(Sys.getenv("HADOOP_HOME"), "bin", "hdfs"),
-        suppressWarnings(system2(command = "which", args = "hdfs", stdout = TRUE)),
+        try(
+          suppressWarnings(
+            system2(
+              command = "which", 
+              args = "hdfs", 
+              stdout = TRUE, 
+              stderr = FALSE))),
         hadoop.cmd())
     alternatives[min(which(sapply(alternatives, file.exists)))]}
 
