@@ -487,19 +487,19 @@ equijoin =
         output = output,
         input.format = input.format,
         output.format = output.format,)
-  if(outer == "") out
-  else {
-    template = 
-      values(
-        from.dfs(
-        mapreduce(
-          out, 
-          map = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
-          reduce = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
-          combine = TRUE)))
-    mapreduce(
-      out,
-      map = function(k,v) plyr::rbind.fill(c(v, list(template[NULL,]))))}}
+    if(outer == "") out
+    else {
+      template = 
+        values(
+          from.dfs(
+            mapreduce(
+              out, 
+              map = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
+              reduce = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
+              combine = TRUE)))
+      mapreduce(
+        out,
+        map = function(k,v) plyr::rbind.fill(c(v, list(template[NULL,]))))}}
 
 status = function(value)
   cat(

@@ -219,7 +219,7 @@ rmr.stream =
     work.dir = "."
     rmr.local.env = tempfile(pattern = "rmr-local-env")
     rmr.global.env = tempfile(pattern = "rmr-global-env")
-        
+    
     preamble = paste(sep = "", '
   sink(file = stderr())
   options(warn = 1) 
@@ -285,7 +285,7 @@ rmr.stream =
     vectorized = vectorized.reduce, 
     map.only = !has.reduce)
 '
-  reduce.line = '  
+    reduce.line = '  
   rmr2:::reduce.loop(
     reduce = reduce, 
     vectorized = vectorized.reduce,
@@ -295,7 +295,7 @@ rmr.stream =
     profile = profile.nodes)
 '
     
-  combine.line = '  
+    combine.line = '  
   rmr2:::reduce.loop(
     reduce = combine, 
     vectorized = vectorized.reduce,
@@ -342,15 +342,15 @@ rmr.stream =
     
     libs = sub("package:", "", grep("package", rev(search()), value = TRUE))
     image.files = 
-    c(
-      save.env(
-        environment(), 
-        rmr.local.env, 
-        NULL),
-      save.env(
-        .GlobalEnv, 
-        rmr.global.env, 
-        pkg.opts$exclude.objects))
+      c(
+        save.env(
+          environment(), 
+          rmr.local.env, 
+          NULL),
+        save.env(
+          .GlobalEnv, 
+          rmr.global.env, 
+          pkg.opts$exclude.objects))
     ## prepare hadoop streaming command
     hadoop.command = hadoop.streaming()
     input = make.input.files(in.folder)
@@ -378,17 +378,17 @@ rmr.stream =
         paste(
           rscript, 
           file.path(work.dir, basename(map.file))))
-  if(!is.null(reduce))
-    reducer = 
-    paste.options(
+    if(!is.null(reduce)) {
       reducer = 
-        paste(
-          rscript, 
-          file.path(work.dir, basename(reduce.file))))
-  else {
-    reducer = ""
-    reduce.file = NULL }
-  if(is.function(combine)) {
+        paste.options(
+          reducer = 
+            paste(
+              rscript, 
+              file.path(work.dir, basename(reduce.file))))}
+    else {
+      reducer = ""
+      reduce.file = NULL }
+    if(is.function(combine)) {
       combiner = 
         paste.options(
           combiner = 
@@ -399,34 +399,34 @@ rmr.stream =
     else {
       combiner = ""
       combine.file = NULL}
-  if(is.null(reduce) && 
-       !is.element(
-         "mapred.reduce.tasks",
-         sapply(
-           strsplit(as.character(named.slice(backend.parameters, 'D')), '='), 
-           function(x)x[[1]])))
-    backend.parameters = c(list(D = 'mapred.reduce.tasks=0'), backend.parameters)
-  #debug.opts = "-mapdebug kdfkdfld -reducexdebug jfkdlfkja"
-  
-  on.exit(splat(file.remove)(c(image.files, map.file, reduce.file, combine.file)), add = TRUE)
-  
-  final.command = 
-    paste(
-      hadoop.command, 
-      stream.mapred.io,  
-      if(is.null(backend.parameters)) ""
-      else
-        do.call(paste.options, backend.parameters), 
-      paste.options(
-        files = 
-          paste(
-            collapse = ",",           
-            c(image.files, map.file, reduce.file, combine.file))),
-      input, 
-      output, 
-      mapper, 
-      combiner,
-      reducer, 
+    if(is.null(reduce) && 
+         !is.element(
+           "mapred.reduce.tasks",
+           sapply(
+             strsplit(as.character(named.slice(backend.parameters, 'D')), '='), 
+             function(x)x[[1]])))
+      backend.parameters = c(list(D = 'mapred.reduce.tasks=0'), backend.parameters)
+    #debug.opts = "-mapdebug kdfkdfld -reducexdebug jfkdlfkja"
+    
+    on.exit(splat(file.remove)(c(image.files, map.file, reduce.file, combine.file)), add = TRUE)
+    
+    final.command = 
+      paste(
+        hadoop.command, 
+        stream.mapred.io,  
+        if(is.null(backend.parameters)) ""
+        else
+          do.call(paste.options, backend.parameters), 
+        paste.options(
+          files = 
+            paste(
+              collapse = ",",           
+              c(image.files, map.file, reduce.file, combine.file))),
+        input, 
+        output, 
+        mapper, 
+        combiner,
+        reducer, 
         input.format.opt, 
         output.format.opt, 
         "2>&1")
@@ -494,8 +494,8 @@ nonempty.or.null =
     function() {
       x = Sys.getenv(var)
       if(x == "") NULL else x} 
-  
+
 current.task = nonempty.or.null("mapred_task_id")
-    
+
 current.job = nonempty.or.null("mapred_job_id")
 
