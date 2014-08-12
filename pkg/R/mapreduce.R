@@ -72,9 +72,6 @@ rmr.options =
       opt.assign("backend.parameters", backend.parameters)
     if(is.named.arg("exclude.objects"))
       opt.assign("exclude.objects", exclude.objects)
-    if (rmr.options.env$backend == "hadoop")
-      if(!hdfs.exists(hdfs.tempdir)) #can't do this at package load time
-        warning("Please set an HDFS temp directory with rmr.options(hdfs.tempdir = ...)")
     read.args = {
       if(is.null(names(args)))
         args
