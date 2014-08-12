@@ -469,19 +469,20 @@ hdfs.cmd =
         function() Sys.getenv("HDFS_CMD"),
         function() file.path(dirname(hadoop.cmd()), "hdfs"),
         function() file.path(Sys.getenv("HADOOP_HOME"), "bin", "hdfs"),
-        function() try(
+        function() 
+          if(.Platform$OS.type != "windows"){
           suppressWarnings(
             system2(
               command = "which", 
               args = "hdfs", 
               stdout = TRUE, 
-              stderr = FALSE))),
+              stderr = FALSE))},
         hadoop.cmd)
     for (f in alternatives) {
       cmd = f()
       if(file.exists(cmd))
         return(cmd)}
-  stop("Can't find an alternative for hdfs command")}
+    stop("Can't find an alternative for hdfs command")}
 
 hadoop.streaming = 
   function() {
