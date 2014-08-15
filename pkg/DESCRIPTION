@@ -11,3 +11,5 @@ Collate: basic.R extras.R hdfs.R keyval.R IO.R local.R mapreduce.R parse-url.R q
 Maintainer: Revolution Analytics <rhadoop@revolutionanalytics.com>
 Description: Supports the map reduce programming model on top of hadoop streaming
 License: Apache License (== 2.0)
+ByteCompile: TRUE
+BuildVignettes: FALSE
