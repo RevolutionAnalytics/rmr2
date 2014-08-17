@@ -223,6 +223,7 @@ rmr.split =
           if(lossy) Curry(split.data.frame.fastest, keep.rownames = keep.rownames)
           else split.data.frame.fast},
         split)
+    if(is.factor(x)) x = as.character(x)
     y = spl(x,ind, drop = TRUE)
     if (is.matrix(ind))
       ind = as.data.frame(ind)
@@ -242,6 +243,15 @@ row.names.to.column =
   function(df){
     df[, ncol(df) + 1] = rownames(df)
     df}
+
+defactor = 
+  function(x)
+    lapply(
+      x,
+      function(y){
+        if(is.factor(y))
+          as.character(y)
+        else y})
 
 split.keyval = function(kv, size, lossy = FALSE) {
   k = keys(kv)
@@ -279,7 +289,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
           switch(
             class(x),
             list = split(x, 1:length(x)),
-            data.frame = if(lossy) t.list(x) else rmr.split(x, x , FALSE, keep.rownames = FALSE),
+            data.frame = if(lossy) t.list(defactor(x)) else rmr.split(x, x , FALSE, keep.rownames = FALSE),
             matrix = if(lossy) t.list(as.data.frame(x)) else rmr.split(x, as.data.frame(x), FALSE, keep.rownames = FALSE),
             factor = as.list(as.character(x)),
             as.list(x))

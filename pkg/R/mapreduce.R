@@ -20,7 +20,14 @@ rmr.options.env$backend = "hadoop"
 rmr.options.env$profile.nodes = "off"
 rmr.options.env$hdfs.tempdir = "/tmp" #can't check it exists here
 rmr.options.env$exclude.objects = NULL
-rmr.options.env$backend.parameters = list()
+rmr.options.env$backend.parameters =  
+  list(
+    hadoop = 
+      list(
+        D = "mapreduce.map.java.opts=-Xmx400M", 
+        D = "mapreduce.reduce.java.opts=-Xmx400M", 
+        D = "mapreduce.map.memory.mb=4096", 
+        D = "mapreduce.reduce.memory.mb=4096"))
 
 add.last =
   function(action) {
@@ -65,9 +72,6 @@ rmr.options =
       opt.assign("backend.parameters", backend.parameters)
     if(is.named.arg("exclude.objects"))
       opt.assign("exclude.objects", exclude.objects)
-    if (rmr.options.env$backend == "hadoop")
-      if(!hdfs.exists(hdfs.tempdir)) #can't do this at package load time
-        warning("Please set an HDFS temp directory with rmr.options(hdfs.tempdir = ...)")
     read.args = {
       if(is.null(names(args)))
         args
@@ -483,19 +487,19 @@ equijoin =
         output = output,
         input.format = input.format,
         output.format = output.format,)
-  if(outer == "") out
-  else {
-    template = 
-      values(
-        from.dfs(
-        mapreduce(
-          out, 
-          map = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
-          reduce = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
-          combine = TRUE)))
-    mapreduce(
-      out,
-      map = function(k,v) plyr::rbind.fill(c(v, list(template[NULL,]))))}}
+    if(outer == "") out
+    else {
+      template = 
+        values(
+          from.dfs(
+            mapreduce(
+              out, 
+              map = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
+              reduce = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
+              combine = TRUE)))
+      mapreduce(
+        out,
+        map = function(k,v) plyr::rbind.fill(c(v, list(template[NULL,]))))}}
 
 status = function(value)
   cat(
