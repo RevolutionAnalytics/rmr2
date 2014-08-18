@@ -17,11 +17,11 @@ make.output.format(format = "native", mode = c("binary", "text"), streaming.form
   \item{mode}{Mode can be either \code{"text"} or \code{"binary"}, which tells R what type of connection to use when opening the IO connections.}
   \item{streaming.format}{Class to pass to hadoop streaming as \code{inputformat} or \code{outputformat} option. This class is the first in the input chain to perform its duties on the input side and the last on the output side. Right now this option is not honored in local mode.}
   \item{backend.parameters}{Sometimes the class passed to hadoop streaming (see the \code{streaming.format} argument) needs additional information to be properly configured which can be supplied to the streaming command line, typically with the \code{-D} option. This information can be specified with this argument, with a named list where the names are the option name, typically \code{"D"}, and the values are \code{"property=value"} pairs as length-one character vectors, as in \code{backend.parameters = list(D="property1=value1", D="property2=value2")} }
-  \item{\dots}{Additional arguments to the format function. }
+  \item{\dots}{Additional arguments to the format function, which depend on the format being defined.
   All existing input formats accept a \code{read.size} (for binary) or \code{nrow} (for text) argument representing a number of bytes or number of rows to parse for each map call. These settings are used as suggestions and can not be honored exactly. Correctness of a program should not depend on their values. Custom formats created by users do not need to accept these arguments, but need to provide some other mechanism to read from the input connection in reasonably sized chunk. Moving to more format-specific arguments:
   \describe{
-  \item{csv}{Arguments are the same as for \code{\link{read.table}} and \code{\link{write.table}} for the input and output resp, with the exception of \code{header, file, x, col.names} and \code{row.names}, the latter two allowed for input only.}
-  \item{json}{only on the input side, \code{key.class} and a \code{value.class} help in mapping the JSON data model to R's own more flexibly. An attempt will be made to cast the data to the specified classes.}
+  \item{csv}{Additional arguments detail the specifics of the CSV dialect to use and are the same as for \code{\link{read.table}} and \code{\link{write.table}} for the input and output resp, with the exception of \code{header, file, x, nrows, col.names} and \code{row.names}, the latter two allowed for input only.}
+  \item{json}{Only for the input format, one can specify a \code{key.class} and a \code{value.class} to help in mapping the JSON data model to R's own more flexibly. An attempt will be made to cast the data to the specified classes.}
   \item{native, sequence.typedbytes}{\code{write.size} says how many values to map to a single typedbytes key-value pair when the key is \code{NULL}. }
   \item{hbase}{The name of the table to read from is provided as the input argument to \code{\link{mapreduce}}. Additional arguments are: 
   \describe{
@@ -30,18 +30,20 @@ make.output.format(format = "native", mode = c("binary", "text"), streaming.form
   \item{\code{dense}}{controls whether the data read from hbase is returned as a 4-column data frame (key, family, column and cell) or a number of columns equal to the number of columns selected, plus one for the key;} 
   \item{\code{atomic}}{controls whether the data frame columns are atomic or returned "as is", see \code{\link{I}}.}
   \item{\code{start.row} and \code{stop.row}}{limit input to a range of keys between the two supplied arguments, each optional; remember the order is based on the serialized representation of the keys}
-  \item{\code{row.filter}}{specify a regular expression to filter the input table; remember the regular expression is matched against the serialized representation of the keys}}}}}
+  \item{\code{row.filter}}{specify a regular expression to filter the input table; remember the regular expression is matched against the serialized representation of the keys}}}
+  \item{avro}{(input only) It has one mandatory additional argument, \code{schema.file} that should provide the URL of a file containing an appropriate avro schema, can be the same as file to be read. The user can specify the protocol, for instance \code{file:} or \code{hdfs:} as part of the URL, with the first being the default.}}}}
 
 \details{
 The goal of these functions is to encapsulate some of the complexity of the IO settings, providing meaningful defaults and predefined combinations.  If you don't want to deal with the full complexity of defining custom IO formats, there are prepackaged combinations. 
 \describe{
-\item{text}{free text, useful mostly on the input side for NLP type applications;}
-\item{json}{one or two tab separated, single line JSON objects per record;}
+\item{text}{is free text, useful mostly on the input side for NLP type applications;}
+\item{json}{is one or two tab separated, single line JSON objects per record;}
 \item{csv}{is the CSV format, configurable through additional arguments;}
 \item{native}{uses the internal R serialization, offers the highest level of compatibility with R data types and is the default;}
-\item{sequence.typedbytes}{is a sequence file (in the Hadoop sense) where key and value are of type typedbytes, which is a simple serialization format used in connection with streaming for compatibility with other hadoop subsystems. Typedbytes is documented here \url{https://hadoop.apache.org/mapreduce/docs/current/api/org/apache/hadoop/typedbytes/package-summary.html}}
+\item{sequence.typedbytes}{is a sequence file (in the Hadoop sense) where key and value are of type typedbytes, which is a simple serialization format used in connection with streaming for compatibility with other hadoop subsystems. Typedbytes is documented here \url{https://hadoop.apache.org/mapreduce/docs/current/api/org/apache/hadoop/typedbytes/package-summary.html}.}
 \item{hbase}{allows to read from (but not yet write to) an HBase table. This format should still considered experimental. Hadoop should be already configured to run streaming jobs on HBase tables \url{https://wiki.apache.org/hadoop/Hbase/MapReduce}.}
-\item{pig.hive}{ is a variant of CSV to transfer data to and from Hive or Pig, when using their default format \code{`ROW FORMAT DELIMITED FIELDS TERMINATED BY '001' LINES TERMINATED BY '\n'`}.}}
+\item{pig.hive}{ is a variant of CSV to transfer data to and from Hive or Pig, when using their default format \code{`ROW FORMAT DELIMITED FIELDS TERMINATED BY '001' LINES TERMINATED BY '\n'`}.}
+\item{avro}{(input only) is the format defined by the Apache Avro project.}}
 If you want to implement custom formats, the input processing is the result of the composition of a Java class and an R function, and the same is true on the output side but in reverse order and you can specify both as arguments to these functions.}
 
 \value{
