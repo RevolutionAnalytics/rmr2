@@ -44,6 +44,7 @@ make.json.input.format =
                    keyval(process.field(x[1], key.class), process.field(x[2], value.class))))}}}
 
 
+
 make.json.output.format = 
   function(write.size = 10^4)
     function(kv, con) {
@@ -97,11 +98,47 @@ make.csv.output.format =
                 row.names = FALSE, 
                 col.names = FALSE)}
 
-typedbytes.reader =
-  function(data) {
-    if(is.null(data)) NULL
-    else
-      .Call("typedbytes_reader", data, PACKAGE = "rmr2")}
+make.typedbytes.input.format = function(recycle = TRUE) {
+  obj.buffer = list()
+  obj.buffer.rmr.length = 0
+  raw.buffer = raw()
+  read.size = 100
+  function(con, keyval.length) {
+    while(length(obj.buffer) < 2 || 
+            obj.buffer.rmr.length < keyval.length) {
+      raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
+      if(length(raw.buffer) == 0) break;
+      parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
+      obj.buffer <<- c(obj.buffer, parsed$objects)
+      approx.read.records = {
+        if(length(parsed$objects) == 0) 0 
+        else 
+          sum(
+            sapply(sample(parsed$objects, 10, replace = T), rmr.length)) * 
+          length(parsed$objects)/10.0 }
+      obj.buffer.rmr.length <<- obj.buffer.rmr.length + approx.read.records 
+      read.size <<- ceiling(1.1^sign(keyval.length - obj.buffer.rmr.length) * read.size)
+      if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
+    straddler = list()
+    retval = 
+      if(length(obj.buffer) == 0) NULL 
+    else { 
+      if(length(obj.buffer)%%2 ==1) {
+        straddler = obj.buffer[length(obj.buffer)]
+        obj.buffer <<- obj.buffer[-length(obj.buffer)]}
+      kk = odd(obj.buffer)
+      vv = even(obj.buffer)
+      if(recycle) {
+        keyval(
+          c.or.rbind.rep(kk, sapply.rmr.length(vv)), 
+          c.or.rbind(vv))}
+      else {
+        keyval(kk, vv)}}
+    obj.buffer <<- straddler
+    obj.buffer.rmr.length <<- 0
+    retval}}
+
+make.native.input.format = make.typedbytes.input.format
 
 typedbytes.writer =
   function(objects, con, native) {
@@ -222,7 +259,7 @@ intersperse.one =
         lapply(
           split(a.list, ceiling(seq_along(a.list)/every.so.many)), 
           function(y) c(list(an.element),y))),
-    list(an.element))  
+      list(an.element))  
 
 delevel = 
   function(x) {
@@ -411,9 +448,32 @@ make.keyval.readwriter =
 make.keyval.reader = Curry(make.keyval.readwriter, is.read = TRUE)
 make.keyval.writer = Curry(make.keyval.readwriter, is.read = FALSE)
 
+paste.fromJSON = 
+  function(...)
+    tryCatch(
+      rjson::fromJSON(paste("[", paste(..., sep = ","), "]")),
+      error = 
+        function(e){ 
+          if(is.element(e$message, paste0("unexpected character", c(" 'N'", " 'I'", ": I"), "\n")))
+            e$message = ("Found unexpected character, try updating Avro to 1.7.7 or trunk")
+          stop(e$message)})
+
+make.avro.input.format.function =
+  function(schema.file,...) {
+    schema = ravro:::avro_get_schema(file=schema.file)
+    function(con, n) {
+      lines = 
+        readLines(con = con, n = n)
+      if  (length(lines) == 0) NULL
+      else {
+        x = splat(paste.fromJSON)(lines)
+        y = ravro:::parse_avro(x, schema,encoded_unions=FALSE,
+                               ...)
+        keyval(NULL, y)}}}
+
 IO.formats = c("text", "json", "csv", "native",
                "sequence.typedbytes", "hbase", 
-               "pig.hive")
+               "pig.hive", "avro")
 
 make.input.format = 
   function(
@@ -423,7 +483,8 @@ make.input.format =
     backend.parameters = NULL,
     ...) {
     mode = match.arg(mode)
-    args = list(...)
+    backend.parameters = NULL
+    optlist = list(...)
     if(is.character(format)) {
       format = match.arg(format, IO.formats)
       switch(
@@ -516,13 +577,24 @@ make.input.format =
                           regex.row.filter,
                           sep = "")),
                   list(
-                    libjars = system.file(package = "rmr2", "hadoopy_hbase.jar"))))})}
-    if(is.null(streaming.format) && mode == "binary") 
-      streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
-    list(mode = mode, 
-         format = format, 
-         streaming.format = streaming.format, 
-         backend.parameters = backend.parameters)}
+                    libjars = system.file(package = "rmr2", "hadoopy_hbase.jar"))))},
+        avro = {
+          format = make.avro.input.format.function(...)
+          mode = "text"
+          streaming.format = "org.apache.avro.mapred.AvroAsTextInputFormat"
+          backend.parameters = 
+            list(
+              hadoop = 
+                list(
+                  libjars = 
+                    gsub(":", ",", Sys.getenv("AVRO_LIBS"))))})}
+    )}
+if(is.null(streaming.format) && mode == "binary") 
+  streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
+list(mode = mode, 
+     format = format, 
+     streaming.format = streaming.format, 
+     backend.parameters = backend.parameters)}
 
 set.separator.options =
   function(sep) {

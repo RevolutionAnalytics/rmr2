@@ -159,6 +159,35 @@ for (be in c("local", "hadoop")) {
       precondition = function(l) length(l) > 0,
       sample.size = 10)
   
+  #avro
+  
+  unit.test(
+    function(df) {
+      if(rmr.options("backend") == "local") TRUE 
+      else {
+        tf1 = tempfile()
+        ravro:::write.avro(df, tf1)
+        tf2 = rmr2:::dfs.tempfile()
+        tf3 = paste(tf2(), "avro", sep = ".") 
+        rmr2:::hdfs.put(tf1, tf3)
+        isTRUE(
+          all.equal(
+            df, 
+            values(
+              from.dfs(
+                mapreduce(
+                  tf3, 
+                  map = function(k,v) rmr.str(v),
+                  input.format = 
+                    make.input.format(
+                      format = "avro",
+                      schema.file = tf1)))), #paste("file", tf1, sep = ":"))))), 
+            tolerance = 1e-4, 
+            check.attributes = FALSE))}},
+    generators = list(tdgg.data.frame()),
+    sample.size = 10)
+  
+  
   #equijoin
   stopifnot(
     all(
