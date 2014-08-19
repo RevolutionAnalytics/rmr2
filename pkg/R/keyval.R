@@ -84,7 +84,7 @@ rmr.recycle =
       suppressWarnings(
         do.call(cbind, lapply(args, function(x) 1:rmr.length(x))))
     mapply(
-      rmr2:::rmr.slice, 
+      rmr.slice, 
       args, 
       split(index, col(index)), 
       SIMPLIFY = FALSE)}

@@ -26,7 +26,7 @@ gorder.data.frame =
 gorder.matrix = function(x) gorder(as.data.frame(x))
 gorder.raw = gorder.list = function(x) gorder(cksum(x))
 
-reorder = function(x, o) if(rmr2:::has.rows(x)) x[o, , drop = FALSE] else x[o]
+reorder = function(x, o) if(has.rows(x)) x[o, , drop = FALSE] else x[o]
 
 gsort = function(x) reorder(x, gorder(x))
 

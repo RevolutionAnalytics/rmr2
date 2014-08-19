@@ -12,7 +12,7 @@ test.rmr =
   function() {
     length(
       suppressWarnings(
-        rmr2:::hdfs("- 2>&1 | grep rmr", intern = TRUE))) > 0}
+        hdfs("- 2>&1 | grep rmr", intern = TRUE))) > 0}
 
 hdfs.rmr = 
   (function() {
