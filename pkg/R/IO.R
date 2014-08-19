@@ -588,13 +588,12 @@ make.input.format =
                 list(
                   libjars = 
                     gsub(":", ",", Sys.getenv("AVRO_LIBS"))))})}
-    )}
-if(is.null(streaming.format) && mode == "binary") 
-  streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
-list(mode = mode, 
-     format = format, 
-     streaming.format = streaming.format, 
-     backend.parameters = backend.parameters)}
+    if(is.null(streaming.format) && mode == "binary") 
+      streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
+    list(mode = mode, 
+         format = format, 
+         streaming.format = streaming.format, 
+         backend.parameters = backend.parameters)}
 
 set.separator.options =
   function(sep) {
