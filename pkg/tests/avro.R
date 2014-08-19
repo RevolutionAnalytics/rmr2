@@ -15,6 +15,8 @@
 library(rmr2)
 library(testthat)
 library(ravro)
+library(rhdfs)
+hdfs.init()
 
 rmr.options(backend = "hadoop")
 test_avro_rmr <-
@@ -24,10 +26,10 @@ test_avro_rmr <-
   else {
     tf1 = tempfile(fileext = ".avro")
     expect_true(do.call(ravro:::write.avro, c(list(df, tf1), write.args)))
-    tf2 = rmr2:::dfs.tempfile()
-    tf3 = paste(tf2(), "data.avro", sep = "/")
-    rmr2:::hdfs.mkdir(tf2())
-    rmr2:::hdfs.put(tf1, tf3)
+    tf2 = "/tmp/rmr2.test"
+    tf3 = file.path(tf2, "data.avro")
+    hdfs.mkdir(tf2)
+    hdfs.put(tf1, tf3)
     df.input.format <- do.call(make.input.format,
                                c(list(
                                  format = "avro",
@@ -36,7 +38,7 @@ test_avro_rmr <-
     retdf <- values(
       from.dfs(
         mapreduce(
-          tf2(),
+          tf2,
           map = map,
           input.format = df.input.format)))
     retdf <- retdf[row.names(df), ]
@@ -88,7 +90,7 @@ test_that("type translation", {
   d <- data.frame(x = 1, y = 1:10, fac = factor(fac, levels = L3),
                   b = rep(c(TRUE, FALSE), 5), c = rep(NA, 10),
                   stringsAsFactors = FALSE)
-  expect_equal_avro_rmr(d)
+  expect_equivalent_avro_rmr(d)
 })
 
 ### write can handle missing values
