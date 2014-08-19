@@ -71,7 +71,7 @@ test_that("Handling factors", {
   d <- data.frame(x = 1,
                   y = as.factor(1:10),
                   fac = as.factor(sample(letters[1:3], 10, replace = TRUE)))
-  expect_equal_avro_rmr(d)
+  expect_equivalent_avro_rmr(d) #order of levels can change
 })
 
 
