@@ -88,10 +88,10 @@ for (be in c("local", "hadoop")) {
   ##simplest mapreduce, all default
   unit.test(
     function(kv) {
-    if(rmr2:::length.keyval(kv) == 0) TRUE
-    else {
-      kv1 = from.dfs(mapreduce(input = to.dfs(kv)))
-      kv.cmp(kv, kv1)}},
+      if(rmr2:::length.keyval(kv) == 0) TRUE
+      else {
+        kv1 = from.dfs(mapreduce(input = to.dfs(kv)))
+        kv.cmp(kv, kv1)}},
     generators = list(rmr2:::rkeyval),
     sample.size = 10)
   
@@ -157,9 +157,9 @@ for (be in c("local", "hadoop")) {
             input.format = fmt,
             output.format = fmt),
           format = fmt))}, 
-      generators = list(rlist),
-      precondition = function(l) length(l) > 0,
-      sample.size = 10)
+    generators = list(rlist),
+    precondition = function(l) length(l) > 0,
+    sample.size = 10)
   
   #avro
   
