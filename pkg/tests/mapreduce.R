@@ -14,6 +14,8 @@
 
 library(quickcheck)
 library(rmr2)
+library(rhdfs)
+hdfs.init()
 
 kv.cmp = rmr2:::kv.cmp
 
@@ -167,24 +169,24 @@ for (be in c("local", "hadoop")) {
       else {
         tf1 = tempfile()
         ravro:::write.avro(df, tf1)
-        tf2 = rmr2:::dfs.tempfile()
-        tf3 = paste(tf2(), "avro", sep = ".") 
-        rmr2:::hdfs.put(tf1, tf3)
+        tf2 = "/tmp/rmr2.test.avro"
+        on.exit(hdfs.rm(tf2))
+        rhdfs.put(tf1, tf2)
         isTRUE(
           all.equal(
             df, 
             values(
               from.dfs(
                 mapreduce(
-                  tf3, 
-                  map = function(k,v) rmr.str(v),
+                  tf2, 
+                  map = function(k,v) v,
                   input.format = 
                     make.input.format(
                       format = "avro",
                       schema.file = tf1)))), #paste("file", tf1, sep = ":"))))), 
             tolerance = 1e-4, 
             check.attributes = FALSE))}},
-    generators = list(tdgg.data.frame()),
+    generators = list(rdata.frame),
     sample.size = 10)
   
   

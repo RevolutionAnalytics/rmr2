@@ -30,6 +30,7 @@ test_avro_rmr <-
     tf3 = file.path(tf2, "data.avro")
     hdfs.mkdir(tf2)
     hdfs.put(tf1, tf3)
+    on.exit(hdfs.rmr(tf2))
     df.input.format <- do.call(make.input.format,
                                c(list(
                                  format = "avro",
