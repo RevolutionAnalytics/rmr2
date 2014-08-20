@@ -167,25 +167,21 @@ for (be in c("local", "hadoop")) {
     function(df) {
       if(rmr.options("backend") == "local") TRUE 
       else {
+        names(df) = sub("\\.", "_", names(df))
         tf1 = tempfile()
         ravro:::write.avro(df, tf1)
         tf2 = "/tmp/rmr2.test.avro"
         on.exit(hdfs.rm(tf2))
-        rhdfs.put(tf1, tf2)
-        isTRUE(
-          all.equal(
-            df, 
-            values(
-              from.dfs(
-                mapreduce(
-                  tf2, 
-                  map = function(k,v) v,
-                  input.format = 
-                    make.input.format(
-                      format = "avro",
-                      schema.file = tf1)))), #paste("file", tf1, sep = ":"))))), 
-            tolerance = 1e-4, 
-            check.attributes = FALSE))}},
+        hdfs.put(tf1, tf2)
+        kv.cmp(
+          keyval(NULL, df),
+          from.dfs(
+            mapreduce(
+              tf2, 
+              input.format = 
+                make.input.format(
+                  format = "avro",
+                  schema.file = tf1))))}},
     generators = list(rdata.frame),
     sample.size = 10)
   
