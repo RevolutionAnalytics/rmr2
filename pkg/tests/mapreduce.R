@@ -185,7 +185,6 @@ for (be in c("local", "hadoop")) {
     generators = list(rdata.frame),
     sample.size = 10)
   
-  
   #equijoin
   stopifnot(
     all(
