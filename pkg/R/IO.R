@@ -70,7 +70,7 @@ text.output.format =
   function(kv, con) {
     ser = function(k, v) paste(k, v, collapse = "", sep = "\t")
     out = reduce.keyval(kv, ser, length.keyval(kv))
-    writeLines(paste(out, "\n", collapse="", sep = ""), sep = "\n", con = con)}
+    writeLines(as.character(out), con = con)}
 
 make.csv.input.format =
   function(..., nrows = 10^4) {
