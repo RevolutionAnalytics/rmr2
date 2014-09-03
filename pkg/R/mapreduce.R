@@ -181,6 +181,17 @@ dfs.mkdir =
       stopifnot(all(dir.create(fname)))
     NULL}
 
+dfs.ls =
+  function(fname) {
+    fname = to.dfs.path(fname)
+    if (rmr.options('backend') == 'hadoop') 
+      hdfs.ls(fname)
+    else{
+      fi = file.info(fname)
+      if(fi$isdir)
+        do.call(rbind, lapply(list.files(fname,full.names = TRUE), file.info))
+      else
+        fi}}
 
 # dfs bridge
 
