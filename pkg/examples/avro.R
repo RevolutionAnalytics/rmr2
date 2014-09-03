@@ -1,4 +1,4 @@
-# known limitations: these format work only with mapreduce, not with from.dfs or to.dfs, nor they work in on the local backend
+# known limitations: these formats work only with mapreduce, not with from.dfs or to.dfs, nor they work in on the local backend
 # as a workaround, use a simple conversion job 
 # from.dfs(mapreduce(some.input, input.format = avroIF)) or mapreduce(to.dfs(some.data), output.format = avroOF)
 # avroOF uses a fixed schema "bytes" containing the JSON representation of the data.

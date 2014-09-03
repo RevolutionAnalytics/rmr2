@@ -469,14 +469,18 @@ hdfs.cmd =
         function() Sys.getenv("HDFS_CMD"),
         function() file.path(dirname(hadoop.cmd()), "hdfs"),
         function() file.path(Sys.getenv("HADOOP_HOME"), "bin", "hdfs"),
-        function() 
-          if(.Platform$OS.type != "windows"){
-          suppressWarnings(
-            system2(
-              command = "which", 
-              args = "hdfs", 
-              stdout = TRUE, 
-              stderr = FALSE))},
+        function() {
+          cmd = {
+            if(.Platform$OS.type != "windows"){
+              suppressWarnings(
+                system2(
+                  command = "which", 
+                  args = "hdfs", 
+                  stdout = TRUE, 
+                  stderr = FALSE))}
+            else ""}
+          if (length(cmd) == 0) cmd = ""
+          cmd},
         hadoop.cmd)
     for (f in alternatives) {
       cmd = f()

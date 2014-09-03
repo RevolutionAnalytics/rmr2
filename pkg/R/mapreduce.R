@@ -486,7 +486,7 @@ equijoin =
         input = c(left.input, right.input), 
         output = output,
         input.format = input.format,
-        output.format = output.format,)
+        output.format = if(outer == "") output.format else "native",)
     if(outer == "") out
     else {
       template = 
@@ -499,7 +499,8 @@ equijoin =
               combine = TRUE)))[[1]]
       mapreduce(
         out,
-        map = function(k,v) plyr::rbind.fill(c(v, list(template[NULL,]))))}}
+        map = function(k,v) plyr::rbind.fill(c(v, list(template[NULL,]))),
+        output.format = output.format)}}
 
 status = function(value)
   cat(

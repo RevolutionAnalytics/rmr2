@@ -58,7 +58,7 @@ make.json.output.format =
             gsub("\n", "", toJSON(v, .escapeEscapes=TRUE, collapse = "")),
             sep = "\t")
       out = reduce.keyval(kv, ser, write.size)
-      writeLines(paste(out, collapse = "\n"), sep = "", con = con)}
+      writeLines(paste(out, collapse = "\n"), sep = "\n", con = con)}
 
 make.text.input.format =
   function(nrows = 10^4)
@@ -71,7 +71,7 @@ text.output.format =
   function(kv, con) {
     ser = function(k, v) paste(k, v, collapse = "", sep = "\t")
     out = reduce.keyval(kv, ser, length.keyval(kv))
-    writeLines(paste(out, "\n", collapse="", sep = ""), sep = "", con = con)}
+    writeLines(as.character(out), con = con)}
 
 make.csv.input.format =
   function(..., nrows = 10^4) {
