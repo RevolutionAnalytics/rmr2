@@ -467,9 +467,9 @@ equijoin =
           vr = as.data.frame(vr)
           names(vl) = paste(names(vl), "l", sep = ".")
           names(vr) = paste(names(vr), "r", sep = ".")
-          if(all(is.na(vl))) wrap.if.outer(vr)
+          if(identical(vl, NA)) wrap.if.outer(vr)
           else {
-            if(all(is.na(vr))) wrap.if.outer(vl)
+            if(identical(vr, NA)) wrap.if.outer(vl)
             else
               wrap.if.outer(merge(vl, vr, by = NULL))}}}
     eqj.reduce = 
@@ -494,9 +494,9 @@ equijoin =
           from.dfs(
             mapreduce(
               out, 
-              map = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
-              reduce = function(k,v) keyval(1, plyr::rbind.fill(v)[1,]),
-              combine = TRUE)))
+              map = function(k,v) keyval(1, list(plyr::rbind.fill(v)[1,])),
+              reduce = function(k,v) keyval(1, list(plyr::rbind.fill(v)[1,])),
+              combine = TRUE)))[[1]]
       mapreduce(
         out,
         map = function(k,v) plyr::rbind.fill(c(v, list(template[NULL,]))),
