@@ -225,6 +225,7 @@ rmr.stream =
   options(warn = 1) 
   options(error = quote({sink(stderr()); traceback(); stop()}))
   library(functional)
+  library(methods)
   invisible(
     if(is.null(formals(load)$verbose)) #recent R change
       load("',file.path(work.dir, basename(rmr.global.env)),'")
