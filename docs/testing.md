@@ -4,11 +4,7 @@ In the table at the bottom we collect results concerning testing of rmr on a giv
 
 Testing is conducted by running `R CMD  check path-to-rmr` and requires an additional dependency, quickcheck, also downloadable from our wiki. Failures on producing documentation in legacy formats are not important and are ignored. Notes and warnings are not important in the sense that they do not determine success, but it may be helpful to report them in the issue tracker. Please contribute additional testing reports. 
 
-If you are interested in the testing conducted on other releases, choose one from the drop down menu on the top left, under tags and find this document again (under docs). 
-
-
-
-<table>
+If you are interested in the testing conducted on other releases, choose one from the drop down menu on the top left, under tags and find this document again (under docs).<table>
 <thead>
 <tr><th>Hadoop</th><th>R</th><th>OS</th><th>Notes</th><th>Reporter</th></tr>
 </thead>
