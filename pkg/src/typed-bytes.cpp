@@ -47,7 +47,7 @@ enum type_code {
   R_WITH_ATTRIBUTES = 147, //0x93
   R_NULL = 148, //0x94
   R_LOGICAL = 149,  //0x95
-  R_NA_CHAR = 150,
+  R_NA_CHAR = 150, //0x96
   TYPE_UNKNOWN = 255};
   
 typedef deque<unsigned char> raw;
@@ -191,7 +191,7 @@ CharacterVector unserialize_character_vector(const raw & data, unsigned int & st
       vector<char> tmp_vec_char = unserialize_vector<char>(data, start, str_length);
       string tmp_string(tmp_vec_char.begin(), tmp_vec_char.end());
       retval[i] = tmp_string;}
-    else { 
+    else { //RA_NA_CHAR
       get_length(data, start); // always 0, but must read
       retval[i] = NA_STRING;
     }}
@@ -480,7 +480,8 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
         serialized.push_back(R_CHAR_VECTOR);
         int raw_size = data.size() * 5 + 4;
         for(unsigned int i = 0; i < data.size(); i++) {
-          raw_size += data[i].size();}
+          if(!na_mask[i]) {
+            raw_size += data[i].size();}}
         length_header(raw_size, serialized);
         length_header(data.size(), serialized);
         for(unsigned int i = 0; i < data.size(); i++) {
