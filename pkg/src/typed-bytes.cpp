@@ -47,6 +47,7 @@ enum type_code {
   R_WITH_ATTRIBUTES = 147, //0x93
   R_NULL = 148, //0x94
   R_LOGICAL = 149,  //0x95
+  R_NA_CHAR = 150, //0x96
   TYPE_UNKNOWN = 255};
   
 typedef deque<unsigned char> raw;
@@ -181,16 +182,19 @@ vector<T> unserialize_vector(const raw & data, unsigned int & start, int raw_len
     vec[i] = unserialize_scalar<T>(data, start);}
   return vec;}
   
-template <>
-vector<string> unserialize_vector<string>(const raw & data, unsigned int & start, int raw_length) {
+CharacterVector unserialize_character_vector(const raw & data, unsigned int & start, int raw_length) {
   int v_length = get_length(data, start);
-  vector<string> retval(v_length);
+  CharacterVector retval(v_length);
   for(unsigned int i = 0; i < v_length; i++) {
-    get_type(data, start); //we know it's 07 already
-    int str_length = get_length(data, start);
-    vector<char> tmp_vec_char = unserialize_vector<char>(data, start, str_length);
-    string tmp_string(tmp_vec_char.begin(), tmp_vec_char.end());
-    retval[i] = tmp_string;}
+    if(get_type(data, start) == TB_STRING) { 
+      int str_length = get_length(data, start);
+      vector<char> tmp_vec_char = unserialize_vector<char>(data, start, str_length);
+      string tmp_string(tmp_vec_char.begin(), tmp_vec_char.end());
+      retval[i] = tmp_string;}
+    else { //RA_NA_CHAR
+      get_length(data, start); // always 0, but must read
+      retval[i] = NA_STRING;
+    }}
   return retval;}
       
 RObject unserialize(const raw & data, unsigned int & start, int type_code = TYPE_UNKNOWN);
@@ -259,8 +263,7 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       break;
     case TB_STRING: {
       int length = get_length(data, start);
-      vector<char> vec_tmp = unserialize_vector<char>(data, start, length);
-      new_object =  wrap(string(vec_tmp.begin(), vec_tmp.end()));}
+      new_object =  unserialize_character_vector(data, start, length);}
       break;
     case TB_VECTOR:
       new_object = wrap(unserialize_list(data, start));
@@ -331,7 +334,7 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       break;
     case R_CHAR_VECTOR: {
         int raw_length = get_length(data, start);
-        new_object = wrap(unserialize_vector<string>(data, start, raw_length));}
+        new_object = unserialize_character_vector(data, start, raw_length);}
       break;
     default: {
       throw UnsupportedType(type_code);}}
@@ -449,15 +452,15 @@ void serialize_native(const RObject & object, raw & serialized) {
   length_header(tmp.size(), serialized);
   serialized.insert(serialized.end(), tmp.begin(), tmp.end());}
 
-void serialize_null(raw & serialized) {
-  serialized.push_back(R_NULL);
+void serialize_special_value(unsigned char type_code, raw & serialized) {
+  serialized.push_back(type_code);
   length_header(0, serialized);}
 
 void serialize_noattr(const RObject & object, raw & serialized, bool native) {
   if(native) {
     switch(object.sexp_type()) {
       case NILSXP: {
-        serialize_null(serialized);}
+        serialize_special_value(R_NULL, serialized);}
       break;
       case RAWSXP: {//raw
       RawVector data(object);
@@ -473,14 +476,19 @@ void serialize_noattr(const RObject & object, raw & serialized, bool native) {
       break;
       case STRSXP: { //character
         CharacterVector data(object);
+        LogicalVector na_mask = is_na(data);
         serialized.push_back(R_CHAR_VECTOR);
         int raw_size = data.size() * 5 + 4;
         for(unsigned int i = 0; i < data.size(); i++) {
-          raw_size += data[i].size();}
+          if(!na_mask[i]) {
+            raw_size += data[i].size();}}
         length_header(raw_size, serialized);
         length_header(data.size(), serialized);
         for(unsigned int i = 0; i < data.size(); i++) {
-          serialize_many(data[i], TB_STRING, serialized);}}
+          if(na_mask[i]) {
+            serialize_special_value(R_NA_CHAR, serialized);}
+          else {    
+            serialize_many(data[i], TB_STRING, serialized);}}}
       break; 
       case INTSXP: {
         IntegerVector data(object);  
