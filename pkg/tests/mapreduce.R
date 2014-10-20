@@ -14,6 +14,8 @@
 
 library(quickcheck)
 library(rmr2)
+library(rhdfs)
+hdfs.init()
 
 kv.cmp = rmr2:::kv.cmp
 
@@ -86,10 +88,10 @@ for (be in c("local", "hadoop")) {
   ##simplest mapreduce, all default
   unit.test(
     function(kv) {
-    if(rmr2:::length.keyval(kv) == 0) TRUE
-    else {
-      kv1 = from.dfs(mapreduce(input = to.dfs(kv)))
-      kv.cmp(kv, kv1)}},
+      if(rmr2:::length.keyval(kv) == 0) TRUE
+      else {
+        kv1 = from.dfs(mapreduce(input = to.dfs(kv)))
+        kv.cmp(kv, kv1)}},
     generators = list(rmr2:::rkeyval),
     sample.size = 10)
   
@@ -155,9 +157,33 @@ for (be in c("local", "hadoop")) {
             input.format = fmt,
             output.format = fmt),
           format = fmt))}, 
-      generators = list(rlist),
-      precondition = function(l) length(l) > 0,
-      sample.size = 10)
+    generators = list(rlist),
+    precondition = function(l) length(l) > 0,
+    sample.size = 10)
+  
+  #avro
+  
+  unit.test(
+    function(df) {
+      if(rmr.options("backend") == "local") TRUE 
+      else {
+        names(df) = sub("\\.", "_", names(df))
+        tf1 = tempfile()
+        ravro:::write.avro(df, tf1)
+        tf2 = "/tmp/rmr2.test.avro"
+        on.exit(hdfs.rm(tf2))
+        hdfs.put(tf1, tf2)
+        kv.cmp(
+          keyval(NULL, df),
+          from.dfs(
+            mapreduce(
+              tf2, 
+              input.format = 
+                make.input.format(
+                  format = "avro",
+                  schema.file = tf1))))}},
+    generators = list(rdata.frame),
+    sample.size = 10)
   
   #equijoin
   stopifnot(
