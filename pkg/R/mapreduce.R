@@ -461,24 +461,27 @@ equijoin =
       function(k, vl, vr) {
         if((is.list(vl) && !is.data.frame(vl)) || 
              (is.list(vr) && !is.data.frame(vr)))
-          list(left = vl, right = vr)
+          keyval(key, list(left = vl, right = vr))
         else{
           vl = as.data.frame(vl)
           vr = as.data.frame(vr)
           names(vl) = paste(names(vl), "l", sep = ".")
           names(vr) = paste(names(vr), "r", sep = ".")
-          if(identical(vl, NA)) vr
+          val = {
+            if(identical(vl, NA)) vr
           else {
             if(identical(vr, NA)) vl
             else
-              merge(vl, vr, by = NULL)}}}
+              merge(vl, vr, by = NULL)}}
+          keyval(k, val)}}
     eqj.reduce = 
       function(k, vv) {
         rs = reduce.split(vv)
         left.side = pad.side(rs$`TRUE`, right.outer || full.outer)
         right.side = pad.side(rs$`FALSE`, left.outer || full.outer)
-        if(!is.null(left.side) && !is.null(right.side))
-          wrap.if.outer(reduce(k[[1]], left.side, right.side))}
+        if(!is.null(left.side) && !is.null(right.side)) {
+          reduce.out = reduce(k[[1]], left.side, right.side)
+          keyval(keys(reduce.out), wrap.if.outer(values(reduce.out)))}}
     out = 
       mapreduce(
         map = map, 
