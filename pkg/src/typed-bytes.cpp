@@ -336,7 +336,7 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       break;
     case R_CHAR_VECTOR: {
         int raw_length = get_length(data, start);
-        new_object = unserialize_character_vector(data, start, raw_length);}
+        new_object = wrap(unserialize_character_vector(data, start, raw_length));}
       break;
     default: {
       throw UnsupportedType(type_code);}}
