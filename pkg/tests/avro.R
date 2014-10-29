@@ -19,6 +19,8 @@ library(rhdfs)
 hdfs.init()
 
 rmr.options(backend = "hadoop")
+Sys.setenv(AVRO_LIBS = ravro::AVRO_TOOLS)
+
 test_avro_rmr <-
   function(df, test, write.args = list(),
            input.format.args = list(), map = function(k, v) v ) {

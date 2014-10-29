@@ -163,6 +163,7 @@ for (be in c("local", "hadoop")) {
   
   #avro
   
+  Sys.setenv(AVRO_LIBS = ravro:::AVRO_TOOLS)
   unit.test(
     function(df) {
       if(rmr.options("backend") == "local") TRUE 
