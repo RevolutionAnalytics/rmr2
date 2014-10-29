@@ -263,7 +263,9 @@ RObject unserialize(const raw & data, unsigned int & start, int type_code){
       break;
     case TB_STRING: {
       int length = get_length(data, start);
-      new_object =  unserialize_character_vector(data, start, length);}
+      vector<char> vec_tmp = unserialize_vector<char>(data, start, length); 
+      // unserialize_vector needs raw_length, luckily here they are the same
+      new_object =  wrap(string(vec_tmp.begin(), vec_tmp.end()));}
       break;
     case TB_VECTOR:
       new_object = wrap(unserialize_list(data, start));
