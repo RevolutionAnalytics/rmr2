@@ -491,7 +491,7 @@ equijoin =
         left.side = pad.side(rs$`TRUE`, right.outer || full.outer)
         right.side = pad.side(rs$`FALSE`, left.outer || full.outer)
         if(!is.null(left.side) && !is.null(right.side)) {
-          reduce.out = reduce(k[[1]], left.side, right.side)
+          reduce.out = as.keyval(reduce(k[[1]], left.side, right.side))
           keyval(keys(reduce.out), wrap.if.outer(values(reduce.out)))}}
     out = 
       mapreduce(
