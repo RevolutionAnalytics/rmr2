@@ -174,7 +174,8 @@ to.data.frame =
           rmr.coerce(x[[i]], template[[i]]))
     names(y) = names(template)
     df = data.frame(y, stringsAsFactors = FALSE)
-    rownames(df) = make.unique(rmr.coerce(x[[length(x)]], character()))
+    candidate.names = make.unique(rmr.coerce(x[[length(x)]], character()))
+    rownames(df) =  make.unique(ifelse(is.na(candidate.names), "NA", candidate.names))
     df}
 
 from.list =
