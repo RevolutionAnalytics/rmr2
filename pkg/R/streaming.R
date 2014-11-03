@@ -495,6 +495,7 @@ hadoop.streaming =
       hadoop_home = Sys.getenv("HADOOP_HOME")
       if(hadoop_home == "") stop("Please make sure that the env. variable HADOOP_STREAMING is set")
       stream.jar = list.files(path = file.path(hadoop_home, "contrib", "streaming"), pattern = "jar$", full.names = TRUE)
+      if(stream.jar == "") stop("Can't find streaming jar, please set env. variable HADOOP_STREAMING")
       paste(hadoop.cmd(), "jar", stream.jar)}
     else paste(hadoop.cmd(), "jar", hadoop_streaming)}
 
