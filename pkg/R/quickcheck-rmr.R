@@ -13,9 +13,8 @@
 # limitations under the License.
 
 ##app-specific generators
-if(require(quickcheck)) {
-  rkeyval = function(keytdg = rdouble, valtdg = make.rany()) keyval(keytdg(), valtdg())
-  rkeyvalsimple = function() keyval(runif(1), runif(1))} #we can do better than this
+rkeyval = function(keytdg = rdouble, valtdg = make.rany()) keyval(keytdg(), valtdg())
+rkeyvalsimple = function() keyval(runif(1), runif(1)) #we can do better than this
 
 ## generic sorting for normalized comparisons
 gorder = function(...) UseMethod("gorder")
