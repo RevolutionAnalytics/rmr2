@@ -21,9 +21,9 @@ gorder = function(...) UseMethod("gorder")
 gorder.default = order
 gorder.factor = function(x) order(as.character(x))
 gorder.data.frame = 
-  function(x) splat(gorder)(lapply(x, function(x) if(is.factor(x)) as.character(x) else if(is.list(x) || is.raw(x)) cksum(x) else x))
+  function(x) splat(gorder)(lapply(x, function(x) if(is.factor(x)) as.character(x) else if(is.list(x) || is.raw(x)) sapply(x, digest) else x))
 gorder.matrix = function(x) gorder(as.data.frame(x))
-gorder.raw = gorder.list = function(x) gorder(cksum(x))
+gorder.raw = gorder.list = function(x) gorder(sapply(x, digest))
 
 reorder = function(x, o) if(has.rows(x)) x[o, , drop = FALSE] else x[o]
 
@@ -38,8 +38,8 @@ gsort.keyval =
       else 
         gorder(
           data.frame(
-            if(is.list(k) && !is.data.frame(k)) cksum(k) else k,
-            if(is.list(v) && !is.data.frame(v)) cksum(v) else v))}
+            if(is.list(k) && !is.data.frame(k)) sapply(x, digest) else k,
+            if(is.list(v) && !is.data.frame(v)) sapply(x, digest) else v))}
     keyval(reorder(k, o), reorder(v, o))}
 
 ## keyval compare

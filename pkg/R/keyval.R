@@ -272,7 +272,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
         v = values(kv)
         ind = {
           if(is.list(k) && !is.data.frame(k)) 
-            cksum(k)
+            sapply(k, digest)
           else {
             if(is.matrix(k))
               as.data.frame(k)
