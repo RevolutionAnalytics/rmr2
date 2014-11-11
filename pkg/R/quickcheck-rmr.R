@@ -38,8 +38,8 @@ gsort.keyval =
       else 
         gorder(
           data.frame(
-            if(is.list(k) && !is.data.frame(k)) sapply(x, digest) else k,
-            if(is.list(v) && !is.data.frame(v)) sapply(x, digest) else v))}
+            if(is.list(k) && !is.data.frame(k)) sapply(k, digest) else k,
+            if(is.list(v) && !is.data.frame(v)) sapply(v, digest) else v))}
     keyval(reorder(k, o), reorder(v, o))}
 
 ## keyval compare
