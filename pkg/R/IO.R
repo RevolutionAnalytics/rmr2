@@ -467,6 +467,8 @@ paste.fromJSON =
 
 make.avro.input.format.function =
   function(schema.file, ..., read.size = 10^5) {
+    if(!require("ravro"))
+      stop("Package ravro needs to be installed before using this format")
     schema = ravro:::avro_get_schema(file = schema.file)
     function(con) {
       lines =
