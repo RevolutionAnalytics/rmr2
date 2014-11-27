@@ -163,7 +163,18 @@ for (be in c("local", "hadoop")) {
   
   #avro
   
-  Sys.setenv(AVRO_LIBS = ravro:::AVRO_TOOLS)
+  pathname = ravro::AVRO_TOOLS
+  if(.Platform$OS.type == "windows") {
+    subfname = strsplit(pathname, ":")
+    if(length(subfname[[1]]) > 1)
+    {
+      pathname = subfname[[1]][2]
+    }
+    pathname = gsub("\"","",pathname)
+    pathname = shortPathName(pathname)
+    pathname = gsub("\\\\","/",pathname)}
+  Sys.setenv(AVRO_LIBS = pathname)
+  
   unit.test(
     function(df) {
       if(rmr.options("backend") == "local") TRUE 

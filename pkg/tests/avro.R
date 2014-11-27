@@ -19,7 +19,18 @@ library(rhdfs)
 hdfs.init()
 
 rmr.options(backend = "hadoop")
-Sys.setenv(AVRO_LIBS = ravro::AVRO_TOOLS)
+
+pathname = ravro::AVRO_TOOLS
+if(.Platform$OS.type == "windows") {
+  subfname = strsplit(pathname, ":")
+  if(length(subfname[[1]]) > 1)
+  {
+    pathname = subfname[[1]][2]
+  }
+  pathname = gsub("\"","",pathname)
+  pathname = shortPathName(pathname)
+  pathname = gsub("\\\\","/",pathname)}
+Sys.setenv(AVRO_LIBS = pathname)
 
 test_avro_rmr <-
   function(df, test, write.args = list(),

@@ -593,7 +593,12 @@ make.input.format =
               hadoop =
                 list(
                   libjars =
-                    gsub(":", ", ", Sys.getenv("AVRO_LIBS"))))})}
+                    gsub(
+                      if(.Platform$OS.type == "windows") 
+                        ";"
+                      else
+                        ":",
+                      ", ", Sys.getenv("AVRO_LIBS"))))})}
     if(is.null(streaming.format) && mode == "binary")
       streaming.format = "org.apache.hadoop.streaming.AutoInputFormat"
     list(mode = mode,
