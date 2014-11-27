@@ -1,10 +1,13 @@
-`r read_chunk('../../pkg/tests/benchmarks.R')`
-`r read_chunk('../../pkg/tests/basic-examples.R')`
-`r read_chunk('../../pkg/tests/wordcount.R')`
-`r read_chunk('../../pkg/tests/logistic-regression.R')`
-`r read_chunk('../../pkg/tests/linear-least-squares.R')`
-`r read_chunk('../../pkg/tests/kmeans.R')`
-`r opts_chunk$set(echo=TRUE, eval=FALSE, cache=FALSE, tidy=FALSE)`
+```{r} 
+library(knitr)
+ read_chunk('../../pkg/tests/benchmarks.R')
+ read_chunk('../../pkg/tests/basic-examples.R')
+ read_chunk('../../pkg/tests/wordcount.R')
+ read_chunk('../../pkg/tests/logistic-regression.R')
+ read_chunk('../../pkg/tests/linear-least-squares.R')
+ read_chunk('../../pkg/tests/kmeans.R')
+ opts_chunk$set(echo=TRUE, eval=FALSE, cache=FALSE, tidy=FALSE)
+```
 
 
 ## RHadoop Tutorial
