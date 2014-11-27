@@ -25,9 +25,7 @@ rmr.options.env$backend.parameters =
     hadoop = 
       list(
         D = "mapreduce.map.java.opts=-Xmx400M", 
-        D = "mapreduce.reduce.java.opts=-Xmx400M", 
-        D = "mapreduce.map.memory.mb=4096", 
-        D = "mapreduce.reduce.memory.mb=4096"))
+        D = "mapreduce.reduce.java.opts=-Xmx400M"))
 
 add.last =
   function(action) {
