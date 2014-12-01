@@ -27,6 +27,10 @@ rmr.options.env$backend.parameters =
         D = "mapreduce.map.java.opts=-Xmx400M", 
         D = "mapreduce.reduce.java.opts=-Xmx400M"))
 
+.onLoad = 
+  function(lib, pkg) 
+    packageStartupMessage("Please review your hadoop settings. See help(\"mapreduce-settings\")")
+
 add.last =
   function(action) {
     old.Last = {
@@ -365,7 +369,6 @@ mapreduce = function(
     output = dfs.tempfile()
   if(is.character(input.format)) input.format = make.input.format(input.format)
   if(is.character(output.format)) output.format = make.output.format(output.format)
-  if(!missing(backend.parameters)) warning("backend.parameters is deprecated.")
   
   backend  =  rmr.options('backend')
   
