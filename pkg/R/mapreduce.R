@@ -29,7 +29,7 @@ rmr.options.env$backend.parameters =
 
 .onLoad = 
   function(lib, pkg) 
-    packageStartupMessage("Please review your hadoop settings. See help(\"mapreduce-settings\")")
+    packageStartupMessage("Please review your hadoop settings. See help(hadoop.settings)")
 
 add.last =
   function(action) {
