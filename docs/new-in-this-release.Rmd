@@ -9,7 +9,13 @@ output:
 
 * `dfs.ls`: backend-independent listing of directories
 * [`avro`](avro.apache.org/) input format
+
+## Enhancements
+
 * `equijoin` preserves keys in default reducer 
+* default `backend.parameters` less intrusive, hopefully work for more people out of the box
+* added startup message about important Hadoop settings pointing to a help entry
+
 
 ## Bugs Fixed
 
