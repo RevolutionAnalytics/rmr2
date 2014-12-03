@@ -9,12 +9,19 @@ If you are interested in the testing conducted on other releases, choose one fro
 
 
 <table>
+
 <thead>
 <tr><th>Hadoop</th><th>R</th><th>OS</th><th>Notes</th><th>Reporter</th></tr>
 </thead>
-<tbody>
-<tr><td>Hadoop 2.4.0</td><td>R 3.1.1 (Revolution R Open 8.0 beta)</td><td>CentOS 6.4</td><td></td><td><a href=mailto:rhadoop@revolutionanalytics.com>Revolution</a></td></tr>
-></td></tr>
 
+<tbody>
+<tr>
+  <td>Hadoop 2.4.0</td>
+  <td>R 3.1.1 (Revolution R Open 8.0 beta)</td>
+  <td>CentOS 6.4</td>
+  <td></td>
+  <td><a href=mailto:rhadoop@revolutionanalytics.com>Revolution</a></td>
+</tr>
 </tbody>
+
 </table>
