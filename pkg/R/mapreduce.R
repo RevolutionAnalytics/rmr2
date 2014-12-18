@@ -475,16 +475,18 @@ equijoin =
              (is.list(vr) && !is.data.frame(vr)))
           keyval(key, list(left = vl, right = vr))
         else{
-          vl = as.data.frame(vl)
-          vr = as.data.frame(vr)
-          names(vl) = paste(names(vl), "l", sep = ".")
-          names(vr) = paste(names(vr), "r", sep = ".")
+          if(!identical(vl, NA)) {
+            vl = as.data.frame(vl)
+            names(vl) = paste(names(vl), "l", sep = ".")}
+          if(!identical(vr, NA)) {
+            vr = as.data.frame(vr)
+            names(vr) = paste(names(vr), "r", sep = ".")}
           val = {
             if(identical(vl, NA)) vr
-          else {
-            if(identical(vr, NA)) vl
-            else
-              merge(vl, vr, by = NULL)}}
+            else {
+              if(identical(vr, NA)) vl
+              else
+                merge(vl, vr, by = NULL)}}
           keyval(k, val)}}
     eqj.reduce = 
       function(k, vv) {
