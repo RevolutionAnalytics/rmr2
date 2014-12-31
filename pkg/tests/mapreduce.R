@@ -71,16 +71,16 @@ for (be in c("local", "hadoop")) {
   
   fmt = "sequence.typedbytes"
   unit.test(
-    function(l) 
+    function(l) {
+      l = c(0, l)
       kv.cmp(
         keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
         from.dfs(
           to.dfs(
             keyval(1, l), 
             format = fmt), 
-          format = fmt)), 
+          format = fmt))}, 
     generators = list(rlist),
-    precondition = function(l) length(l) > 0,
     sample.size = 10)
   
   ##mapreduce
@@ -147,6 +147,7 @@ for (be in c("local", "hadoop")) {
   fmt = "sequence.typedbytes"
   unit.test(
     function(l) {
+      l = c(0, l)
       kv.cmp(
         keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
         from.dfs(
@@ -158,11 +159,9 @@ for (be in c("local", "hadoop")) {
             output.format = fmt),
           format = fmt))}, 
     generators = list(rlist),
-    precondition = function(l) length(l) > 0,
     sample.size = 10)
   
   #avro
-  
   pathname = ravro::AVRO_TOOLS
   if(.Platform$OS.type == "windows") {
     subfname = strsplit(pathname, ":")

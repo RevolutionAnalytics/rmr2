@@ -13,7 +13,7 @@
 # limitations under the License.
 
 ##app-specific generators
-rkeyval = function(keytdg = rdouble, valtdg = make.rany()) keyval(keytdg(), valtdg())
+rkeyval = function(keytdg = rdouble, valtdg = rany) keyval(keytdg(), valtdg())
 rkeyvalsimple = function() keyval(runif(1), runif(1)) #we can do better than this
 
 ## generic sorting for normalized comparisons

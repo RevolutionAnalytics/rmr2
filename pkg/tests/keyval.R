@@ -19,7 +19,7 @@ library(rmr2)
 unit.test(
   function(x) {
     is.null(nrow(x)) == !rmr2:::has.rows(x)},
-  list(make.rany()))
+  list(rany)
 
 #all.have rows TODO
 #rmr.length TODO
@@ -28,11 +28,11 @@ unit.test(
 unit.test(
   function(x){
     k = x
-    v = lapply(x, function(x) make.rany()())
+    v = lapply(x, rany)
     kv = keyval(k, v)
     identical(keys(kv), k) &&
       identical(values(kv), v)},
-  list(make.rany()))
+  list(rany))
 
 #NULL key case
 unit.test(
@@ -41,4 +41,4 @@ unit.test(
     kv = keyval(k, v)
     identical(keys(kv), k) &&
       identical(values(kv), v)},
-  list(make.rany()))
+  list(rany))
