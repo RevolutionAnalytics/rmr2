@@ -152,14 +152,13 @@ typedbytes.writer =
       .Call("typedbytes_writer", objects, native, PACKAGE = "rmr2"),
       con)}
 
-setAs("integer", "Date", function(from) as.Date(from, origin = "1970-1-1"))
-
 rmr.coerce =
   function(x, template) {
     if(is.atomic(template))
       switch(
         class(template),
         factor = factor(unlist(x)),
+        Date = as.Date(unlist(x), origin = "1970-1-1"),
         as(unlist(x), class(template)))
     else
       I(splat(c)(x))}

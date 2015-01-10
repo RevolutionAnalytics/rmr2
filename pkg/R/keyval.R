@@ -207,11 +207,14 @@ split.data.frame.fastest =
     t.list(
       lapply(
         if(keep.rownames) row.names.to.column(x) else x, 
-        function(y) 
-          split(
-            if(is.factor(y)) as.character(y) else y, 
-            f = ind, 
-            drop = drop)))
+        function(y) {
+          if(class(y) == "Date")
+            split.default(y, f = ind, drop = drop)
+          else 
+            split(
+              if(is.factor(y)) as.character(y) else y, 
+              f = ind, 
+              drop = drop)}))
 
 rmr.split = 
   function(x, ind, lossy, keep.rownames) {
