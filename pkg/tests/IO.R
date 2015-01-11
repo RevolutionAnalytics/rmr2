@@ -17,7 +17,7 @@ library(quickcheck)
 library(rmr2)
 
 
-# unit.test(
+# test(
 #   function(l) {
 #     l = rapply(l, how = 'replace', 
 #                function(x){

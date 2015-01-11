@@ -16,26 +16,26 @@ library(quickcheck)
 library(rmr2)
 
 #has.rows
-unit.test(
+test(
   function(x) {
     is.null(nrow(x)) == !rmr2:::has.rows(x)},
-  list(rany)
+  list(rany))
 
 #all.have rows TODO
 #rmr.length TODO
 
 #keyval, keys.values
-unit.test(
+test(
   function(x){
     k = x
-    v = lapply(x, rany)
+    v = replicate(rmr2:::rmr.length(k), rany)
     kv = keyval(k, v)
     identical(keys(kv), k) &&
       identical(values(kv), v)},
   list(rany))
 
 #NULL key case
-unit.test(
+test(
   function(v){
     k = NULL
     kv = keyval(k, v)

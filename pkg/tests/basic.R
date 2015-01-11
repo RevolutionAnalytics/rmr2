@@ -19,14 +19,14 @@ library(rmr2)
 library(quickcheck)
 
 #qw
-unit.test(
+test(
   function(ss) {
     ss = paste("v", ss, sep = "")
     ss == eval(parse(text = paste("rmr2:::qw(", paste(ss, collapse = ","), ")")))},
   list(rcharacter))
 
 # Make.single.arg
-unit.test(
+test(
   function(l) {
     f = function(...) list(...)
     g = rmr2:::Make.single.arg(f)
@@ -34,7 +34,7 @@ unit.test(
   list(rlist))
                   
 # Make.multi.arg
-unit.test(
+test(
   function(l) {
     f = function(x) x
     g = rmr2:::Make.multi.arg(f)
@@ -42,13 +42,13 @@ unit.test(
   list(rlist))
 
 # Make.single.or.multi.arg
-unit.test(
-  function(l, arity) {
+test(
+  function(l, x, arity) {
+    l = c(l, x)
     f = if(arity == "single") identity else c 
     g = rmr2:::Make.single.or.multi.arg(f, from = arity)
     identical(g(l), do.call(g, l))},
-  list(rlist,
-       make.rselect(rmr2:::qw(single, multi))))
+  list(rlist, rany, select(rmr2:::qw(single, multi))))
 
 #%:% TODO
 # all.predicate TODO
@@ -56,7 +56,7 @@ unit.test(
 # make.fast.list TODO
 # actually the function has been working forever, the test doesn't
 
-# unit.test(
+# test(
 #   function(l){
 #     fl = rmr2:::make.fast.list()
 #     lapply(l, fl)

@@ -14,8 +14,8 @@
 
 library(quickcheck)
 library(rmr2)
-library(rhdfs)
-hdfs.init()
+# library(rhdfs)
+# hdfs.init()
 
 kv.cmp = rmr2:::kv.cmp
 
@@ -26,7 +26,7 @@ for (be in c("local", "hadoop")) {
   ##from.dfs to.dfs
   
   ##native
-  unit.test(
+  test(
     function(kv) 
       kv.cmp(
         kv, 
@@ -35,7 +35,10 @@ for (be in c("local", "hadoop")) {
     sample.size = 10)
   
   ## csv
-  unit.test(
+  cg = quickcheck:::column.generators()
+  cg = cg[-which(names(cg) == "rraw" | names(cg) == "rDate")]
+  rdata.frame.simple = fun(rdata.frame(element = cg, ncol = 10))
+  test(
     function(df) 
       kv.cmp(
         keyval(NULL, df),
@@ -44,12 +47,12 @@ for (be in c("local", "hadoop")) {
             keyval(NULL, df), 
             format = "csv"), 
           format = "csv")),
-    generators = list(rdata.frame),
+    generators = list(rdata.frame.simple),
     sample.size = 10)
   
   #json
   fmt = "json"
-  unit.test(
+  test(
     function(df) 
       kv.cmp(
         keyval(1, df), 
@@ -58,7 +61,7 @@ for (be in c("local", "hadoop")) {
             keyval(1, df), 
             format = fmt), 
           format = make.input.format("json", key.class = "list", value.class = "data.frame"))), 
-    generators = list(rdata.frame),
+    generators = list(rdata.frame.simple),
     sample.size = 10)
   
   #sequence.typedbytes
@@ -70,7 +73,7 @@ for (be in c("local", "hadoop")) {
         how = "replace")    
   
   fmt = "sequence.typedbytes"
-  unit.test(
+  test(
     function(l) {
       l = c(0, l)
       kv.cmp(
@@ -86,7 +89,7 @@ for (be in c("local", "hadoop")) {
   ##mapreduce
   
   ##simplest mapreduce, all default
-  unit.test(
+  test(
     function(kv) {
       if(rmr2:::length.keyval(kv) == 0) TRUE
       else {
@@ -96,7 +99,7 @@ for (be in c("local", "hadoop")) {
     sample.size = 10)
   
   ##put in a reduce for good measure
-  unit.test(
+  test(
     function(kv) {
       if(rmr2:::length.keyval(kv) == 0) TRUE
       else {
@@ -110,7 +113,7 @@ for (be in c("local", "hadoop")) {
     sample.size = 10)
   
   ## csv
-  unit.test(
+  test(
     function(df)
       kv.cmp(
         keyval(NULL, df),
@@ -128,7 +131,7 @@ for (be in c("local", "hadoop")) {
   #json
   # a more general test would be better for json but the subtleties of mapping R to to JSON are many
   fmt = "json"
-  unit.test(
+  test(
     function(df) 
       kv.cmp(
         keyval(1, df),
@@ -145,7 +148,7 @@ for (be in c("local", "hadoop")) {
   
   #sequence.typedbytes
   fmt = "sequence.typedbytes"
-  unit.test(
+  test(
     function(l) {
       l = c(0, l)
       kv.cmp(
@@ -161,40 +164,40 @@ for (be in c("local", "hadoop")) {
     generators = list(rlist),
     sample.size = 10)
   
-  #avro
-  pathname = ravro::AVRO_TOOLS
-  if(.Platform$OS.type == "windows") {
-    subfname = strsplit(pathname, ":")
-    if(length(subfname[[1]]) > 1)
-    {
-      pathname = subfname[[1]][2]
-    }
-    pathname = gsub("\"","",pathname)
-    pathname = shortPathName(pathname)
-    pathname = gsub("\\\\","/",pathname)}
-  Sys.setenv(AVRO_LIBS = pathname)
-  
-  unit.test(
-    function(df) {
-      if(rmr.options("backend") == "local") TRUE 
-      else {
-        names(df) = sub("\\.", "_", names(df))
-        tf1 = tempfile()
-        ravro:::write.avro(df, tf1)
-        tf2 = "/tmp/rmr2.test.avro"
-        on.exit(hdfs.rm(tf2))
-        hdfs.put(tf1, tf2)
-        kv.cmp(
-          keyval(NULL, df),
-          from.dfs(
-            mapreduce(
-              tf2, 
-              input.format = 
-                make.input.format(
-                  format = "avro",
-                  schema.file = tf1))))}},
-    generators = list(rdata.frame),
-    sample.size = 10)
+#   #avro
+#   pathname = ravro::AVRO_TOOLS
+#   if(.Platform$OS.type == "windows") {
+#     subfname = strsplit(pathname, ":")
+#     if(length(subfname[[1]]) > 1)
+#     {
+#       pathname = subfname[[1]][2]
+#     }
+#     pathname = gsub("\"","",pathname)
+#     pathname = shortPathName(pathname)
+#     pathname = gsub("\\\\","/",pathname)}
+#   Sys.setenv(AVRO_LIBS = pathname)
+#   
+#   test(
+#     function(df) {
+#       if(rmr.options("backend") == "local") TRUE 
+#       else {
+#         names(df) = sub("\\.", "_", names(df))
+#         tf1 = tempfile()
+#         ravro:::write.avro(df, tf1)
+#         tf2 = "/tmp/rmr2.test.avro"
+#         on.exit(hdfs.rm(tf2))
+#         hdfs.put(tf1, tf2)
+#         kv.cmp(
+#           keyval(NULL, df),
+#           from.dfs(
+#             mapreduce(
+#               tf2, 
+#               input.format = 
+#                 make.input.format(
+#                   format = "avro",
+#                   schema.file = tf1))))}},
+#     generators = list(rdata.frame),
+#     sample.size = 10)
   
   #equijoin
   stopifnot(
