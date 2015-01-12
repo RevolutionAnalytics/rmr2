@@ -35,6 +35,7 @@ for (be in c("local", "hadoop")) {
     sample.size = 10)
   
   ## csv
+  ## no support for raw in csv
   cg = quickcheck:::column.generators()
   cg = cg[-which(names(cg) == "rraw" | names(cg) == "rDate")]
   rdata.frame.simple = fun(rdata.frame(element = cg, ncol = 10))
@@ -69,18 +70,22 @@ for (be in c("local", "hadoop")) {
     function(l)
       rapply(
         l,
-        function(x) if(class(x) == "raw" || length(x) == 1) x else as.list(x),
+        function(x){ 
+          if(class(x) == "Date") x = unclass(x)
+          if(is.factor(x)) x = as.character(x)
+          if(class(x) == "raw" || length(x) == 1) x else as.list(x)},
         how = "replace")    
   
   fmt = "sequence.typedbytes"
   test(
     function(l) {
       l = c(0, l)
+      kv = keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l))
       kv.cmp(
-        keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
+        kv,
         from.dfs(
           to.dfs(
-            keyval(1, l), 
+            kv,
             format = fmt), 
           format = fmt))}, 
     generators = list(rlist),
