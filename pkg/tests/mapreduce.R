@@ -14,8 +14,8 @@
 
 library(quickcheck)
 library(rmr2)
-# library(rhdfs)
-# hdfs.init()
+library(rhdfs)
+hdfs.init()
 
 kv.cmp = rmr2:::kv.cmp
 
@@ -164,40 +164,40 @@ for (be in c("local", "hadoop")) {
     generators = list(rlist),
     sample.size = 10)
   
-#   #avro
-#   pathname = ravro::AVRO_TOOLS
-#   if(.Platform$OS.type == "windows") {
-#     subfname = strsplit(pathname, ":")
-#     if(length(subfname[[1]]) > 1)
-#     {
-#       pathname = subfname[[1]][2]
-#     }
-#     pathname = gsub("\"","",pathname)
-#     pathname = shortPathName(pathname)
-#     pathname = gsub("\\\\","/",pathname)}
-#   Sys.setenv(AVRO_LIBS = pathname)
-#   
-#   test(
-#     function(df) {
-#       if(rmr.options("backend") == "local") TRUE 
-#       else {
-#         names(df) = sub("\\.", "_", names(df))
-#         tf1 = tempfile()
-#         ravro:::write.avro(df, tf1)
-#         tf2 = "/tmp/rmr2.test.avro"
-#         on.exit(hdfs.rm(tf2))
-#         hdfs.put(tf1, tf2)
-#         kv.cmp(
-#           keyval(NULL, df),
-#           from.dfs(
-#             mapreduce(
-#               tf2, 
-#               input.format = 
-#                 make.input.format(
-#                   format = "avro",
-#                   schema.file = tf1))))}},
-#     generators = list(rdata.frame),
-#     sample.size = 10)
+  #avro
+  pathname = ravro::AVRO_TOOLS
+  if(.Platform$OS.type == "windows") {
+    subfname = strsplit(pathname, ":")
+    if(length(subfname[[1]]) > 1)
+    {
+      pathname = subfname[[1]][2]
+    }
+    pathname = gsub("\"","",pathname)
+    pathname = shortPathName(pathname)
+    pathname = gsub("\\\\","/",pathname)}
+  Sys.setenv(AVRO_LIBS = pathname)
+  
+  test(
+    function(df) {
+      if(rmr.options("backend") == "local") TRUE 
+      else {
+        names(df) = sub("\\.", "_", names(df))
+        tf1 = tempfile()
+        ravro:::write.avro(df, tf1)
+        tf2 = "/tmp/rmr2.test.avro"
+        on.exit(hdfs.rm(tf2))
+        hdfs.put(tf1, tf2)
+        kv.cmp(
+          keyval(NULL, df),
+          from.dfs(
+            mapreduce(
+              tf2, 
+              input.format = 
+                make.input.format(
+                  format = "avro",
+                  schema.file = tf1))))}},
+    generators = list(rdata.frame),
+    sample.size = 10)
   
   #equijoin
   stopifnot(
