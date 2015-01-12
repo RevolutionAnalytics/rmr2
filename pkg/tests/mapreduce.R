@@ -130,7 +130,7 @@ for (be in c("local", "hadoop")) {
             input.format = "csv",
             output.format = "csv"),
           format = "csv")),
-    generators = list(rdata.frame),
+    generators = list(rdata.frame.simple),
     sample.size = 10, stop = FALSE)
   
   #json
@@ -148,7 +148,7 @@ for (be in c("local", "hadoop")) {
             input.format = make.input.format("json", key.class = "list", value.class = "data.frame"),
             output.format = fmt),
           format = make.input.format("json", key.class = "list", value.class = "data.frame"))),
-    generators = list(rdata.frame),
+    generators = list(rdata.frame.simple),
     sample.size = 10)
   
   #sequence.typedbytes
@@ -156,12 +156,14 @@ for (be in c("local", "hadoop")) {
   test(
     function(l) {
       l = c(0, l)
+      kv = keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l))      
+      l = c(0, l)
       kv.cmp(
-        keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l)),
+        kv,
         from.dfs(
           mapreduce(
             to.dfs(
-              keyval(1, l), 
+              kv, 
               format = fmt), 
             input.format = fmt,
             output.format = fmt),
