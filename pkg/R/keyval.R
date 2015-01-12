@@ -202,6 +202,12 @@ split.data.frame.fast =
       rn, 
       SIMPLIFY = FALSE)}
 
+split.Date = 
+  function (x, f, drop = FALSE, ...) {
+    y = split.default(if(is.double(x)) x else as.integer(x), f, drop = drop)
+    for (i in seq_along(y)) class(y[[i]]) = "Date"
+    y}
+
 split.data.frame.fastest = 
   function(x, ind, drop, keep.rownames) 
     t.list(
@@ -209,7 +215,7 @@ split.data.frame.fastest =
         if(keep.rownames) row.names.to.column(x) else x, 
         function(y) {
           if(class(y) == "Date")
-            split.default(y, f = ind, drop = drop)
+            split.Date(y, f = ind, drop = drop)
           else 
             split(
               if(is.factor(y)) as.character(y) else y, 
