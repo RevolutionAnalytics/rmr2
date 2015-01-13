@@ -203,7 +203,7 @@ for (be in c("local", "hadoop")) {
                 make.input.format(
                   format = "avro",
                   schema.file = tf1))))}},
-    generators = list(rdata.frame),
+    generators = list(rdata.frame.simple),
     sample.size = 10)
   
   #equijoin
