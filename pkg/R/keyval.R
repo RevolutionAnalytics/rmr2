@@ -232,8 +232,11 @@ rmr.split =
           if(lossy) Curry(split.data.frame.fastest, keep.rownames = keep.rownames)
           else split.data.frame.fast},
         split)
-    if(is.factor(x)) x = as.character(x)
+    was.factor = is.factor(x)
+    if(was.factor) x = as.character(x)
     y = spl(x,ind, drop = TRUE)
+    if(was.factor)
+      y = lapply(y, as.factor)
     if (is.matrix(ind))
       ind = as.data.frame(ind)
     perm = NULL
