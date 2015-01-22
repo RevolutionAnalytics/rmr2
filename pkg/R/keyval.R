@@ -302,7 +302,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
             class(x),
             list = split(x, 1:length(x)),
             data.frame = if(lossy) t.list(defactor(x)) else rmr.split(x, x , FALSE, keep.rownames = FALSE),
-            matrix = if(lossy) t.list(as.data.frame(x)) else rmr.split(x, as.data.frame(x), FALSE, keep.rownames = FALSE),
+            matrix = rmr.split(x, as.data.frame(x, stringsAsFactors = FALSE), lossy = lossy, keep.rownames = FALSE),
             factor = as.list(as.character(x)),
             as.list(x))
         keyval(x, unname(rmr.split(v, ind, lossy = lossy, keep.rownames = TRUE)))}}}}
