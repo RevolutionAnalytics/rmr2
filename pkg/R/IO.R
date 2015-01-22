@@ -186,6 +186,7 @@ from.list =
       matrix = splat(rbind)(x),
       data.frame = to.data.frame(x, template),
       factor = factor(unlist(x)),
+      Date = unsplit(x, seq_along(x)),
       unlist(x))}
 
 make.typedbytes.input.format =
