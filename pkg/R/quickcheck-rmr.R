@@ -13,7 +13,17 @@
 # limitations under the License.
 
 ##app-specific generators
-rkeyval = function(keytdg = rdouble, valtdg = rany) keyval(keytdg(), valtdg())
+if(require(quickcheck)){
+rsupported.data.type = 
+  mixture(
+    list(
+      Curry(ratomic, size = 20), 
+      Curry(rmatrix, nrow = 20), 
+      Curry(rdata.frame, ncol = 10, nrow = 20), 
+      Curry(rlist, size = 10, height = 2)))
+rkeyval = 
+  function(keytdg = rsupported.data.type, valtdg = rsupported.data.type) 
+    keyval(keytdg(), valtdg())
 rkeyvalsimple = function() keyval(runif(1), runif(1)) #we can do better than this
 
 ## generic sorting for normalized comparisons
@@ -45,3 +55,5 @@ gsort.keyval =
 ## keyval compare
 kv.cmp = function(kv1, kv2) 
   isTRUE(all.equal(gsort.keyval(kv1), gsort.keyval(kv2), tolerance=1e-4, check.attributes=FALSE))
+
+}
