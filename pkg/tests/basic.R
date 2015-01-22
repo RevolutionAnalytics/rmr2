@@ -20,35 +20,31 @@ library(quickcheck)
 
 #qw
 test(
-  function(ss) {
+  function(ss = rcharacter()) {
     ss = paste("v", ss, sep = "")
-    ss == eval(parse(text = paste("rmr2:::qw(", paste(ss, collapse = ","), ")")))},
-  list(rcharacter))
+    ss == eval(parse(text = paste("rmr2:::qw(", paste(ss, collapse = ","), ")")))})
 
 # Make.single.arg
 test(
-  function(l) {
+  function(l = rlist()) {
     f = function(...) list(...)
     g = rmr2:::Make.single.arg(f)
-    identical(do.call(f, l), g(l))},
-  list(rlist))
+    identical(do.call(f, l), g(l))})
                   
 # Make.multi.arg
 test(
-  function(l) {
+  function(l = rlist()) {
     f = function(x) x
     g = rmr2:::Make.multi.arg(f)
-    identical(do.call(g, l), f(l))},
-  list(rlist))
+    identical(do.call(g, l), f(l))})
 
 # Make.single.or.multi.arg
 test(
-  function(l, x, arity) {
+  function(l = rlist(), x = rany(), arity =  sample(c("single", "multi"), size = 1)) {
     l = c(l, x)
     f = if(arity == "single") identity else c 
     g = rmr2:::Make.single.or.multi.arg(f, from = arity)
-    identical(g(l), do.call(g, l))},
-  list(rlist, rany, select(rmr2:::qw(single, multi))))
+    identical(g(l), do.call(g, l))})
 
 #%:% TODO
 # all.predicate TODO

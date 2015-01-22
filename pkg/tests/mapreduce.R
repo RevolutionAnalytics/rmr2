@@ -27,43 +27,37 @@ for (be in c("local", "hadoop")) {
   
   ##native
   test(
-    function(kv) 
+    function(kv = rmr2:::rkeyval()) 
       kv.cmp(
         kv, 
-        from.dfs(to.dfs(kv))),
-    generators = list(rmr2:::rkeyval),
-    sample.size = 10)
+        from.dfs(to.dfs(kv))))
   
   ## csv
   ## no support for raw in csv
   cg = quickcheck:::column.generators()
   cg = cg[-which(names(cg) == "rraw" | names(cg) == "rDate")]
-  rdata.frame.simple = fun(rdata.frame(element = cg, ncol = 10))
+  rdata.frame.simple = function() rdata.frame(element = cg, ncol = 10)
   test(
-    function(df) 
+    function(df = rdata.frame.simple()) 
       kv.cmp(
         keyval(NULL, df),
         from.dfs(
           to.dfs(
             keyval(NULL, df), 
             format = "csv"), 
-          format = "csv")),
-    generators = list(rdata.frame.simple),
-    sample.size = 10)
+          format = "csv")))
   
   #json
   fmt = "json"
   test(
-    function(df) 
+    function(df = rdata.frame.simple()) 
       kv.cmp(
         keyval(1, df), 
         from.dfs(
           to.dfs(
             keyval(1, df), 
             format = fmt), 
-          format = make.input.format("json", key.class = "list", value.class = "data.frame"))), 
-    generators = list(rdata.frame.simple),
-    sample.size = 10)
+          format = make.input.format("json", key.class = "list", value.class = "data.frame"))))
   
   #sequence.typedbytes
   seq.tb.data.loss = 
@@ -78,7 +72,7 @@ for (be in c("local", "hadoop")) {
   
   fmt = "sequence.typedbytes"
   test(
-    function(l) {
+    function(l = rlist()) {
       l = c(0, l)
       kv = keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l))
       kv.cmp(
@@ -87,25 +81,21 @@ for (be in c("local", "hadoop")) {
           to.dfs(
             kv,
             format = fmt), 
-          format = fmt))}, 
-    generators = list(rlist),
-    sample.size = 10)
+          format = fmt))})
   
   ##mapreduce
   
   ##simplest mapreduce, all default
   test(
-    function(kv) {
+    function(kv = rmr2:::rkeyval()) {
       if(rmr2:::length.keyval(kv) == 0) TRUE
       else {
         kv1 = from.dfs(mapreduce(input = to.dfs(kv)))
-        kv.cmp(kv, kv1)}},
-    generators = list(rmr2:::rkeyval),
-    sample.size = 10)
+        kv.cmp(kv, kv1)}})
   
   ##put in a reduce for good measure
   test(
-    function(kv) {
+    function(kv = rmr2:::rkeyval()) {
       if(rmr2:::length.keyval(kv) == 0) TRUE
       else {
         kv1 = 
@@ -113,13 +103,11 @@ for (be in c("local", "hadoop")) {
             mapreduce(
               input = to.dfs(kv),
               reduce = to.reduce(identity)))
-        kv.cmp(kv, kv1)}},
-    generators = list(rmr2:::rkeyval),
-    sample.size = 10)
+        kv.cmp(kv, kv1)}})
   
   ## csv
   test(
-    function(df)
+    function(df = rdata.frame.simple())
       kv.cmp(
         keyval(NULL, df),
         from.dfs(
@@ -129,15 +117,13 @@ for (be in c("local", "hadoop")) {
               format = "csv"),
             input.format = "csv",
             output.format = "csv"),
-          format = "csv")),
-    generators = list(rdata.frame.simple),
-    sample.size = 10, stop = FALSE)
+          format = "csv")))
   
   #json
   # a more general test would be better for json but the subtleties of mapping R to to JSON are many
   fmt = "json"
   test(
-    function(df) 
+    function(df = rdata.frame.simple()) 
       kv.cmp(
         keyval(1, df),
         from.dfs(
@@ -147,14 +133,12 @@ for (be in c("local", "hadoop")) {
               format = fmt),
             input.format = make.input.format("json", key.class = "list", value.class = "data.frame"),
             output.format = fmt),
-          format = make.input.format("json", key.class = "list", value.class = "data.frame"))),
-    generators = list(rdata.frame.simple),
-    sample.size = 10)
+          format = make.input.format("json", key.class = "list", value.class = "data.frame"))))
   
   #sequence.typedbytes
   fmt = "sequence.typedbytes"
   test(
-    function(l) {
+    function(l = rlist()) {
       l = c(0, l)
       kv = keyval(seq.tb.data.loss(list(1)), seq.tb.data.loss(l))      
       l = c(0, l)
@@ -167,9 +151,7 @@ for (be in c("local", "hadoop")) {
               format = fmt), 
             input.format = fmt,
             output.format = fmt),
-          format = fmt))}, 
-    generators = list(rlist),
-    sample.size = 10)
+          format = fmt))})
   
   #avro
   pathname = ravro::AVRO_TOOLS
@@ -185,7 +167,7 @@ for (be in c("local", "hadoop")) {
   Sys.setenv(AVRO_LIBS = pathname)
   
   test(
-    function(df) {
+    function(df = rdata.frame.simple()) {
       if(rmr.options("backend") == "local") TRUE 
       else {
         names(df) = sub("\\.", "_", names(df))
@@ -202,9 +184,7 @@ for (be in c("local", "hadoop")) {
               input.format = 
                 make.input.format(
                   format = "avro",
-                  schema.file = tf1))))}},
-    generators = list(rdata.frame.simple),
-    sample.size = 10)
+                  schema.file = tf1))))}})
   
   #equijoin
   stopifnot(
