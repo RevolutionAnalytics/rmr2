@@ -34,7 +34,7 @@ for (be in c("local", "hadoop")) {
   
   ## csv
   ## no support for raw in csv
-  cg = quickcheck:::column.generators()
+  cg = quickcheck:::atomic.generators
   cg = cg[-which(names(cg) == "rraw" | names(cg) == "rDate")]
   rdata.frame.simple = function() rdata.frame(element = cg, ncol = 10)
   test(
