@@ -318,6 +318,8 @@ reduce.keyval =
       stop("Must specify key when using reduce or combine functions")) {
     k = keys(kv)
     kvs = split.keyval(kv, split.size)
+    kvs$key = lapply(keys(kvs), function(x) if(is.factor(k)) as.factor(x) else as(x, class(k)))
+    kvs$values = lapply(values(kvs), function(x) if(is.factor(values(kv))) as.factor(x) else as(x, class(values(kv))))
     if(is.null(k)) 
       lapply(values(kvs), function(v) FUN(NULL,v))
     else
