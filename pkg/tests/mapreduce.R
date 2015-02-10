@@ -36,7 +36,7 @@ for (be in c("local", "hadoop")) {
   ## no support for raw in csv
   cg = quickcheck:::atomic.generators
   cg = cg[-which(names(cg) == "rraw" | names(cg) == "rDate")]
-  rdata.frame.simple = function() rdata.frame(element = cg, ncol = 10)
+  rdata.frame.simple = function() rdata.frame(element = mixture(cg), ncol = 10)
   test(
     function(df = rdata.frame.simple()) 
       kv.cmp(
