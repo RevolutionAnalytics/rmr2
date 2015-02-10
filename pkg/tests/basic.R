@@ -22,7 +22,7 @@ library(quickcheck)
 test(
   function(ss = rcharacter()) {
     ss = paste("v", ss, sep = "")
-    ss == eval(parse(text = paste("rmr2:::qw(", paste(ss, collapse = ","), ")")))})
+    all(ss == eval(parse(text = paste("rmr2:::qw(", paste(ss, collapse = ","), ")"))))})
 
 # Make.single.arg
 test(
