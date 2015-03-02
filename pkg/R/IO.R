@@ -75,11 +75,11 @@ text.output.format =
 
 make.csv.input.format =
   function(..., nrows = 10^4) {
-    args = list(...)
+    optlist = list(...)
     function(con) {
       df =
         tryCatch(
-          do.call(read.table, c(list(file = con, header = FALSE, nrows = nrows), args)),
+          do.call(read.table, c(list(file = con, header = FALSE, nrows = nrows), optlist)),
           error =
             function(e) {
               if(e$message != "no lines available in input")
@@ -103,48 +103,6 @@ typedbytes.reader =
     if(is.null(data)) NULL
     else
       .Call("typedbytes_reader", data, PACKAGE = "rmr2")}
-
-make.typedbytes.input.format = function(recycle = TRUE) {
-  obj.buffer = list()
-  obj.buffer.rmr.length = 0
-  raw.buffer = raw()
-  read.size = 100
-  function(con, keyval.length) {
-    while(length(obj.buffer) < 2 ||
-            obj.buffer.rmr.length < keyval.length) {
-      raw.buffer <<- c(raw.buffer, readBin(con, raw(), read.size))
-      if(length(raw.buffer) == 0) break;
-      parsed = typedbytes.reader(raw.buffer, as.integer(read.size/2))
-      obj.buffer <<- c(obj.buffer, parsed$objects)
-      approx.read.records = {
-        if(length(parsed$objects) == 0) 0
-        else
-          sum(
-            sapply(sample(parsed$objects, 10, replace = T), rmr.length)) *
-          length(parsed$objects)/10.0 }
-      obj.buffer.rmr.length <<- obj.buffer.rmr.length + approx.read.records
-      read.size <<- ceiling(1.1^sign(keyval.length - obj.buffer.rmr.length) * read.size)
-      if(parsed$length != 0) raw.buffer <<- raw.buffer[-(1:parsed$length)]}
-    straddler = list()
-    retval =
-      if(length(obj.buffer) == 0) NULL
-    else {
-      if(length(obj.buffer)%%2 ==1) {
-        straddler = obj.buffer[length(obj.buffer)]
-        obj.buffer <<- obj.buffer[-length(obj.buffer)]}
-      kk = odd(obj.buffer)
-      vv = even(obj.buffer)
-      if(recycle) {
-        keyval(
-          c.or.rbind.rep(kk, sapply.rmr.length(vv)),
-          c.or.rbind(vv))}
-      else {
-        keyval(kk, vv)}}
-    obj.buffer <<- straddler
-    obj.buffer.rmr.length <<- 0
-    retval}}
-
-make.native.input.format = make.typedbytes.input.format
 
 typedbytes.writer =
   function(objects, con, native) {
@@ -524,18 +482,18 @@ make.input.format =
         hbase = {
           format =
             make.hbase.input.format(
-              default(args$dense, FALSE),
-              default(args$atomic, FALSE),
-              default(args$key.deserialize, "raw"),
-              default(args$cell.deserialize, "raw"),
-              default(args$read.size, 10^6))
+              default(optlist$dense, FALSE),
+              default(optlist$atomic, FALSE),
+              default(optlist$key.deserialize, "raw"),
+              default(optlist$cell.deserialize, "raw"),
+              default(optlist$read.size, 10^6))
           mode = "binary"
           streaming.format =
             "com.dappervision.hbase.mapred.TypedBytesTableInputFormat"
-          family.columns = args$family.columns
-          start.row = args$start.row
-          stop.row = args$stop.row
-          regex.row.filter=args$regex.row.filter
+          family.columns = optlist$family.columns
+          start.row = optlist$start.row
+          stop.row = optlist$stop.row
+          regex.row.filter=optlist$regex.row.filter
           backend.parameters =
             list(
               hadoop =
@@ -638,7 +596,7 @@ make.output.format =
     backend.parameters = NULL,
     ...) {
     mode = match.arg(mode)
-    args = list(...)
+    optlist = list(...)
     if(is.character(format)) {
       format = match.arg(format, IO.formats)
       switch(
@@ -655,7 +613,7 @@ make.output.format =
           format = make.csv.output.format(...)
           mode = "text"
           streaming.format = NULL
-          backend.parameters = set.separator.options(args$sep)},
+          backend.parameters = set.separator.options(optlist$sep)},
         pig.hive = {
           format =
             make.csv.output.format(
@@ -682,9 +640,9 @@ make.output.format =
                 list(
                   D = paste(
                     "hbase.mapred.tablecolumnsb64=",
-                    args$family,
+                    optlist$family,
                     ":",
-                    args$column,
+                    optlist$column,
                     sep = ""),
                   libjars = system.file(package = "rmr2", "java/hadoopy_hbase.jar")))})}
     mode = match.arg(mode)
