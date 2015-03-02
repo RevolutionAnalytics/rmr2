@@ -47,8 +47,6 @@ Make.single.or.multi.arg = function(f, from = c("single", "multi")) {
       f.single(args[[1]])
     else
       f.multi(...)}}
-  
-
 
 all.predicate = function(x, P) all(sapply(x, P))
 
