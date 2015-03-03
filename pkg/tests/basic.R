@@ -40,9 +40,10 @@ test(
 
 # Make.single.or.multi.arg
 test(
-  function(l = rlist(), x = rany(), arity =  sample(c("single", "multi"), size = 1)) {
-    l = c(l, x)
-    f = if(arity == "single") identity else c 
+  function(
+    l = rlist(size = c(min = 2)), 
+    arity = sample(c("single", "multi"), size = 1)) {
+    f = if(arity == "single") unlist else c 
     g = rmr2:::Make.single.or.multi.arg(f, from = arity)
     identical(g(l), do.call(g, l))})
 

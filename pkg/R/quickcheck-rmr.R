@@ -14,16 +14,58 @@
 
 ##app-specific generators
 if(require(quickcheck)){
-rsupported.data.type = 
-  mixture(
-    list(
-      Curry(ratomic, size = 20), 
-      Curry(rmatrix, nrow = 20), 
-      Curry(rdata.frame, ncol = 10, nrow = 20), 
-      Curry(rlist, size = 10, height = 2)))
+  
+  curry.size = 
+    function(gen, size) {
+      force(gen)
+      Curry(gen,  size = size)}
+  
+  curry.nrow = 
+    function(gen, nrow) {
+      force(gen)
+      Curry(gen,  nrow = nrow, ncol = c(min = 1))}
+  
+  rrmr.data = 
+    function(size = c(min = 0, max = quickcheck::default(vector.size %||% 5 * severity)))
+      quickcheck::mixture(
+        generators = 
+          c(
+            lapply(
+              list(
+                quickcheck::rlogical, 
+                quickcheck::rinteger, 
+                quickcheck::rdouble, 
+                quickcheck::rcharacter, 
+                quickcheck::rraw, 
+                quickcheck::rfactor, 
+                quickcheck::rlist), 
+              curry.size, size = size), 
+            lapply(
+              list(
+                quickcheck::rmatrix, 
+                quickcheck::rdata.frame),
+              curry.nrow, nrow = size)))()
+  
+  rdata.frame.simple = 
+    function(
+      nrow = c(min = 1, max = quickcheck::default(data.frame.nrow %||% 5 * severity)),
+      ncol = c(min = 1, max = quickcheck::default(data.frame.ncol %||% severity)))
+      rdata.frame(
+        generator = 
+          mixture(
+            generators = 
+              list(
+                quickcheck::rlogical, 
+                quickcheck::rinteger, 
+                quickcheck::rdouble, 
+                quickcheck::rcharacter)),
+        nrow = nrow,
+        ncol = ncol)
+  
 rkeyval = 
-  function(keytdg = rsupported.data.type, valtdg = rsupported.data.type) 
-    keyval(keytdg(), valtdg())
+  function(k = rrmr.data(size = c(min = 1)), v = rrmr.data(size = c(min = 1)))
+    keyval(k, v)
+
 rkeyvalsimple = function() keyval(runif(1), runif(1)) #we can do better than this
 
 ## generic sorting for normalized comparisons
