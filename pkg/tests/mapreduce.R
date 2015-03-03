@@ -34,11 +34,9 @@ for (be in c("local", "hadoop")) {
   
   ## csv
   ## no support for raw in csv
-  cg = quickcheck:::atomic.generators
-  cg = cg[-which(names(cg) == "rraw" | names(cg) == "rDate")]
-  rdata.frame.simple = function() rdata.frame(element = mixture(cg), ncol = 10)
+ 
   test(
-    function(df = rdata.frame.simple()) 
+    function(df = rmr2:::rdata.frame.simple()) 
       kv.cmp(
         keyval(NULL, df),
         from.dfs(
@@ -50,7 +48,7 @@ for (be in c("local", "hadoop")) {
   #json
   fmt = "json"
   test(
-    function(df = rdata.frame.simple()) 
+    function(df = rmr2:::rdata.frame.simple()) 
       kv.cmp(
         keyval(1, df), 
         from.dfs(
@@ -107,7 +105,7 @@ for (be in c("local", "hadoop")) {
   
   ## csv
   test(
-    function(df = rdata.frame.simple())
+    function(df = rmr2:::rdata.frame.simple())
       kv.cmp(
         keyval(NULL, df),
         from.dfs(
@@ -123,7 +121,7 @@ for (be in c("local", "hadoop")) {
   # a more general test would be better for json but the subtleties of mapping R to to JSON are many
   fmt = "json"
   test(
-    function(df = rdata.frame.simple()) 
+    function(df = rmr2:::rdata.frame.simple()) 
       kv.cmp(
         keyval(1, df),
         from.dfs(
@@ -167,7 +165,7 @@ for (be in c("local", "hadoop")) {
   Sys.setenv(AVRO_LIBS = pathname)
   
   test(
-    function(df = rdata.frame.simple()) {
+    function(df = rmr2:::rdata.frame.simple()) {
       if(rmr.options("backend") == "local") TRUE 
       else {
         names(df) = sub("\\.", "_", names(df))

@@ -17,7 +17,7 @@ library(rmr2)
 
 #has.rows
 test(
-  function(x = rany()) {
+  function(x = rmr2:::rrmr.data()) {
     is.null(nrow(x)) == !rmr2:::has.rows(x)})
 
 #all.have rows TODO
@@ -25,16 +25,14 @@ test(
 
 #keyval, keys.values
 test(
-  function(x = rany()){
-    k = x
-    v = replicate(rmr2:::rmr.length(k), rany)
+  function(k = rmr2:::rrmr.data(size = c(min = 1)), v = rmr2:::rrmr.data(size = ~rmr2:::rmr.length(k))){
     kv = keyval(k, v)
     identical(keys(kv), k) &&
       identical(values(kv), v)})
 
 #NULL key case
 test(
-  function(v = rany()){
+  function(v = rmr2:::rrmr.data(size = c(min = 1))){
     k = NULL
     kv = keyval(k, v)
     identical(keys(kv), k) &&
