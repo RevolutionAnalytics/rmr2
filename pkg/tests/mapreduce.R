@@ -165,7 +165,7 @@ for (be in c("local", "hadoop")) {
   Sys.setenv(AVRO_LIBS = pathname)
   
   test(
-    function(df = rmr2:::rdata.frame.simple()) {
+    function(df = rmr2:::rdata.frame.simple(nrow = c(min = 2))) {
       if(rmr.options("backend") == "local") TRUE 
       else {
         names(df) = sub("\\.", "_", names(df))
