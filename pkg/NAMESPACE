@@ -18,6 +18,11 @@ S3method(gorder, data.frame)
 S3method(gorder, matrix)
 S3method(gorder, raw)
 
+S3method(deraw, data.frame)
+S3method(deraw, matrix)
+S3method(deraw, raw)
+S3method(deraw, default)
+
 importFrom(functional, Curry)
 importFrom(plyr, splat)
 importFrom(plyr, quickdf)

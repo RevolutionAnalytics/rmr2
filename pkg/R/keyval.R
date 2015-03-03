@@ -222,6 +222,24 @@ split.data.frame.fastest =
               f = ind, 
               drop = drop)}))
 
+deraw = function(x) UseMethod("deraw")
+
+deraw.raw = as.integer
+
+deraw.matrix = 
+  function(x) {
+    xi = deraw(unclass(x))
+    attributes(xi) = attributes(x)
+    xi}
+    
+deraw.data.frame =
+  function(x) {
+    y = lapply(x, deraw)
+    attributes(y) = attributes(x)
+    y}
+    
+deraw.default = identity
+
 rmr.split = 
   function(x, ind, lossy, keep.rownames) {
     spl = 
@@ -234,7 +252,8 @@ rmr.split =
         split)
     was.factor = is.factor(x)
     if(was.factor) x = as.character(x)
-    y = spl(x,ind, drop = TRUE)
+    ind = deraw(ind)
+    y = spl(x, ind, drop = TRUE)
     if(was.factor)
       y = lapply(y, as.factor)
     if (is.matrix(ind))
