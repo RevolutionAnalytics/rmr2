@@ -306,6 +306,7 @@ split.keyval = function(kv, size, lossy = FALSE) {
             sapply(
               k, 
               function(x) {
+                if(is.factor(x)) x = as.character(x)
                 attributes(x) = NULL 
                 digest(x)})
           else {
@@ -317,9 +318,11 @@ split.keyval = function(kv, size, lossy = FALSE) {
               else
                 k}}}
         x = k 
-        if(!has.rows(x)) 
+        if(has.rows(x)) {
           names(x) = NULL
-        x = x[!duplicated(ind)]
+          x = x[!duplicated(ind), , drop = FALSE]}
+        else
+          x = x[!duplicated(ind)]
         x = 
           switch(
             class(x),
