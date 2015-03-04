@@ -303,7 +303,12 @@ split.keyval = function(kv, size, lossy = FALSE) {
         v = values(kv)
         ind = {
           if(is.list(k) && !is.data.frame(k)) 
-            sapply(k, digest)
+            sapply(
+              k, 
+              function(x) {
+                if(is.factor(x)) x = as.character(x)
+                attributes(x) = NULL 
+                digest(x)})
           else {
             if(is.matrix(k))
               as.data.frame(k)
@@ -313,9 +318,11 @@ split.keyval = function(kv, size, lossy = FALSE) {
               else
                 k}}}
         x = k 
-        if(!has.rows(x)) 
+        if(has.rows(x)) {
           names(x) = NULL
-        x = unique(x)
+          x = x[!duplicated(ind), , drop = FALSE]}
+        else
+          x = x[!duplicated(ind)]
         x = 
           switch(
             class(x),
@@ -338,7 +345,7 @@ reduce.keyval =
     k = keys(kv)
     kvs = split.keyval(kv, split.size)
     kvs$key = lapply(keys(kvs), function(x) if(is.factor(k)) as.factor(x) else as(x, class(k)))
-    kvs$values = lapply(values(kvs), function(x) if(is.factor(values(kv))) as.factor(x) else as(x, class(values(kv))))
+    kvs$val = lapply(values(kvs), function(x) if(is.factor(values(kv))) as.factor(x) else as(x, class(values(kv))))
     if(is.null(k)) 
       lapply(values(kvs), function(v) FUN(NULL,v))
     else
