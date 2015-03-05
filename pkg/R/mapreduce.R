@@ -418,7 +418,8 @@ equijoin =
     outer = c("", "left", "right", "full"), 
     map.left = to.map(identity), 
     map.right = to.map(identity), 
-    reduce  = reduce.default) { 
+    reduce  = reduce.default,
+    vectorized.reduce = FALSE) { 
     stopifnot(
       xor(
         !is.null(left.input), !is.null(input) &&
@@ -471,6 +472,7 @@ equijoin =
         if(outer == "") x else list(x)
     reduce.default = 
       function(k, vl, vr) {
+        if(vectorized.reduce) stop("Default reduce is not vectorized. Please supply a custom reduce")
         if((is.list(vl) && !is.data.frame(vl)) || 
              (is.list(vr) && !is.data.frame(vr)))
           keyval(key, list(left = vl, right = vr))
@@ -503,7 +505,8 @@ equijoin =
         input = c(left.input, right.input), 
         output = output,
         input.format = input.format,
-        output.format = if(outer == "") output.format else "native",)
+        output.format = if(outer == "") output.format else "native",
+        vectorized.reduce = vectorized.reduce)
     if(outer == "") out
     else {
       template = 
