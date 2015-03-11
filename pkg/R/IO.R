@@ -260,12 +260,17 @@ make.native.or.typedbytes.output.format =
               list(
                 key = delevel(rmr.slice(k, 0)),
                 val = delevel(rmr.slice(v, 0)))}
-          N = {
-            if(length(vs) < 100) 1
-            else {
-              r = ceiling((object.size(ks) + object.size(vs))/10^6)
-              if (r < 100) length(vs) / 100
-              else r}}
+          N = 
+            min(
+              100, #every 100 rows
+              ceiling (length(vs)/100), #more for small runs
+              ceiling(length(vs)/((object.size(ks) + object.size(vs))/10^6))) # every 1Mb for large
+#           N = {
+#             if(length(vs) < 100) 1
+#             else {
+#               r = ceiling((object.size(ks) + object.size(vs))/10^6)
+#               if (r < 100) length(vs) / 100
+#               else r}}
           ks = intersperse(ks, sample(ks, ceiling(length(ks)/N)), N)
           vs = intersperse.one(vs, structure(template, rmr.template = TRUE), N)}
         typedbytes.writer(
