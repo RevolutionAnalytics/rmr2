@@ -319,10 +319,11 @@ split.keyval = function(kv, size, lossy = FALSE) {
                 k}}}
         x = k 
         if(has.rows(x)) {
-          names(x) = NULL
+          rownames(x) = NULL
           x = x[!duplicated(ind), , drop = FALSE]}
-        else
-          x = x[!duplicated(ind)]
+        else {
+          names(x) = NULL
+          x = x[!duplicated(ind)]}          
         x = 
           switch(
             class(x),
